@@ -1,6 +1,6 @@
-package com.itmo.java.basics.logic;
+package main.java.com.itmo.java.basics.logic;
 
-import com.itmo.java.basics.exceptions.DatabaseException;
+import main.java.com.itmo.java.basics.exceptions.DatabaseException;
 
 import java.util.Optional;
 
@@ -23,8 +23,8 @@ public interface Database {
     /**
      * Записывает значение в указанную таблицу по переданному ключу.
      *
-     * @param tableName   таблица, в которую нужно записать значение
-     * @param objectKey   ключ, по которому нужно записать значение
+     * @param tableName таблица, в которую нужно записать значение
+     * @param objectKey ключ, по которому нужно записать значение
      * @param objectValue значение, которое нужно записать
      * @throws DatabaseException если указанная таблица не была найдена или если произошла ошибка ввода-вывода
      */
@@ -36,7 +36,7 @@ public interface Database {
      * @param tableName таблица, из которой нужно считать значение
      * @param objectKey ключ, по которому нужно получить значение
      * @return значение, которое находится по ключу
-     * @throws DatabaseException если не была найдена указанная таблица, или произошла ошибка ввода-вывода
+     * @throws DatabaseException если не была найдена указанная таблица, или если не была найдена запись по данному ключу, или произошла ошибка ввода-вывода
      */
     Optional<byte[]> read(String tableName, String objectKey) throws DatabaseException;
 

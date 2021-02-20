@@ -1,4 +1,4 @@
-package com.itmo.java.basics.logic;
+package main.java.com.itmo.java.basics.logic;
 
 /**
  * Содержит информацию о параметрах {@link DatabaseRecord} для хранения в БД
