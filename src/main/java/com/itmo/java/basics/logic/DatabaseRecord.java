@@ -1,4 +1,4 @@
-package com.itmo.java.basics.logic;
+package main.java.com.itmo.java.basics.logic;
 
 /**
  * Представляет собой единицу хранения в БД

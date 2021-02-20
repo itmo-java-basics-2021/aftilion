@@ -1,6 +1,6 @@
-package com.itmo.java.basics.index.impl;
+package main.java.com.itmo.java.basics.index.impl;
 
-import com.itmo.java.basics.index.SegmentOffsetInfo;
+import main.java.com.itmo.java.basics.index.SegmentOffsetInfo;
 
 public class SegmentOffsetInfoImpl implements SegmentOffsetInfo {
     private final long offset;
