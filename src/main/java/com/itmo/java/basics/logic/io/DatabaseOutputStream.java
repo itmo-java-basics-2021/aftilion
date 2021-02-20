@@ -1,6 +1,6 @@
-package com.itmo.java.basics.logic.io;
+package main.java.com.itmo.java.basics.logic.io;
 
-import com.itmo.java.basics.logic.WritableDatabaseRecord;
+import main.java.com.itmo.java.basics.logic.WritableDatabaseRecord;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -11,12 +11,8 @@ import java.io.OutputStream;
  */
 public class DatabaseOutputStream extends DataOutputStream {
 
-    private final OutputStream outputStream;
-
     public DatabaseOutputStream(OutputStream outputStream) {
-
         super(outputStream);
-        this.outputStream = outputStream;
     }
 
     /**
@@ -35,17 +31,6 @@ public class DatabaseOutputStream extends DataOutputStream {
      * @throws IOException если запись не удалась
      */
     public int write(WritableDatabaseRecord databaseRecord) throws IOException {
-
-        writeInt(databaseRecord.getKeySize());
-        write(databaseRecord.getKey());
-        writeInt(databaseRecord.getValueSize());
-
-        if (databaseRecord.isValuePresented()) {
-            write(databaseRecord.getValue());
-        }
-        flush();
-
-        return (int) databaseRecord.size();
-
+        return 0;
     }
 }
