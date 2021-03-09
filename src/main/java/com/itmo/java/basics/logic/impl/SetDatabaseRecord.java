@@ -2,47 +2,35 @@ package com.itmo.java.basics.logic.impl;
 
 import com.itmo.java.basics.logic.WritableDatabaseRecord;
 
-/**
- * Запись в БД, означающая добавление значения по ключу
- */
 public class SetDatabaseRecord implements WritableDatabaseRecord {
-
-    private byte[] key;
-    private byte[] value;
-
-    public SetDatabaseRecord(byte[] key, byte[] value) {
-        this.key = key;
-        this.value = value;
-    }
-
 
     @Override
     public byte[] getKey() {
-        return key;
+        return new byte[0];
     }
 
     @Override
     public byte[] getValue() {
-        return value;
+        return new byte[0];
     }
 
     @Override
     public long size() {
-        return getKeySize() + getValueSize() + 4 + 4;
+        return 0;
     }
 
     @Override
     public boolean isValuePresented() {
-        return true;
+        return false;
     }
 
     @Override
     public int getKeySize() {
-        return key.length;
+        return 0;
     }
 
     @Override
     public int getValueSize() {
-        return value.length;
+        return 0;
     }
 }
