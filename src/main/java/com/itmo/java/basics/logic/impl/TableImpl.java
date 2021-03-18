@@ -8,6 +8,8 @@ import com.itmo.java.basics.logic.Table;
 import java.nio.file.Path;
 import java.util.Optional;
 
+public class TableImpl implements Table {
+    static Table create(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
 /**
  * Таблица - логическая сущность, представляющая собой набор файлов-сегментов, которые объединены одним
  * именем и используются для хранения однотипных данных (данных, представляющих собой одну и ту же сущность,

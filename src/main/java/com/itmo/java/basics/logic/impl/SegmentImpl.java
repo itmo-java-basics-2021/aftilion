@@ -1,5 +1,7 @@
 package com.itmo.java.basics.logic.impl;
 
+import com.itmo.java.basics.logic.Segment;
+import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.initialization.SegmentInitializationContext;
 import com.itmo.java.basics.logic.Segment;
@@ -8,6 +10,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 
+public class SegmentImpl implements Segment {
+    static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
+        throw new UnsupportedOperationException(); // todo implement
 /**
  * Сегмент - append-only файл, хранящий пары ключ-значение, разделенные специальным символом.
  * - имеет ограниченный размер, большие значения (>100000) записываются в последний сегмент, если он не read-only
