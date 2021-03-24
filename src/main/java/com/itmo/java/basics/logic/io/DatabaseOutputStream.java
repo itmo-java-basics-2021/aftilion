@@ -3,6 +3,7 @@ package com.itmo.java.basics.logic.io;
 import com.itmo.java.basics.logic.WritableDatabaseRecord;
 
 import java.io.DataOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -11,8 +12,11 @@ import java.io.OutputStream;
  */
 public class DatabaseOutputStream extends DataOutputStream {
 
+    private OutputStream outputStream;
     public DatabaseOutputStream(OutputStream outputStream) {
+
         super(outputStream);
+        this.outputStream = outputStream;
     }
 
     /**
@@ -31,6 +35,19 @@ public class DatabaseOutputStream extends DataOutputStream {
      * @throws IOException если запись не удалась
      */
     public int write(WritableDatabaseRecord databaseRecord) throws IOException {
-        return 0;
+        //String DataBaseRecord = databaseRecord.getKeySize() +  databaseRecord.getKey().toString() + databaseRecord.getValueSize() + databaseRecord.getValue().toString();
+       // запихать в один write?
+
+
+            writeInt(databaseRecord.getKeySize());
+            write(databaseRecord.getKey());
+            writeInt(databaseRecord.getValueSize());
+            if (databaseRecord.isValuePresented())
+                write(databaseRecord.getValue());
+            // just write mm,
+            flush();
+
+       return databaseRecord.getKeySize()+ databaseRecord.getValueSize() + 4 + 4;
+
     }
 }
