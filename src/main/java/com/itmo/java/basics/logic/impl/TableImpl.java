@@ -22,15 +22,15 @@ public class TableImpl implements Table {
     public  String tableName;
     public  Path pathToDatabaseRoot;
     public  TableIndex tableIndex;
-    public SegmentImpl lastSegment;
+    public Segment lastSegment;
 
     public static Map<String, Segment> tableDictionary = new HashMap<String,Segment>();
 
-    private TableImpl(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex)
-    {
+    private TableImpl(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
         this.tableName = tableName;
         this.pathToDatabaseRoot = pathToDatabaseRoot;
         this.tableIndex = tableIndex;
+        this.lastSegment = SegmentImpl.create(SegmentImpl.createSegmentName(tableName),pathToDatabaseRoot);
     }
 
     static Table create(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException, IOException {
