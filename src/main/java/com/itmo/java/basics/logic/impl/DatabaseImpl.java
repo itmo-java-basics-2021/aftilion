@@ -21,7 +21,7 @@ public class DatabaseImpl implements Database {
     public  String dbName;
     public  Path databaseRoot;
 
-    public static Map<String, TableImpl> tableDictionary = new HashMap<String, TableImpl>();
+    public static Map<String, Table> tableDictionary = new HashMap<String, Table>();
 
     private DatabaseImpl(String dbName, Path databaseRoot)
     {
@@ -67,7 +67,7 @@ public class DatabaseImpl implements Database {
     }
 
     @Override
-    public void createTableIfNotExists(String tableName) throws DatabaseException, IOException {
+    public void createTableIfNotExists(String tableName) throws DatabaseException {
 
         if (tableName == null)
             throw new DatabaseException("Why tableName name is null?");
@@ -77,7 +77,7 @@ public class DatabaseImpl implements Database {
 
         TableIndex newTableIndex = new TableIndex();
         Path pathToTableRoot = Paths.get(databaseRoot.toString() , dbName);
-        TableImpl newTable = (TableImpl) TableImpl.create(tableName , pathToTableRoot , newTableIndex);
+        Table newTable =  TableImpl.create(tableName , pathToTableRoot , newTableIndex);
 
         tableDictionary.put(tableName,newTable);
     }
@@ -91,20 +91,20 @@ public class DatabaseImpl implements Database {
 
         if (tableName == null)
             throw new DatabaseException("Error while writing in database");
-        TableImpl tableimpl = tableDictionary.get(tableName);
-        tableimpl.write(objectKey ,  objectValue );
+        Table table = tableDictionary.get(tableName);
+        table.write(objectKey ,  objectValue );
 
     }
 
     @Override
     public Optional<byte[]> read(String tableName, String objectKey) throws DatabaseException {
 
-        TableImpl tableimpl = tableDictionary.get(tableName);
+        Table table = tableDictionary.get(tableName);
 
         if (tableName == null)
             throw new DatabaseException("Error while writing in database");
 
-        return tableimpl.read(objectKey);
+        return table.read(objectKey);
 
         //return Optional.empty();
     }
@@ -112,7 +112,14 @@ public class DatabaseImpl implements Database {
     @Override
     public void delete(String tableName, String objectKey) throws DatabaseException {
 
-        TableImpl tableimpl = tableDictionary.get(tableName);
+        if (!tableDictionary.containsKey(tableName)){
+            throw new DatabaseException("Table " + tableName + " doesn't exist in database" + dbName);
+        }
+
+        if (tableName == null)
+            throw new DatabaseException("Writing in database error");
+
+        Table tableimpl = tableDictionary.get(tableName);
 
         if (tableName == null)
             throw new DatabaseException("Writing in database error");
