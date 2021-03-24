@@ -19,7 +19,7 @@ public interface Database {
      * @param tableName имя таблицы
      * @throws DatabaseException если таблица с данным именем уже существует или если произошла ошибка ввода-вывода
      */
-    void createTableIfNotExists(String tableName) throws DatabaseException, IOException;
+    void createTableIfNotExists(String tableName) throws DatabaseException;
 
     /**
      * Записывает значение в указанную таблицу по переданному ключу.
