@@ -73,7 +73,7 @@ public class DatabaseImpl implements Database {
     }
 
     @Override
-    public void write(String tableName, String objectKey, byte[] objectValue) throws DatabaseException, IOException {
+    public void write(String tableName, String objectKey, byte[] objectValue) throws DatabaseException {
         if (!tableDictionary.containsKey(tableName)){
             throw new DatabaseException("Table " + tableName + " doesn't exist in database" + dbName);
         }
@@ -87,7 +87,7 @@ public class DatabaseImpl implements Database {
     }
 
     @Override
-    public Optional<byte[]> read(String tableName, String objectKey) throws DatabaseException, IOException {
+    public Optional<byte[]> read(String tableName, String objectKey) throws DatabaseException {
 
         TableImpl tableimpl = tableDictionary.get(tableName);
 
@@ -100,7 +100,7 @@ public class DatabaseImpl implements Database {
     }
 
     @Override
-    public void delete(String tableName, String objectKey) throws DatabaseException, IOException {
+    public void delete(String tableName, String objectKey) throws DatabaseException {
 
         TableImpl tableimpl = tableDictionary.get(tableName);
 

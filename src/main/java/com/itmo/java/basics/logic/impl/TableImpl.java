@@ -60,7 +60,7 @@ public class TableImpl implements Table {
     }
 
     @Override
-    public void write(String objectKey, byte[] objectValue) throws DatabaseException, IOException {
+    public void write(String objectKey, byte[] objectValue) throws DatabaseException{
 
         try
         {
@@ -83,7 +83,7 @@ public class TableImpl implements Table {
     }
 
     @Override
-    public Optional<byte[]> read(String objectKey) throws DatabaseException, IOException {
+    public Optional<byte[]> read(String objectKey) throws DatabaseException {
 
         try
         {
@@ -105,7 +105,7 @@ public class TableImpl implements Table {
     }
 
     @Override
-    public void delete(String objectKey) throws DatabaseException, IOException {
+    public void delete(String objectKey) throws DatabaseException {
 
         try
         {
