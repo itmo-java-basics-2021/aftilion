@@ -6,34 +6,45 @@ import com.itmo.java.basics.logic.WritableDatabaseRecord;
  * Запись в БД, означающая удаление значения по ключу
  */
 public class RemoveDatabaseRecord implements WritableDatabaseRecord {
+    public byte[] key;
+    public byte[] value;
+
+    public RemoveDatabaseRecord(byte[] key){ this.key = key;}
     @Override
-    public byte[] getKey() {
-        return new byte[0];
+
+
+    public byte[] getKey()
+    {
+        return key;
     }
 
     @Override
-    public byte[] getValue() {
-        return new byte[0];
+    public byte[] getValue()
+    {
+        return null;
     }
 
     @Override
     public long size() {
-        return 0;
+        return getKeySize() + getValueSize() + 4 + 4;
     }
 
     @Override
     public boolean isValuePresented() {
+        //return ((getValue() == null ) && (getValueSize() == 0));
         return false;
     }
 
     @Override
-    public int getKeySize() {
-        return 0;
+    public int getKeySize()
+    {
+        return key.length;
     }
 
     @Override
-    public int getValueSize() {
-        return 0;
+    public int getValueSize()
+    {
+        return -1;
     }
 }
 
