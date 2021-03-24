@@ -50,7 +50,7 @@ public class SegmentImpl implements Segment {
 
         try
         {
-            have = tableRootPath.toFile().createNewFile();
+            have = segRoot.toFile().createNewFile();
             outputStream = Files.newOutputStream(segRoot);
 
         }
