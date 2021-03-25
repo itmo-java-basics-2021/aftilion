@@ -17,6 +17,9 @@ public class MainTest {
         try {
             Files.walk(Path.of("db1")).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
             Database db1 = DatabaseImpl.create("db1", Path.of("."));
+           // db1.write("table1", "1", "user".getBytes(StandardCharsets.UTF_8));
+            db1.createTableIfNotExists("table1");
+
             db1.createTableIfNotExists("table1");
 
 //            db1.write("table1", "1", "user".getBytes(StandardCharsets.UTF_8));
@@ -24,7 +27,7 @@ public class MainTest {
 //            db1.delete("table1", "1");
 //            System.out.println(new String(db1.read("table1", "1").toString()));
 
-            db1.write("table1", "1", null);
+          //  db1.write("table1", "1", null);
 
             System.out.println(new String(db1.read("table1", "1").toString()));
         }catch(DatabaseException | IOException exception){

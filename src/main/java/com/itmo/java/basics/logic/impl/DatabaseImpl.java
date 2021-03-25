@@ -21,7 +21,7 @@ public class DatabaseImpl implements Database {
     public  String dbName;
     public  Path databaseRoot;
 
-    public static Map<String, Table> tableDictionary = new HashMap<String, Table>();
+    public Map<String, Table> tableDictionary = new HashMap<String, Table>();
 
     private DatabaseImpl(String dbName, Path databaseRoot)
     {
@@ -30,7 +30,7 @@ public class DatabaseImpl implements Database {
     }
 
 
-    public static Database create(String dbName, Path databaseRoot) throws DatabaseException, IOException {
+    public static Database create(String dbName, Path databaseRoot) throws DatabaseException {
 
         if (dbName == null)
             throw new DatabaseException("Why dataBase name is null?");
