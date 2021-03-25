@@ -22,9 +22,9 @@ public class TableImpl implements Table {
     public  String tableName;
     public  Path pathToDatabaseRoot;
     public  TableIndex tableIndex;
-    public Segment lastSegment;
+    public  Segment lastSegment;
 
-    public static Map<String, Segment> tableDictionary = new HashMap<String,Segment>();
+
 
     private TableImpl(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
         this.tableName = tableName;
@@ -37,6 +37,7 @@ public class TableImpl implements Table {
 
         if (tableName == null)
             throw new DatabaseException("Why tableBase name is null?");
+
 
         Path pathToTableRoot = Paths.get(pathToDatabaseRoot.toString() , tableName);
 
