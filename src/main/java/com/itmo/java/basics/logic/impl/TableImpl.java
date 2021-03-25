@@ -67,7 +67,7 @@ public class TableImpl implements Table {
         {
             boolean canWewrite = lastSegment.write(objectKey, objectValue);
 
-            if (canWewrite)
+            if (!canWewrite)
             {
 
                 this.lastSegment = (SegmentImpl) SegmentImpl.create(SegmentImpl.createSegmentName(tableName),pathToDatabaseRoot);
