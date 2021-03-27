@@ -6,7 +6,7 @@ public interface KvsIndex<K, V> {
     /**
      * Оповещает индекс об обновлении значения по определенному ключу.
      *
-     * @param key ключ, который обновился
+     * @param key   ключ, который обновился
      * @param value новое значение
      */
     void onIndexedEntityUpdated(K key, V value);
