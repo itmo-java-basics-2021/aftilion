@@ -10,20 +10,18 @@ public class SetDatabaseRecord implements WritableDatabaseRecord {
     public byte[] key;
     public byte[] value;
 
-    public SetDatabaseRecord(byte[] key , byte[] value)
-    {
+    public SetDatabaseRecord(byte[] key, byte[] value) {
         this.key = key;
-        this.value =value;
+        this.value = value;
     }
+
     @Override
-    public byte[] getKey()
-    {
+    public byte[] getKey() {
         return key;
     }
 
     @Override
-    public byte[] getValue()
-    {
+    public byte[] getValue() {
         return value;
     }
 
@@ -33,20 +31,15 @@ public class SetDatabaseRecord implements WritableDatabaseRecord {
     }
 
     @Override
-    public boolean isValuePresented() {
-      //  return ((getValue() == null ) && (getValueSize() == 0));
-        return true;
-    }
+    public boolean isValuePresented() { return true; }
 
     @Override
-    public int getKeySize()
-    {
+    public int getKeySize() {
         return key.length;
     }
 
     @Override
-    public int getValueSize()
-    {
+    public int getValueSize() {
         return value.length;
     }
 }
