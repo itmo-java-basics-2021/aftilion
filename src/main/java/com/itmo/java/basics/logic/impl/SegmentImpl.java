@@ -109,14 +109,14 @@ public class SegmentImpl implements Segment {
     @Override
     public boolean delete(String objectKey) throws IOException {
 
+        if (segmentIndex.searchForKey(objectKey).isPresent()){
+            throw new IOException("Deleting error in Segment");
+        }
+
         if (isReadOnly()) {
             outStream.close();
             return false;
         }
-
-//        if (segmentIndex.searchForKey(objectKey).isPresent()){
-//            throw new IOException("Deleting error in Segment");
-//        }
 
         RemoveDatabaseRecord newSeg = new RemoveDatabaseRecord(objectKey.getBytes());
         segmentIndex.onIndexedEntityUpdated(objectKey, new SegmentOffsetInfoImpl(segmentSize));
