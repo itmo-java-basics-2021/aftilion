@@ -9,18 +9,17 @@ public class RemoveDatabaseRecord implements WritableDatabaseRecord {
     public byte[] key;
     public byte[] value;
 
-    public RemoveDatabaseRecord(byte[] key){ this.key = key;}
+    public RemoveDatabaseRecord(byte[] key) {
+        this.key = key;
+    }
+
     @Override
-
-
-    public byte[] getKey()
-    {
+    public byte[] getKey() {
         return key;
     }
 
     @Override
-    public byte[] getValue()
-    {
+    public byte[] getValue() {
         return null;
     }
 
@@ -30,20 +29,15 @@ public class RemoveDatabaseRecord implements WritableDatabaseRecord {
     }
 
     @Override
-    public boolean isValuePresented() {
-        //return ((getValue() == null ) && (getValueSize() == 0));
-        return false;
-    }
+    public boolean isValuePresented() { return false; }
 
     @Override
-    public int getKeySize()
-    {
+    public int getKeySize() {
         return key.length;
     }
 
     @Override
-    public int getValueSize()
-    {
+    public int getValueSize() {
         return -1;
     }
 }
