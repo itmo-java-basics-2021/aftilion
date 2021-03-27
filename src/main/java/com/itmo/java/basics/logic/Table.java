@@ -2,7 +2,6 @@ package com.itmo.java.basics.logic;
 
 import com.itmo.java.basics.exceptions.DatabaseException;
 
-import java.io.IOException;
 import java.util.Optional;
 
 /**
@@ -25,7 +24,7 @@ public interface Table {
     /**
      * Записывает в таблицу переданное значение по указанному ключу.
      *
-     * @param objectKey ключ, по которому нужно записать значение
+     * @param objectKey   ключ, по которому нужно записать значение
      * @param objectValue значение, которое нужно записать
      * @throws DatabaseException если произошла ошибка ввода-вывода
      */
