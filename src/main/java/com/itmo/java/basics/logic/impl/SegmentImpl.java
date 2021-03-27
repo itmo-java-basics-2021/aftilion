@@ -114,9 +114,9 @@ public class SegmentImpl implements Segment {
             return false;
         }
 
-        if (segmentIndex.searchForKey(objectKey).isPresent()){
-            throw new IOException("Deleting error in Segment");
-        }
+//        if (segmentIndex.searchForKey(objectKey).isPresent()){
+//            throw new IOException("Deleting error in Segment");
+//        }
 
         RemoveDatabaseRecord newSeg = new RemoveDatabaseRecord(objectKey.getBytes());
         segmentIndex.onIndexedEntityUpdated(objectKey, new SegmentOffsetInfoImpl(segmentSize));
