@@ -122,7 +122,10 @@ public class SegmentImpl implements Segment {
 
     @Override
     public boolean delete(String objectKey) throws IOException {
-        
+
+        if (!segmentIndex.searchForKey(objectKey).isPresent()){
+            throw new IOException("Error while deleting");
+        }
         if (isReadOnly()) {
             outStream.close();
             return false;
