@@ -44,7 +44,7 @@ public class DatabaseOutputStream extends DataOutputStream {
             write(databaseRecord.getValue());
         flush();
 
-        return databaseRecord.getKeySize() + databaseRecord.getValueSize() + 4 + 4;
+        return databaseRecord.getKeySize() + databaseRecord.getValueSize() + 8;
 
     }
 }
