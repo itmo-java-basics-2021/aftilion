@@ -108,13 +108,14 @@ public class SegmentImpl implements Segment {
 
     @Override
     public boolean delete(String objectKey) throws IOException {
-        
+
         if (isReadOnly()) {
             outStream.close();
             return false;
         }
 
         if (segmentIndex.searchForKey(objectKey).isEmpty()){
+            outStream.close();
             return false;
         }
 
