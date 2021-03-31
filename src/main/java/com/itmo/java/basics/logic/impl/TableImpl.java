@@ -27,15 +27,15 @@ public class TableImpl implements Table {
 
     static Table create(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
 
-        if (tableName == null)
+        if (tableName == null) {
             throw new DatabaseException("Why tableBase name is null?");
-
+        }
         Path pathToTableRoot = Paths.get(pathToDatabaseRoot.toString(), tableName);
 
         try {
             Files.createDirectory(pathToTableRoot);
         } catch (IOException ex) {
-            throw new DatabaseException("Error while creating a Table(" + tableName + ") directory");
+            throw new DatabaseException("Error while creating a Table(" + tableName + ") directory" ,ex);
         }
 
         return new TableImpl(tableName, pathToTableRoot, tableIndex);
@@ -49,14 +49,13 @@ public class TableImpl implements Table {
 
         try {
             boolean canWewrite = lastSegment.write(objectKey, objectValue);
-
             if (!canWewrite) {
                 lastSegment = SegmentImpl.create(SegmentImpl.createSegmentName(tableName), pathToDatabaseRoot);
                 lastSegment.write(objectKey, objectValue);
             }
             tableIndex.onIndexedEntityUpdated(objectKey, lastSegment);
         } catch (IOException ex) {
-            throw new DatabaseException("Writing in database error " + ex);
+            throw new DatabaseException("Writing in database error " , ex);
         }
     }
 
@@ -65,14 +64,13 @@ public class TableImpl implements Table {
 
         try {
             Optional<Segment> segmentRead = tableIndex.searchForKey(objectKey);
-
             if (segmentRead.isPresent()) {
                 return segmentRead.get().read(objectKey);
-
-            } else
+            } else {
                 return Optional.empty();
+            }
         } catch (IOException ex) {
-            throw new DatabaseException("Reading in database error " + ex);
+            throw new DatabaseException("Reading in database error " , ex);
         }
     }
 
@@ -81,15 +79,13 @@ public class TableImpl implements Table {
 
         try {
             boolean canDel = lastSegment.delete(objectKey);
-
             if (!canDel) {
-                this.lastSegment = SegmentImpl.create(SegmentImpl.createSegmentName(tableName), pathToDatabaseRoot);
-                this.lastSegment.delete(objectKey);
+                lastSegment = SegmentImpl.create(SegmentImpl.createSegmentName(tableName), pathToDatabaseRoot);
+                lastSegment.delete(objectKey);
             }
-
             tableIndex.onIndexedEntityUpdated(objectKey, null);
         } catch (IOException ex) {
-            throw new DatabaseException("Deleting error in Table");
+            throw new DatabaseException("Deleting error in Table" , ex);
         }
     }
 }
