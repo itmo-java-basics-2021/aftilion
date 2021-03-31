@@ -48,15 +48,16 @@ public class SegmentImpl implements Segment {
 
         try {
             fileExists = segRoot.toFile().createNewFile();
+
             outputStream = Files.newOutputStream(segRoot);
 
-        } catch (IOException exception) {
-            throw new DatabaseException("Creating Error " + segmentName);
+        } catch (IOException ex) {
+            throw new DatabaseException("Creating Error " + segmentName , ex);
         }
+
         if (!fileExists) {
             throw new DatabaseException("Creating Error" + segmentName + "as it already exists");
         }
-
         return new SegmentImpl(segRoot, segmentName, outputStream);
     }
 
@@ -76,13 +77,10 @@ public class SegmentImpl implements Segment {
             outStream.close();
             return false;
         }
-
         if (objectValue == null) {
             return delete(objectKey);
         }
-
         SetDatabaseRecord newSeg = new SetDatabaseRecord(objectKey.getBytes(StandardCharsets.UTF_8), objectValue);
-
         segmentIndex.onIndexedEntityUpdated(objectKey, new SegmentOffsetInfoImpl(segmentSize));
         segmentSize += outStream.write(newSeg);
         return true;
