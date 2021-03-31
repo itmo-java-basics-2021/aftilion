@@ -2,6 +2,7 @@ package com.itmo.java.basics.logic.impl;
 
 import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.index.impl.TableIndex;
+import com.itmo.java.basics.initialization.DatabaseInitializationContext;
 import com.itmo.java.basics.logic.Database;
 import com.itmo.java.basics.logic.Table;
 

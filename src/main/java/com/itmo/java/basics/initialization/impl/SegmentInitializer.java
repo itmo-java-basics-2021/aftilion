@@ -4,6 +4,7 @@ import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.initialization.InitializationContext;
 import com.itmo.java.basics.initialization.Initializer;
 
+
 public class SegmentInitializer implements Initializer {
 
     /**

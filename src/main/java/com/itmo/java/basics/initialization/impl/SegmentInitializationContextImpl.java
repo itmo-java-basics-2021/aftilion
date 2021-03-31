@@ -6,17 +6,10 @@ import com.itmo.java.basics.initialization.SegmentInitializationContext;
 import java.nio.file.Path;
 
 public class SegmentInitializationContextImpl implements SegmentInitializationContext {
-    public SegmentInitializationContextImpl(String segmentName, Path segmentPath, long currentSize, SegmentIndex index) {
+    private SegmentInitializationContextImpl(String segmentName, Path segmentPath, int currentSize, SegmentIndex index) {
     }
 
-    /**
-     * Не используйте этот конструктор. Оставлен для совместимости со старыми тестами.
-     */
-    public SegmentInitializationContextImpl(String segmentName, Path tablePath, long currentSize) {
-    }
-
-    public SegmentInitializationContextImpl(String segmentName, Path tablePath) {
-        this(segmentName, tablePath.resolve(segmentName), 0, new SegmentIndex());
+    public SegmentInitializationContextImpl(String segmentName, Path tablePath, int currentSize) {
     }
 
     @Override
