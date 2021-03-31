@@ -89,10 +89,10 @@ public class SegmentImpl implements Segment {
         long myOf = offsetInfo.get().getOffset();
         DatabaseInputStream input = new DatabaseInputStream(Files.newInputStream(tableRootPath));
         input.skip(myOf);
-        long skiped = input.skip(myOf);
-        if (skiped != myOf) {
-        throw new IOException("Error with skipping");
-        }
+        //  long skiped = input.skip(myOf);
+       // if (skiped != myOf) {
+       // throw new IOException("Error with skipping");
+       // }
         Optional<DatabaseRecord> value = input.readDbUnit();
         if (value.isEmpty()) {
             return Optional.empty();
