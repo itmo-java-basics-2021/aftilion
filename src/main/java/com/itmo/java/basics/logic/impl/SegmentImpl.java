@@ -37,20 +37,18 @@ public class SegmentImpl implements Segment {
 
         Path segRoot = Paths.get(tableRootPath.toString(), segmentName);
         boolean fileExists;
-        OutputStream outputStream;
+       // OutputStream outputStream;
 
-        try {
+        try( OutputStream outputStream = Files.newOutputStream(segRoot)) {
             fileExists = segRoot.toFile().createNewFile();
-            outputStream = Files.newOutputStream(segRoot);
-
-        } catch (IOException exception) {
-            throw new DatabaseException("Creating Error " + segmentName);
+            if (!fileExists) {
+                throw new DatabaseException("Creating Error" + segmentName + "as it already exists");
+            }
+            //outputStream = Files.newOutputStream(segRoot);
+            return new SegmentImpl(segRoot, segmentName, outputStream);
+        } catch (IOException ex) {
+            throw new DatabaseException("Creating Error " + segmentName , ex);
         }
-        if (!fileExists) {
-            throw new DatabaseException("Creating Error" + segmentName + "as it already exists");
-        }
-
-        return new SegmentImpl(segRoot, segmentName, outputStream);
     }
 
     static String createSegmentName(String tableName) {
@@ -69,13 +67,10 @@ public class SegmentImpl implements Segment {
             outStream.close();
             return false;
         }
-
         if (objectValue == null) {
             return delete(objectKey);
         }
-
         SetDatabaseRecord newSeg = new SetDatabaseRecord(objectKey.getBytes(StandardCharsets.UTF_8), objectValue);
-
         segmentIndex.onIndexedEntityUpdated(objectKey, new SegmentOffsetInfoImpl(segmentSize));
         segmentSize += outStream.write(newSeg);
         return true;
@@ -85,20 +80,20 @@ public class SegmentImpl implements Segment {
     public Optional<byte[]> read(String objectKey) throws IOException {
 
         Optional<SegmentOffsetInfo> offsetInfo = segmentIndex.searchForKey(objectKey);
-
-        if (offsetInfo.isEmpty())
+        if (offsetInfo.isEmpty()) {
             return Optional.empty();
-
+        }
         long myOf = offsetInfo.get().getOffset();
-
         DatabaseInputStream input = new DatabaseInputStream(Files.newInputStream(tableRootPath));
         input.skip(myOf);
-
+        long skiped = input.skip(myOf);
+        if (skiped != myOf) {
+        throw new IOException("Error with skipping");
+        }
         Optional<DatabaseRecord> value = input.readDbUnit();
-
-        if (value.isEmpty())
+        if (value.isEmpty()) {
             return Optional.empty();
-
+        }
         input.close();
         return Optional.of(value.get().getValue());
     }
@@ -113,13 +108,10 @@ public class SegmentImpl implements Segment {
             outStream.close();
             return false;
         }
-
-        if (segmentIndex.searchForKey(objectKey).isEmpty()){
+        if (segmentIndex.searchForKey(objectKey).isEmpty()) {
             outStream.close();
             return false;
         }
-
-
         RemoveDatabaseRecord newSeg = new RemoveDatabaseRecord(objectKey.getBytes());
         segmentIndex.onIndexedEntityUpdated(objectKey, new SegmentOffsetInfoImpl(segmentSize));
         segmentSize += outStream.write(newSeg);
