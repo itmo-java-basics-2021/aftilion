@@ -1,15 +1,20 @@
-package main.java.com.itmo.java.basics.logic.impl;
+package com.itmo.java.basics.logic.impl;
 
-import main.java.com.itmo.java.basics.logic.Segment;
-import main.java.com.itmo.java.basics.exceptions.DatabaseException;
+import com.itmo.java.basics.initialization.SegmentInitializationContext;
+import com.itmo.java.basics.logic.Segment;
+import com.itmo.java.basics.exceptions.DatabaseException;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 
 public class SegmentImpl implements Segment {
-    static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
-        throw new UnsupportedOperationException(); // todo implement
+    public static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
+        throw new UnsupportedOperationException();
+    }
+
+    public static Segment initializeFromContext(SegmentInitializationContext context) {
+        return null;
     }
 
     static String createSegmentName(String tableName) {
