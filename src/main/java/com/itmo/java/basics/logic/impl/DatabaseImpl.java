@@ -2,6 +2,7 @@ package com.itmo.java.basics.logic.impl;
 
 import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.index.impl.TableIndex;
+import com.itmo.java.basics.initialization.DatabaseInitializationContext;
 import com.itmo.java.basics.logic.Database;
 import com.itmo.java.basics.logic.Table;
 
@@ -39,6 +40,10 @@ public class DatabaseImpl implements Database {
             throw new DatabaseException("Error while creating a DataBase(" + dbName + ") directory" , ex);
         }
         return new DatabaseImpl(dbName, databaseRoot);
+    }
+
+    public static Database initializeFromContext(DatabaseInitializationContext context) {
+        return null;
     }
 
     @Override
