@@ -50,4 +50,3 @@ public class DatabaseInputStream extends DataInputStream {
         return Optional.of(datarecord);
     }
 }
-
