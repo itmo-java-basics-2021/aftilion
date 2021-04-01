@@ -39,10 +39,11 @@ public class DatabaseOutputStream extends DataOutputStream {
         writeInt(databaseRecord.getKeySize());
         write(databaseRecord.getKey());
         writeInt(databaseRecord.getValueSize());
-        if (databaseRecord.isValuePresented()) {
+
+        if (databaseRecord.isValuePresented())
             write(databaseRecord.getValue());
-        }
         flush();
+
         return databaseRecord.getKeySize() + databaseRecord.getValueSize() + 8;
 
     }
