@@ -96,7 +96,7 @@ public class SegmentImpl implements Segment {
         if (skipped != myOf){
             throw new IOException("Error while skipping bytes " + segmentName);
         }
-        input.skip(myOf);
+       // input.skip(myOf);
 
 
         Optional<DatabaseRecord> value = input.readDbUnit();
