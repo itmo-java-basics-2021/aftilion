@@ -36,25 +36,21 @@ public class SegmentImpl implements Segment {
     static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
 
         Path segRoot = Paths.get(tableRootPath.toString(), segmentName);
-        //boolean fileExists;
-        //OutputStream outputStream;
+        boolean fileExists;
+        OutputStream outputStream;
 
-        try( OutputStream outputStream = Files.newOutputStream(segRoot) ) {
-            boolean fileExists;
+        try {
             fileExists = segRoot.toFile().createNewFile();
+            outputStream = Files.newOutputStream(segRoot);
 
-            if (!fileExists) {
-                throw new DatabaseException("Creating Error" + segmentName + "as it already exists");
-            }
-
-            return new SegmentImpl(segRoot, segmentName, outputStream);
         } catch (IOException ex) {
             throw new DatabaseException("Creating Error " + segmentName + ex);
         }
-        catch (DatabaseException ex){
-            throw new DatabaseException( "Creating error" + ex);
+        if (!fileExists) {
+            throw new DatabaseException("Creating Error" + segmentName + "as it already exists");
         }
-       // return new SegmentImpl(segRoot, segmentName, outputStream);
+
+        return new SegmentImpl(segRoot, segmentName, outputStream);
     }
 
     static String createSegmentName(String tableName) {
