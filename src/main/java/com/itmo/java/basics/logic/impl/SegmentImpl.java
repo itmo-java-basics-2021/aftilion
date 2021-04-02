@@ -90,23 +90,17 @@ public class SegmentImpl implements Segment {
             return Optional.empty();
         long myOf = offsetInfo.get().getOffset();
 
-        try{
-            DatabaseInputStream input = new DatabaseInputStream(Files.newInputStream(tableRootPath));
-            long skipped = input.skip(myOf);
-            if( skipped != myOf){
-                throw new IOException("Error while skipping bytes" + segmentName);
-            }
-            input.skip(myOf);
-            Optional<DatabaseRecord> value = input.readDbUnit();
-            if (value.isEmpty())
-                return Optional.empty();
 
-            input.close();
-            return Optional.of(value.get().getValue());
-        }
-        catch ( IOException ex){
-            throw new IOException( "Error while reading " + segmentName + ex);
-        }
+        DatabaseInputStream input = new DatabaseInputStream(Files.newInputStream(tableRootPath));
+        input.skip(myOf);
+
+        Optional<DatabaseRecord> value = input.readDbUnit();
+
+        if (value.isEmpty())
+            return Optional.empty();
+
+        input.close();
+        return Optional.of(value.get().getValue());
     }
 
     @Override
