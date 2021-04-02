@@ -52,21 +52,25 @@ public class SegmentImpl implements Segment {
     }
 
         Path segRoot = Paths.get(tableRootPath.toString(), segmentName);
-        boolean fileExists;
-        OutputStream outputStream;
+        //boolean fileExists;
+        //OutputStream outputStream;
 
-        try {
+        try( OutputStream outputStream = Files.newOutputStream(segRoot) ) {
+            boolean fileExists;
             fileExists = segRoot.toFile().createNewFile();
-            outputStream = Files.newOutputStream(segRoot);
 
-        } catch (IOException exception) {
-            throw new DatabaseException("Creating Error " + segmentName);
-        }
-        if (!fileExists) {
-            throw new DatabaseException("Creating Error" + segmentName + "as it already exists");
-        }
+            if (!fileExists) {
+                throw new DatabaseException("Creating Error" + segmentName + "as it already exists");
+            }
 
-        return new SegmentImpl(segRoot, segmentName, outputStream);
+            return new SegmentImpl(segRoot, segmentName, outputStream);
+        } catch (IOException ex) {
+            throw new DatabaseException("Creating Error " + segmentName + ex);
+        }
+        catch (DatabaseException ex){
+            throw new DatabaseException( "Creating error" + ex);
+        }
+       // return new SegmentImpl(segRoot, segmentName, outputStream);
     }
 
     static String createSegmentName(String tableName) {
@@ -104,19 +108,25 @@ public class SegmentImpl implements Segment {
 
         if (offsetInfo.isEmpty())
             return Optional.empty();
-
         long myOf = offsetInfo.get().getOffset();
 
-        DatabaseInputStream input = new DatabaseInputStream(Files.newInputStream(tableRootPath));
-        input.skip(myOf);
+        try{
+            DatabaseInputStream input = new DatabaseInputStream(Files.newInputStream(tableRootPath));
+            long skipped = input.skip(myOf);
+            if( skipped != myOf){
+                throw new IOException("Error while skipping bytes" + segmentName);
+            }
+            input.skip(myOf);
+            Optional<DatabaseRecord> value = input.readDbUnit();
+            if (value.isEmpty())
+                return Optional.empty();
 
-        Optional<DatabaseRecord> value = input.readDbUnit();
-
-        if (value.isEmpty())
-            return Optional.empty();
-
-        input.close();
-        return Optional.of(value.get().getValue());
+            input.close();
+            return Optional.of(value.get().getValue());
+        }
+        catch ( IOException ex){
+            throw new IOException( "Error while reading " + segmentName + ex);
+        }
     }
 
     @Override

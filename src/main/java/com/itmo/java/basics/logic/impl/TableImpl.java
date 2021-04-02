@@ -83,8 +83,8 @@ public class TableImpl implements Table {
             boolean canDel = lastSegment.delete(objectKey);
 
             if (!canDel) {
-                this.lastSegment = SegmentImpl.create(SegmentImpl.createSegmentName(tableName), pathToDatabaseRoot);
-                this.lastSegment.delete(objectKey);
+                lastSegment = SegmentImpl.create(SegmentImpl.createSegmentName(tableName), pathToDatabaseRoot);
+                lastSegment.delete(objectKey);
             }
 
             tableIndex.onIndexedEntityUpdated(objectKey, null);
