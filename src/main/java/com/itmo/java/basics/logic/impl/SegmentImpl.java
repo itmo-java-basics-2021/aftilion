@@ -36,20 +36,18 @@ public class SegmentImpl implements Segment {
     static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
 
         Path segRoot = Paths.get(tableRootPath.toString(), segmentName);
-        boolean fileExists;
-        OutputStream outputStream;
 
-        try {
+        try(OutputStream outputStream = Files.newOutputStream(segRoot) ) {
+            boolean fileExists;
             fileExists = segRoot.toFile().createNewFile();
-            outputStream = Files.newOutputStream(segRoot);
 
+            if (!fileExists) {
+                throw new DatabaseException("Creating Error" + segmentName + "as it already exists");
+            }
+            return new SegmentImpl(segRoot, segmentName, outputStream);
         } catch (IOException ex) {
             throw new DatabaseException("Creating Error " + segmentName + ex);
         }
-        if (!fileExists) {
-            throw new DatabaseException("Creating Error" + segmentName + "as it already exists");
-        }
-        return new SegmentImpl(segRoot, segmentName, outputStream);
     }
 
     static String createSegmentName(String tableName) {
@@ -88,17 +86,24 @@ public class SegmentImpl implements Segment {
             return Optional.empty();
         }
         long myOf = offsetInfo.get().getOffset();
-        DatabaseInputStream input = new DatabaseInputStream(Files.newInputStream(tableRootPath));
-        input.skip(myOf);
+        try {
+            DatabaseInputStream input = new DatabaseInputStream(Files.newInputStream(tableRootPath));
+            long skipped = input.skip(myOf);
+            if (skipped != myOf) {
+                throw new IOException("Error while skipping bytes " + segmentName);
+            }
+            Optional<DatabaseRecord> value = input.readDbUnit();
 
-        Optional<DatabaseRecord> value = input.readDbUnit();
+            if (value.isEmpty()) {
+                return Optional.empty();
+            }
+            input.close();
 
-        if (value.isEmpty()) {
-            return Optional.empty();
+            return Optional.of(value.get().getValue());
         }
-        input.close();
-
-        return Optional.of(value.get().getValue());
+        catch(IOException ex) {
+            throw new IOException("Error while reading in " + segmentName + ex);
+        }
     }
 
     @Override
