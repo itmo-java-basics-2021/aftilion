@@ -26,18 +26,18 @@ public class DatabaseImpl implements Database {
 
     public static Database create(String dbName, Path databaseRoot) throws DatabaseException {
 
-        if (dbName == null)
+        if (dbName == null) {
             throw new DatabaseException("Why dataBase name is null?");
-
-        if (Files.exists(Paths.get(databaseRoot.toString(), dbName)))
+        }
+        if (Files.exists(Paths.get(databaseRoot.toString(), dbName))) {
             throw new DatabaseException("This" + dbName + "already exists");
+        }
 
         try {
             Files.createDirectory(Paths.get(databaseRoot.toString(), dbName));
         } catch (IOException ex) {
             throw new DatabaseException("Error while creating a DataBase(" + dbName + ") directory");
         }
-
         return new DatabaseImpl(dbName, databaseRoot);
         return new DatabaseImpl(dbName,databaseRoot);
     /**
@@ -60,16 +60,16 @@ public class DatabaseImpl implements Database {
     @Override
     public void createTableIfNotExists(String tableName) throws DatabaseException {
 
-        if (tableName == null)
+        if (tableName == null) {
             throw new DatabaseException("Why tableName name is null?");
-
-        if ((tableDictionary.containsKey(tableName)) || (Files.exists(Paths.get(databaseRoot.toString(), dbName, tableName))))
+        }
+        if ((tableDictionary.containsKey(tableName)) || (Files.exists(Paths.get(databaseRoot.toString(), dbName, tableName)))) {
             throw new DatabaseException("We have " + tableName + " in " + dbName + "directory");
+        }
 
         TableIndex newTableIndex = new TableIndex();
         Path pathToTableRoot = Paths.get(databaseRoot.toString(), dbName);
         Table newTable = TableImpl.create(tableName, pathToTableRoot, newTableIndex);
-
         tableDictionary.put(tableName, newTable);
     }
 
@@ -78,10 +78,9 @@ public class DatabaseImpl implements Database {
         if (!tableDictionary.containsKey(tableName)) {
             throw new DatabaseException("Table " + tableName + " doesn't exist in database" + dbName);
         }
-
-        if (tableName == null)
-            throw new DatabaseException("Error while writing in database");
-
+        if (tableName == null) {
+            throw new DatabaseException("Error while writing in , null name");
+        }
         Table table = tableDictionary.get(tableName);
         table.write(objectKey, objectValue);
     }
@@ -91,9 +90,9 @@ public class DatabaseImpl implements Database {
 
         Table table = tableDictionary.get(tableName);
 
-        if (tableName == null)
-            throw new DatabaseException("Error while writing in database");
-
+        if (tableName == null) {
+            throw new DatabaseException("Error while reading in database , null name");
+        }
         return table.read(objectKey);
     }
 
@@ -103,12 +102,10 @@ public class DatabaseImpl implements Database {
         if (!tableDictionary.containsKey(tableName)) {
             throw new DatabaseException("Table " + tableName + " doesn't exist in database" + dbName);
         }
-
-        if (tableName == null)
+        if (tableName == null) {
             throw new DatabaseException("Writing in database error");
-
+        }
         Table tableImpl = tableDictionary.get(tableName);
-
         tableImpl.delete(objectKey);
     }
 }

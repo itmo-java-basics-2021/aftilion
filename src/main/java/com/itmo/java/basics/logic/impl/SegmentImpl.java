@@ -50,13 +50,12 @@ public class SegmentImpl implements Segment {
             fileExists = segRoot.toFile().createNewFile();
             outputStream = Files.newOutputStream(segRoot);
 
-        } catch (IOException exception) {
-            throw new DatabaseException("Creating Error " + segmentName);
+        } catch (IOException ex) {
+            throw new DatabaseException("Creating Error " + segmentName + ex);
         }
         if (!fileExists) {
             throw new DatabaseException("Creating Error" + segmentName + "as it already exists");
         }
-
         return new SegmentImpl(segRoot, segmentName, outputStream);
     }
 
@@ -82,7 +81,6 @@ public class SegmentImpl implements Segment {
         }
 
         SetDatabaseRecord newSeg = new SetDatabaseRecord(objectKey.getBytes(StandardCharsets.UTF_8), objectValue);
-
         segmentIndex.onIndexedEntityUpdated(objectKey, new SegmentOffsetInfoImpl(segmentSize));
         segmentSize += outStream.write(newSeg);
         return true;
@@ -93,20 +91,20 @@ public class SegmentImpl implements Segment {
 
         Optional<SegmentOffsetInfo> offsetInfo = segmentIndex.searchForKey(objectKey);
 
-        if (offsetInfo.isEmpty())
+        if (offsetInfo.isEmpty()) {
             return Optional.empty();
-
+        }
         long myOf = offsetInfo.get().getOffset();
-
         DatabaseInputStream input = new DatabaseInputStream(Files.newInputStream(tableRootPath));
         input.skip(myOf);
 
         Optional<DatabaseRecord> value = input.readDbUnit();
 
-        if (value.isEmpty())
+        if (value.isEmpty()) {
             return Optional.empty();
-
+        }
         input.close();
+
         return Optional.of(value.get().getValue());
     }
 
@@ -125,7 +123,6 @@ public class SegmentImpl implements Segment {
             outStream.close();
             return false;
         }
-
 
         RemoveDatabaseRecord newSeg = new RemoveDatabaseRecord(objectKey.getBytes());
         segmentIndex.onIndexedEntityUpdated(objectKey, new SegmentOffsetInfoImpl(segmentSize));
