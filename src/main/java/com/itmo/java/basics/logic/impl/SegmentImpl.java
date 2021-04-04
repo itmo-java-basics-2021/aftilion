@@ -52,21 +52,18 @@ public class SegmentImpl implements Segment {
     }
 
         Path segRoot = Paths.get(tableRootPath.toString(), segmentName);
-        boolean fileExists;
-        OutputStream outputStream;
 
-        try {
+        try(OutputStream outputStream = Files.newOutputStream(segRoot) ) {
+            boolean fileExists;
             fileExists = segRoot.toFile().createNewFile();
-            outputStream = Files.newOutputStream(segRoot);
 
+            if (!fileExists) {
+                throw new DatabaseException("Creating Error" + segmentName + "as it already exists");
+            }
+            return new SegmentImpl(segRoot, segmentName, outputStream);
         } catch (IOException ex) {
             throw new DatabaseException("Creating Error " + segmentName + ex);
         }
-        if (!fileExists) {
-            throw new DatabaseException("Creating Error" + segmentName + "as it already exists");
-        }
-
-        return new SegmentImpl(segRoot, segmentName, outputStream);
     }
 
     static String createSegmentName(String tableName) {
@@ -91,7 +88,6 @@ public class SegmentImpl implements Segment {
         }
 
         SetDatabaseRecord newSeg = new SetDatabaseRecord(objectKey.getBytes(StandardCharsets.UTF_8), objectValue);
-
         segmentIndex.onIndexedEntityUpdated(objectKey, new SegmentOffsetInfoImpl(segmentSize));
         segmentSize += outStream.write(newSeg);
         return true;
@@ -102,26 +98,27 @@ public class SegmentImpl implements Segment {
 
         Optional<SegmentOffsetInfo> offsetInfo = segmentIndex.searchForKey(objectKey);
 
-        if (offsetInfo.isEmpty())
+        if (offsetInfo.isEmpty()) {
             return Optional.empty();
+        }
         long myOf = offsetInfo.get().getOffset();
-
-        try{
+        try {
             DatabaseInputStream input = new DatabaseInputStream(Files.newInputStream(tableRootPath));
             long skipped = input.skip(myOf);
-            if( skipped != myOf){
-                throw new IOException("Error while skipping bytes" + segmentName);
+            if (skipped != myOf) {
+                throw new IOException("Error while skipping bytes " + segmentName);
             }
-            input.skip(myOf);
             Optional<DatabaseRecord> value = input.readDbUnit();
-            if (value.isEmpty())
-                return Optional.empty();
 
+            if (value.isEmpty()) {
+                return Optional.empty();
+            }
             input.close();
+
             return Optional.of(value.get().getValue());
         }
-        catch ( IOException ex){
-            throw new IOException( "Error while reading " + segmentName + ex);
+        catch(IOException ex) {
+            throw new IOException("Error while reading in " + segmentName + ex);
         }
     }
 
@@ -136,8 +133,9 @@ public class SegmentImpl implements Segment {
             return false;
         }
 
-        if (segmentIndex.searchForKey(objectKey).isPresent()){
-            throw new IOException("Deleting error in Segment");
+        if (segmentIndex.searchForKey(objectKey).isEmpty()){
+            outStream.close();
+            return false;
         }
 
         RemoveDatabaseRecord newSeg = new RemoveDatabaseRecord(objectKey.getBytes());
