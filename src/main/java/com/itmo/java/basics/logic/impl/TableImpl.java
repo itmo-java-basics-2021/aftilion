@@ -27,8 +27,9 @@ public class TableImpl implements Table {
 
     static Table create(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
 
-        if (tableName == null)
+        if (tableName == null) {
             throw new DatabaseException("Why tableBase name is null?");
+        }
 
         Path pathToTableRoot = Paths.get(pathToDatabaseRoot.toString(), tableName);
 
@@ -37,7 +38,6 @@ public class TableImpl implements Table {
         } catch (IOException ex) {
             throw new DatabaseException("Error while creating a Table(" + tableName + ") directory");
         }
-
         return new TableImpl(tableName, pathToTableRoot, tableIndex);
     }
 
@@ -68,7 +68,6 @@ public class TableImpl implements Table {
 
             if (segmentRead.isPresent()) {
                 return segmentRead.get().read(objectKey);
-
             } else
                 return Optional.empty();
         } catch (IOException ex) {
@@ -86,7 +85,6 @@ public class TableImpl implements Table {
                 lastSegment = SegmentImpl.create(SegmentImpl.createSegmentName(tableName), pathToDatabaseRoot);
                 lastSegment.delete(objectKey);
             }
-
             tableIndex.onIndexedEntityUpdated(objectKey, null);
         } catch (IOException ex) {
             throw new DatabaseException("Deleting error in Table");
