@@ -6,8 +6,8 @@ import com.itmo.java.basics.logic.WritableDatabaseRecord;
  * Запись в БД, означающая удаление значения по ключу
  */
 public class RemoveDatabaseRecord implements WritableDatabaseRecord {
-    public byte[] key;
-    public byte[] value;
+    private byte[] key;
+    private byte[] value;
 
     public RemoveDatabaseRecord(byte[] key) {
         this.key = key;
