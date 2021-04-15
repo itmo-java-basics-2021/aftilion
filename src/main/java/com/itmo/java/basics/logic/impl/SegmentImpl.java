@@ -19,11 +19,11 @@ import java.util.Optional;
 
 public class SegmentImpl implements Segment {
 
-    public Path tableRootPath;
-    public String segmentName;
-    public SegmentIndex segmentIndex;
-    public final long sizeMaximum = 100000;
-    public long segmentSize;
+    private Path tableRootPath;
+    private String segmentName;
+    private SegmentIndex segmentIndex;
+    private final long sizeMaximum = 100000;
+    private long segmentSize;
     private final DatabaseOutputStream outStream;
 
     public SegmentImpl(Path tableRootPath, String segmentName, OutputStream outStream) {
@@ -34,20 +34,20 @@ public class SegmentImpl implements Segment {
     }
 
     static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
+        Path segmentRoot = Paths.get(tableRootPath.toString(), segmentName);
+        boolean isCreated;
+        OutputStream outputStream;
 
-        Path segRoot = Paths.get(tableRootPath.toString(), segmentName);
-
-        try(OutputStream outputStream = Files.newOutputStream(segRoot) ) {
-            boolean fileExists;
-            fileExists = segRoot.toFile().createNewFile();
-
-            if (!fileExists) {
-                throw new DatabaseException("Creating Error" + segmentName + "as it already exists");
-            }
-            return new SegmentImpl(segRoot, segmentName, outputStream);
-        } catch (IOException ex) {
-            throw new DatabaseException("Creating Error " + segmentName + ex);
+        try{
+            isCreated = segmentRoot.toFile().createNewFile();
+            outputStream = Files.newOutputStream(segmentRoot);
+        }catch(IOException ex){
+            throw new DatabaseException("Error while creating segment " + segmentName, ex);
         }
+        if(!isCreated){
+            throw new DatabaseException("Error while creating segment " + segmentName + "as it already exists");
+        }
+        return new SegmentImpl(segmentRoot, segmentName, outputStream);
     }
 
     static String createSegmentName(String tableName) {
@@ -66,11 +66,9 @@ public class SegmentImpl implements Segment {
             outStream.close();
             return false;
         }
-
         if (objectValue == null) {
             return delete(objectKey);
         }
-
         SetDatabaseRecord newSeg = new SetDatabaseRecord(objectKey.getBytes(StandardCharsets.UTF_8), objectValue);
         segmentIndex.onIndexedEntityUpdated(objectKey, new SegmentOffsetInfoImpl(segmentSize));
         segmentSize += outStream.write(newSeg);
@@ -81,28 +79,26 @@ public class SegmentImpl implements Segment {
     public Optional<byte[]> read(String objectKey) throws IOException {
 
         Optional<SegmentOffsetInfo> offsetInfo = segmentIndex.searchForKey(objectKey);
-
         if (offsetInfo.isEmpty()) {
             return Optional.empty();
         }
+
         long myOf = offsetInfo.get().getOffset();
-        try {
-            DatabaseInputStream input = new DatabaseInputStream(Files.newInputStream(tableRootPath));
-            long skipped = input.skip(myOf);
+        try (DatabaseInputStream in = new DatabaseInputStream(Files.newInputStream(tableRootPath))) {
+            long skipped = in.skip(myOf);
             if (skipped != myOf) {
-                throw new IOException("Error while skipping bytes " + segmentName);
+                throw new IOException("Error while skipping bytes in segment called " + segmentName);
             }
-            Optional<DatabaseRecord> value = input.readDbUnit();
+            Optional<DatabaseRecord> value = in.readDbUnit();
 
             if (value.isEmpty()) {
                 return Optional.empty();
             }
-            input.close();
 
             return Optional.of(value.get().getValue());
-        }
-        catch(IOException ex) {
-            throw new IOException("Error while reading in " + segmentName + ex);
+
+        } catch (IOException exception) {
+            throw new IOException("Error while creating a Segment file " + segmentName, exception);
         }
     }
 

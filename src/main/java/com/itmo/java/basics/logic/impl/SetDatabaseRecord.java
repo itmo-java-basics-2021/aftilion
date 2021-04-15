@@ -4,8 +4,8 @@ import com.itmo.java.basics.logic.WritableDatabaseRecord;
 
 public class SetDatabaseRecord implements WritableDatabaseRecord {
 
-    public byte[] key;
-    public byte[] value;
+    private byte[] key;
+    private byte[] value;
 
     public SetDatabaseRecord(byte[] key, byte[] value) {
         this.key = key;

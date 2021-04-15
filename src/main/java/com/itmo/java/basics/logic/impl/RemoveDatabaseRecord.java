@@ -3,8 +3,8 @@ package com.itmo.java.basics.logic.impl;
 import com.itmo.java.basics.logic.WritableDatabaseRecord;
 
 public class RemoveDatabaseRecord implements WritableDatabaseRecord {
-    public byte[] key;
-    public byte[] value;
+    private byte[] key;
+    private byte[] value;
 
     public RemoveDatabaseRecord(byte[] key) {
         this.key = key;

@@ -15,9 +15,9 @@ import java.util.Optional;
 
 public class DatabaseImpl implements Database {
 
-    public String dbName;
-    public Path databaseRoot;
-    public Map<String, Table> tableDictionary = new HashMap<String, Table>();
+    private String dbName;
+    private Path databaseRoot;
+    private Map<String, Table> tableDictionary = new HashMap<String, Table>();
     private DatabaseImpl(String dbName, Path databaseRoot) {
         this.dbName = dbName;
         this.databaseRoot = databaseRoot;
@@ -36,7 +36,7 @@ public class DatabaseImpl implements Database {
         try {
             Files.createDirectory(Paths.get(databaseRoot.toString(), dbName));
         } catch (IOException ex) {
-            throw new DatabaseException("Error while creating a DataBase(" + dbName + ") directory");
+            throw new DatabaseException("Error while creating a DataBase(" + dbName + ") directory" , ex);
         }
         return new DatabaseImpl(dbName, databaseRoot);
     }
