@@ -13,10 +13,10 @@ import java.util.Optional;
 
 public class TableImpl implements Table {
 
-    public String tableName;
-    public Path pathToDatabaseRoot;
-    public TableIndex tableIndex;
-    public Segment lastSegment;
+    private String tableName;
+    private Path pathToDatabaseRoot;
+    private TableIndex tableIndex;
+    private Segment lastSegment;
 
     private TableImpl(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
         this.tableName = tableName;
@@ -56,7 +56,7 @@ public class TableImpl implements Table {
             }
             tableIndex.onIndexedEntityUpdated(objectKey, lastSegment);
         } catch (IOException ex) {
-            throw new DatabaseException("Writing in database error " + ex);
+            throw new DatabaseException("Writing in database error " , ex);
         }
     }
 
@@ -71,7 +71,7 @@ public class TableImpl implements Table {
             } else
                 return Optional.empty();
         } catch (IOException ex) {
-            throw new DatabaseException("Reading in database error " + ex);
+            throw new DatabaseException("Reading in database error " , ex);
         }
     }
 
