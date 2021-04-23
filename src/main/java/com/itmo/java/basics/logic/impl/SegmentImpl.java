@@ -27,12 +27,8 @@ import java.util.Optional;
  * - является неизменяемым после появления более нового сегмента
  */
 public class SegmentImpl implements Segment {
-    public static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
-        throw new UnsupportedOperationException();
-    }
 
-    public static Segment initializeFromContext(SegmentInitializationContext context) {
-        return null;
+
 
     private Path tableRootPath;
     private String segmentName;
@@ -48,7 +44,7 @@ public class SegmentImpl implements Segment {
         this.outStream = new DatabaseOutputStream(outStream);
     }
 
-    static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
+    public static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
         Path segmentRoot = Paths.get(tableRootPath.toString(), segmentName);
         boolean isCreated;
         OutputStream outputStream;
@@ -63,6 +59,10 @@ public class SegmentImpl implements Segment {
             throw new DatabaseException("Error while creating segment " + segmentName + "as it already exists");
         }
         return new SegmentImpl(segmentRoot, segmentName, outputStream);
+    }
+
+    public static Segment initializeFromContext(SegmentInitializationContext context) {
+        return null;
     }
 
     static String createSegmentName(String tableName) {
