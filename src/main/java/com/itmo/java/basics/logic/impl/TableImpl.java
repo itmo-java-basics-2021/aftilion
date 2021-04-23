@@ -26,7 +26,7 @@ public class TableImpl implements Table {
         this.lastSegment = SegmentImpl.create(SegmentImpl.createSegmentName(tableName), pathToDatabaseRoot);
     }
 
-    static Table create(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
+   public static Table create(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
 
         if (tableName == null) {
             throw new DatabaseException("Why tableBase name is null?");
