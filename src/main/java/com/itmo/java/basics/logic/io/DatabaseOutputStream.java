@@ -11,8 +11,12 @@ import java.io.OutputStream;
  */
 public class DatabaseOutputStream extends DataOutputStream {
 
+    private final OutputStream outputStream;
+
     public DatabaseOutputStream(OutputStream outputStream) {
+
         super(outputStream);
+        this.outputStream = outputStream;
     }
 
     /**
@@ -31,6 +35,17 @@ public class DatabaseOutputStream extends DataOutputStream {
      * @throws IOException если запись не удалась
      */
     public int write(WritableDatabaseRecord databaseRecord) throws IOException {
-        return 0;
+
+        writeInt(databaseRecord.getKeySize());
+        write(databaseRecord.getKey());
+        writeInt(databaseRecord.getValueSize());
+
+        if (databaseRecord.isValuePresented()) {
+            write(databaseRecord.getValue());
+        }
+        flush();
+
+        return databaseRecord.getKeySize() + databaseRecord.getValueSize() + 8;
+
     }
 }
