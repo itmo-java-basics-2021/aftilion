@@ -2,8 +2,8 @@ package com.itmo.java.basics.logic.impl;
 
 import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.index.impl.TableIndex;
-import com.itmo.java.basics.logic.Segment;
 import com.itmo.java.basics.initialization.TableInitializationContext;
+import com.itmo.java.basics.logic.Segment;
 import com.itmo.java.basics.logic.Table;
 
 import java.io.IOException;
@@ -13,12 +13,6 @@ import java.nio.file.Paths;
 import java.util.Optional;
 
 public class TableImpl implements Table {
-    public static Table create(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
-        return null;
-    }
-
-    public static Table initializeFromContext(TableInitializationContext context) {
-        return null;
 
     private String tableName;
     private Path pathToDatabaseRoot;
@@ -48,8 +42,14 @@ public class TableImpl implements Table {
         return new TableImpl(tableName, pathToTableRoot, tableIndex);
     }
 
+    public static Table initializeFromContext(TableInitializationContext context) {
+        return null;
+    }
+
     @Override
-    public String getName() { return tableName; }
+    public String getName() {
+        return tableName;
+    }
 
     @Override
     public void write(String objectKey, byte[] objectValue) throws DatabaseException {
@@ -63,7 +63,7 @@ public class TableImpl implements Table {
             }
             tableIndex.onIndexedEntityUpdated(objectKey, lastSegment);
         } catch (IOException ex) {
-            throw new DatabaseException("Writing in database error " , ex);
+            throw new DatabaseException("Writing in database error ", ex);
         }
     }
 
@@ -78,7 +78,7 @@ public class TableImpl implements Table {
             } else
                 return Optional.empty();
         } catch (IOException ex) {
-            throw new DatabaseException("Reading in database error " , ex);
+            throw new DatabaseException("Reading in database error ", ex);
         }
     }
 
