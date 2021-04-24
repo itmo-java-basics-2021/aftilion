@@ -8,8 +8,7 @@ import com.itmo.java.basics.logic.impl.DatabaseImpl;
 
 import java.io.File;
 import java.io.IOException;
-import lombok.Builder;
-@Builder
+
 public class DatabaseServerInitializer implements Initializer {
     private final Initializer databaseInitializer;
 
