@@ -61,12 +61,12 @@ public class SegmentImpl implements Segment {
         return new SegmentImpl(segmentRoot, segmentName, outputStream);
     }
 
-    public static Segment initializeFromContext(SegmentInitializationContext context) throws DatabaseException {
+    public static Segment initializeFromContext(SegmentInitializationContext context)  {
         OutputStream outputStream;
         try{
             outputStream = Files.newOutputStream(context.getSegmentPath());
         }catch(IOException ex){
-            throw new DatabaseException("Error while creating segment " + context.getSegmentPath(), ex);
+          outputStream = null;
         }
         SegmentImpl newSegment = new SegmentImpl(context , outputStream);
         newSegment.segmentSize = context.getCurrentSize();
