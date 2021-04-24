@@ -8,7 +8,8 @@ import com.itmo.java.basics.logic.impl.DatabaseImpl;
 
 import java.io.File;
 import java.io.IOException;
-
+import lombok.Builder;
+@Builder
 public class DatabaseServerInitializer implements Initializer {
     private final Initializer databaseInitializer;
 
@@ -25,24 +26,24 @@ public class DatabaseServerInitializer implements Initializer {
      */
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
-
-            if (context.currentDbContext() == null) {
-                throw new DatabaseException("Context Db is null");
-            }
-                File dir = context.currentDbContext().getDatabasePath().toFile();
-                if (dir.listFiles() == null) {
-                    return;
-                }
-                File[] tablesDataBase = dir.listFiles();
-                for (File table : tablesDataBase) {
-                    InitializationContext init = new InitializationContextImpl(context.executionEnvironment(),
-                            context.currentDbContext(),
-                            new TableInitializationContextImpl(table.getName(), table.toPath(), new TableIndex()),
-                            context.currentSegmentContext());
-                    databaseInitializer.perform(init);
-                }
-                context.executionEnvironment().addDatabase(DatabaseImpl.initializeFromContext(context.currentDbContext()));
+        if (context.executionEnvironment() == null) {
+            throw new DatabaseException("Context Env is null");
+        }
+        File directory = context.executionEnvironment().getWorkingPath().toFile();
+        if (directory.listFiles() == null) {
+            return;
+        }
+        File[] files = directory.listFiles();
+        for (File file : files) {
+            if (file.isDirectory()) {
+                InitializationContext init = InitializationContextImpl.builder()
+                        .executionEnvironment(context.executionEnvironment())
+                        .currentDatabaseContext(new DatabaseInitializationContextImpl(file.getName(), file.toPath())).build();
+                databaseInitializer.perform(init);
             }
         }
+    }
+}
+
 
 
