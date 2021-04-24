@@ -24,6 +24,11 @@ public class DatabaseImpl implements Database {
         this.databaseRoot = databaseRoot;
     }
 
+    private DatabaseImpl(DatabaseInitializationContext context){
+        this.dbName = context.getDbName();
+        this.databaseRoot = context.getDatabasePath();
+    }
+
 
     public static Database create(String dbName, Path databaseRoot) throws DatabaseException {
 

@@ -1,6 +1,7 @@
 package com.itmo.java.basics.logic.impl;
 
 import com.itmo.java.basics.initialization.SegmentInitializationContext;
+import com.itmo.java.basics.initialization.TableInitializationContext;
 import com.itmo.java.basics.logic.Segment;
 import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.index.SegmentOffsetInfo;
@@ -28,19 +29,25 @@ import java.util.Optional;
  */
 public class SegmentImpl implements Segment {
 
-
-
     private Path tableRootPath;
     private String segmentName;
     private SegmentIndex segmentIndex;
     private final long sizeMaximum = 100000;
     private long segmentSize;
+    private boolean ReadOnly;
     private final DatabaseOutputStream outStream;
 
     public SegmentImpl(Path tableRootPath, String segmentName, OutputStream outStream) {
         this.tableRootPath = tableRootPath;
         this.segmentName = segmentName;
         this.segmentIndex = new SegmentIndex();
+        this.outStream = new DatabaseOutputStream(outStream);
+    }
+
+    private SegmentImpl(SegmentInitializationContext context , OutputStream outStream) {
+        this.tableRootPath = context.getSegmentPath();
+        this.segmentName = context.getSegmentName();
+        this.segmentIndex = context.getIndex();
         this.outStream = new DatabaseOutputStream(outStream);
     }
 
@@ -61,8 +68,16 @@ public class SegmentImpl implements Segment {
         return new SegmentImpl(segmentRoot, segmentName, outputStream);
     }
 
-    public static Segment initializeFromContext(SegmentInitializationContext context) {
-        return null;
+    public static Segment initializeFromContext(SegmentInitializationContext context) throws DatabaseException {
+        OutputStream outputStream;
+        try{
+            outputStream = Files.newOutputStream(context.getSegmentPath());
+        }catch(IOException ex){
+            throw new DatabaseException("Error while creating segment " + context.getSegmentPath(), ex);
+        }
+        SegmentImpl newSegment = new SegmentImpl(context , outputStream);
+        newSegment.segmentSize = context.getCurrentSize();
+        return newSegment;
     }
 
     static String createSegmentName(String tableName) {
