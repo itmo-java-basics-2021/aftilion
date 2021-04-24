@@ -21,7 +21,7 @@ import java.util.Optional;
 
 public class SegmentInitializer implements Initializer {
 
-    private  DatabaseOutputStream outStream;
+
     /**
      * Добавляет в контекст информацию об инициализируемом сегменте.
      * Составляет индекс сегмента
@@ -55,7 +55,6 @@ public class SegmentInitializer implements Initializer {
         catch (IOException ex) {
             throw new DatabaseException("Error while InitializationContext " , ex);
         }
-
-        }
+    }
 }
 
