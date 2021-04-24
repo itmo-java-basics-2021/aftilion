@@ -1,11 +1,17 @@
 package com.itmo.java.basics.initialization.impl;
 
 import com.itmo.java.basics.exceptions.DatabaseException;
+import com.itmo.java.basics.index.impl.TableIndex;
 import com.itmo.java.basics.initialization.InitializationContext;
 import com.itmo.java.basics.initialization.Initializer;
+import com.itmo.java.basics.logic.impl.DatabaseImpl;
+
+import java.io.File;
 
 public class DatabaseInitializer implements Initializer {
+    private final Initializer tableInitializer;
     public DatabaseInitializer(TableInitializer tableInitializer) {
+        this.tableInitializer = tableInitializer;
     }
 
     /**
@@ -18,5 +24,21 @@ public class DatabaseInitializer implements Initializer {
      */
     @Override
     public void perform(InitializationContext initialContext) throws DatabaseException {
+        if (initialContext.currentDbContext() == null) {
+            throw new DatabaseException("Error with ContextTable"+ initialContext.currentTableContext());
+        }
+        File directory = initialContext.currentDbContext().getDatabasePath().toFile();
+        if (directory.listFiles() == null) {
+            return;
+        }
+        File[] tables = directory.listFiles();
+        for (File table : tables) {
+            InitializationContext init = new InitializationContextImpl(initialContext.executionEnvironment(),
+                    initialContext.currentDbContext(),
+                    new TableInitializationContextImpl(table.getName(), table.toPath(), new TableIndex()),
+                    initialContext.currentSegmentContext());
+            tableInitializer.perform(init);
+        }
+        initialContext.executionEnvironment().addDatabase(DatabaseImpl.initializeFromContext(initialContext.currentDbContext()));
     }
 }
