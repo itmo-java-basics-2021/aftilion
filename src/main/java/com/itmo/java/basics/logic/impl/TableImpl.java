@@ -46,7 +46,8 @@ public class TableImpl implements Table {
         } catch (IOException ex) {
             throw new DatabaseException("Error while creating a Table(" + tableName + ") directory");
         }
-        return new TableImpl(tableName, pathToTableRoot, tableIndex);
+        TableImpl newTb = new TableImpl(tableName , pathToTableRoot , tableIndex);
+        return new CachingTable(newTb);
     }
 
     public static Table initializeFromContext(TableInitializationContext context) {
