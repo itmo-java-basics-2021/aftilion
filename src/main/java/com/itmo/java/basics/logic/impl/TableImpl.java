@@ -26,6 +26,13 @@ public class TableImpl implements Table {
         this.lastSegment = SegmentImpl.create(SegmentImpl.createSegmentName(tableName), pathToDatabaseRoot);
     }
 
+    private TableImpl(TableInitializationContext context) {
+        this.tableName = context.getTableName();
+        this.lastSegment = context.getCurrentSegment();
+        this.pathToDatabaseRoot = context.getTablePath().getParent();
+        this.tableIndex = context.getTableIndex();
+    }
+
    public static Table create(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
 
         if (tableName == null) {
@@ -43,7 +50,7 @@ public class TableImpl implements Table {
     }
 
     public static Table initializeFromContext(TableInitializationContext context) {
-        return null;
+       return new TableImpl(context);
     }
 
     @Override
