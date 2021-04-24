@@ -28,6 +28,7 @@ public class DatabaseServerInitializer implements Initializer {
         if (context.executionEnvironment() == null) {
             throw new DatabaseException("Context Env is null");
         }
+
         File directory = context.executionEnvironment().getWorkingPath().toFile();
         if (directory.listFiles() == null) {
             return;
@@ -41,6 +42,7 @@ public class DatabaseServerInitializer implements Initializer {
                 databaseInitializer.perform(init);
             }
         }
+
     }
 }
 
