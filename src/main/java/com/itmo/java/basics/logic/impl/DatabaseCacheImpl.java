@@ -19,16 +19,17 @@ public class DatabaseCacheImpl implements DatabaseCache {
 
     @Override
     public byte[] get(String key) {
-        return new byte[0];
+        return cache.get(key).getBytes();
     }
 
     @Override
     public void set(String key, byte[] value) {
-
+        cache.put(key, value.toString());
     }
 
     @Override
     public void delete(String key) {
-
+        cache.remove(key);
+        cache.put(key,null);
     }
 }
