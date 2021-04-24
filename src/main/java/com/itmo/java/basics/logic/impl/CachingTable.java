@@ -8,13 +8,27 @@ import java.util.Optional;
 
 public class CachingTable implements Table {
 
+    private final Table table;
+    private final DatabaseCache cache;
+
+    public CachingTable(Table table) {
+        this.table = table;
+        this.cache = new DatabaseCacheImpl();
+    }
+
+    public CachingTable(Table table, DatabaseCache cache) {
+        this.table = table;
+        this.cache = cache;
+    }
     @Override
     public String getName() {
-      return  null;
+      return table.getName();
     }
 
     @Override
     public void write(String objectKey, byte[] objectValue) throws DatabaseException {
+     cache.set(objectKey ,objectValue);
+     table.write(objectKey ,objectValue);
 
     }
 
