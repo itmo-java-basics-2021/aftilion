@@ -7,8 +7,6 @@ import com.itmo.java.basics.initialization.Initializer;
 import com.itmo.java.basics.logic.impl.TableImpl;
 
 import java.io.File;
-import lombok.Builder;
-@Builder
 public class TableInitializer implements Initializer {
 
     private final Initializer segmentInitializer;
