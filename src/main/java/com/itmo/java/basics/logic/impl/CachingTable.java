@@ -3,16 +3,15 @@ package com.itmo.java.basics.logic.impl;
 import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.logic.DatabaseCache;
 import com.itmo.java.basics.logic.Table;
-import static java.nio.file.StandardOpenOption.APPEND;
 import java.util.Optional;
 
 public class CachingTable implements Table {
 
 
 
-    private final Table cacheTable;
-    private final DatabaseCache dbCache;
-    private final int maxCache = 10000;
+    private  Table cacheTable;
+    private  DatabaseCache dbCache;
+   static private final int maxCache = 10000;
 
     public CachingTable(Table myTable) {
         this.cacheTable = myTable;
