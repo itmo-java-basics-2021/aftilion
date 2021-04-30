@@ -51,8 +51,13 @@ public class TableImpl implements Table {
     }
 
     public static Table initializeFromContext(TableInitializationContext context) {
-        return new CachingTable(new TableImpl(context));
+        try {
+            return new CachingTable(new TableImpl(context));
+        }catch (Exception ex) {
+            return null;
+        }
     }
+
 
     @Override
     public String getName() {
