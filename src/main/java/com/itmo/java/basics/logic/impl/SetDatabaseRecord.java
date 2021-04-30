@@ -15,6 +15,8 @@ public class SetDatabaseRecord implements WritableDatabaseRecord {
         this.value = value;
     }
 
+
+
     @Override
     public byte[] getKey() {
         return key;
