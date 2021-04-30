@@ -54,11 +54,11 @@ public class SegmentImpl implements Segment {
         try{
             isCreated = segmentRoot.toFile().createNewFile();
             outputStream = Files.newOutputStream(segmentRoot);
-        }catch(IOException ex){
-            throw new DatabaseException("Error while creating segment " + segmentName, ex);
+        }catch(IOException exception){
+            throw new DatabaseException("Error while creating a Segment file " + segmentName, exception);
         }
         if(!isCreated){
-            throw new DatabaseException("Error while creating segment " + segmentName + "as it already exists");
+            throw new DatabaseException("Error while creating a Segment file " + segmentName + "as it already exists");
         }
         return new SegmentImpl(segmentRoot, segmentName, outputStream);
     }
