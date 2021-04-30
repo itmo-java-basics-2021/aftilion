@@ -66,6 +66,7 @@ public class SegmentInitializer implements Initializer {
         }
         context.currentTableContext().updateCurrentSegment(newSegment);
     }
-}
+
+    }
 
 
