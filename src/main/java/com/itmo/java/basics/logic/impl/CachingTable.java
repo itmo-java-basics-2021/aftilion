@@ -14,11 +14,9 @@ public class CachingTable implements Table {
     private final Table cacheTable;
     private final DatabaseCache dbCache;
 
-    static final int maxCache = 100_000;
-
     public CachingTable(Table myTable) {
         this.cacheTable = myTable;
-        this.dbCache = new DatabaseCacheImpl(maxCache);
+        this.dbCache = new DatabaseCacheImpl();
     }
 
     @Override
