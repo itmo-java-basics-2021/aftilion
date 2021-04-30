@@ -66,29 +66,6 @@ public class SegmentInitializer implements Initializer {
         }
         context.currentTableContext().updateCurrentSegment(newSegment);
     }
-//        SegmentInitializationContext segmentInContext = context.currentSegmentContext();
-//        Path segmentPath = segmentInContext.getSegmentPath();
-//        Segment segmentIn =  SegmentImpl.initializeFromContext(segmentInContext);
-//        SegmentIndex segmentIndex =  segmentInContext.getIndex();
-//        int offSet = 0;
-//        try (DatabaseInputStream inputStream = new DatabaseInputStream( new FileInputStream(segmentPath.toString()))) {
-//            Optional<DatabaseRecord> dbUn = inputStream.readDbUnit();
-//            while(dbUn.isPresent()){
-//                DatabaseRecord databaseUnit = dbUn.get();
-//                if ( databaseUnit.isValuePresented()) {
-//                    segmentIndex.onIndexedEntityUpdated(new String(databaseUnit.getKey()), new SegmentOffsetInfoImpl(offSet));
-//                }
-//                else {
-//                    segmentIndex.onIndexedEntityUpdated(new String(databaseUnit.getKey()) , null);
-//                }
-//                context.currentTableContext().getTableIndex().onIndexedEntityUpdated(new String(databaseUnit.getKey()) , segmentIn);
-//                offSet += databaseUnit.size();
-//                dbUn = inputStream.readDbUnit();
-//                }
-//        }
-//        catch (IOException ex) {
-//            throw new DatabaseException("Error while InitializationContext " , ex);
-//        }
-    }
+}
 
 
