@@ -32,7 +32,12 @@ public class TableInitializer implements Initializer {
     @Override
 
     public void perform(InitializationContext context) throws DatabaseException {
-
+        if (context.currentTableContext() == null) {
+            throw new DatabaseException("Error with ContextTable"+ context.currentTableContext());
+        }
+        if (context.currentDbContext() == null) {
+            throw new DatabaseException("Error with ContextTable"+context.currentTableContext());
+        }
         TableInitializationContext tbinitalContext = context.currentTableContext();
         File curFile = new File(tbinitalContext.getTablePath().toString());
         if(!curFile.exists()){
