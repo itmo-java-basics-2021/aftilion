@@ -30,9 +30,7 @@ public class DatabaseServerInitializer implements Initializer {
     public void perform(InitializationContext context) throws DatabaseException {
         ExecutionEnvironment exEnvironment = context.executionEnvironment();
         Path path = exEnvironment.getWorkingPath();
-        if (context.executionEnvironment() == null) {
-            throw new DatabaseException("Context Env is null");
-        }
+        
         if(!Files.exists(path)){
             try{
                 Files.createDirectory(path);

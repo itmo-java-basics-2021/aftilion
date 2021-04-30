@@ -86,7 +86,6 @@ public class DatabaseImpl implements Database {
 
     @Override
     public void write(String tableName, String objectKey, byte[] objectValue) throws DatabaseException {
-
         if (!tableDictionary.containsKey(tableName)) {
             throw new DatabaseException("Table " + tableName + " doesn't exist in database" + dbName);
         }
@@ -117,7 +116,7 @@ public class DatabaseImpl implements Database {
         if (tableName == null) {
             throw new DatabaseException("Writing in database error");
         }
-        Table table = tableDictionary.get(tableName);
-        table.delete(objectKey);
+        Table tableImpl = tableDictionary.get(tableName);
+        tableImpl.delete(objectKey);
     }
 }
