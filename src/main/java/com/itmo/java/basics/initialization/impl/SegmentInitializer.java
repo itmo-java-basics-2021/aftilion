@@ -35,18 +35,16 @@ public class SegmentInitializer implements Initializer {
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
 
-        if (context.currentSegmentContext() == null) {
-        throw new DatabaseException("Why" +  context.currentSegmentContext() + "is null?");
-        }
         SegmentInitializationContext segmentinitialContext = context.currentSegmentContext();
         SegmentIndex segmentIndex = segmentinitialContext.getIndex();
         Path segmentPath = segmentinitialContext.getSegmentPath();
         Segment segment = SegmentImpl.initializeFromContext(segmentinitialContext);
         int offset = 0;
+
         if (!Files.exists(segmentPath)) {
             throw new DatabaseException(segmentinitialContext.getSegmentName() + " does not exist");
         }
-        ArrayList<String> keys= new ArrayList<>();
+        ArrayList<String> keys = new ArrayList<>();
         try (DatabaseInputStream InputStream = new DatabaseInputStream(new FileInputStream(segmentPath.toFile()))) {
             Optional<DatabaseRecord> dbUnitOptional = InputStream.readDbUnit();
             while (dbUnitOptional.isPresent()) {
@@ -59,14 +57,12 @@ public class SegmentInitializer implements Initializer {
         } catch (IOException ex) {
             throw new DatabaseException("Error while initialisation segment", ex);
         }
-        Segment newSegment = SegmentImpl.initializeFromContext(new SegmentInitializationContextImpl(segmentinitialContext.getSegmentName(),
-                segmentinitialContext.getSegmentPath(), offset, segmentIndex));
-        for (String key : keys){
-            context.currentTableContext().getTableIndex().onIndexedEntityUpdated(key, segment);
+        Segment newSegment = SegmentImpl.initializeFromContext(new SegmentInitializationContextImpl(segmentinitialContext.getSegmentName(), segmentinitialContext.getSegmentPath(), offset, segmentIndex));
+        for (String i : keys){
+            context.currentTableContext().getTableIndex().onIndexedEntityUpdated(i, segment);
         }
         context.currentTableContext().updateCurrentSegment(newSegment);
     }
-
-    }
+}
 
 
