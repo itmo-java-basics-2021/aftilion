@@ -73,7 +73,7 @@ public class SegmentImpl implements Segment {
     public static Segment initializeFromContext(SegmentInitializationContext context)  {
         OutputStream outputStream;
         try{
-            outputStream = Files.newOutputStream(context.getSegmentPath());
+            outputStream = Files.newOutputStream(context.getSegmentPath(),APPEND);
         }catch(IOException ex){
           outputStream = null;
         }
