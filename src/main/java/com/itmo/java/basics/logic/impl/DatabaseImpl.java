@@ -27,6 +27,7 @@ public class DatabaseImpl implements Database {
     private DatabaseImpl(DatabaseInitializationContext context){
         this.dbName = context.getDbName();
         this.databaseRoot = context.getDatabasePath();
+        this.tableDictionary = context.getTables();
     }
 
 
@@ -48,7 +49,7 @@ public class DatabaseImpl implements Database {
     }
 
     public static Database initializeFromContext(DatabaseInitializationContext context) {
-        return null;
+        return new DatabaseImpl(context);
     }
 
     @Override
@@ -74,6 +75,7 @@ public class DatabaseImpl implements Database {
 
     @Override
     public void write(String tableName, String objectKey, byte[] objectValue) throws DatabaseException {
+
         if (!tableDictionary.containsKey(tableName)) {
             throw new DatabaseException("Table " + tableName + " doesn't exist in database" + dbName);
         }
@@ -104,7 +106,7 @@ public class DatabaseImpl implements Database {
         if (tableName == null) {
             throw new DatabaseException("Writing in database error");
         }
-        Table tableImpl = tableDictionary.get(tableName);
-        tableImpl.delete(objectKey);
+        Table table = tableDictionary.get(tableName);
+        table.delete(objectKey);
     }
 }
