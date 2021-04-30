@@ -51,7 +51,7 @@ public class TableImpl implements Table {
     }
 
     public static Table initializeFromContext(TableInitializationContext context) {
-       return new TableImpl(context);
+        return new CachingTable(new TableImpl(context));
     }
 
     @Override
