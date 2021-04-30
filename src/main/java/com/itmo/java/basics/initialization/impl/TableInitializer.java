@@ -29,6 +29,9 @@ public class TableInitializer implements Initializer {
         if (context.currentTableContext() == null) {
             throw new DatabaseException("Error with ContextTable"+ context.currentTableContext());
         }
+        if (context.currentDbContext() == null) {
+            throw new DatabaseException("Error with ContextTable"+context.currentTableContext());
+        }
         File directory = context.currentTableContext().getTablePath().toFile();
         if (directory.listFiles() == null) {
             return;
