@@ -5,6 +5,7 @@ import com.itmo.java.basics.logic.WritableDatabaseRecord;
 import com.itmo.java.basics.logic.impl.SetDatabaseRecord;
 
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
@@ -26,27 +27,31 @@ public class DatabaseInputStream extends DataInputStream {
      */
     public Optional<DatabaseRecord> readDbUnit() throws IOException {
 
-        if (available() <= 4) {
-            return Optional.empty();
-        }
-        int keySize = readInt();
+        try {
+            if (available() <= 4) {
+                return Optional.empty();
+            }
+            int keySize = readInt();
 
-        if (available() <= 0) {
-            return Optional.empty();
-        }
-        byte[] key = readNBytes(keySize);
+            if (available() <= 0) {
+                return Optional.empty();
+            }
+            byte[] key = readNBytes(keySize);
 
-        if (available() <= 4) {
-            return Optional.empty();
-        }
-        int valueSize = readInt();
+            if (available() <= 4) {
+                return Optional.empty();
+            }
+            int valueSize = readInt();
 
-        if ((available() <= 0) && (valueSize == REMOVED_OBJECT_SIZE)) {
-            return Optional.empty();
-        }
-        byte[] value = readNBytes(valueSize);
-        SetDatabaseRecord datarecord = new SetDatabaseRecord(key, value);
+            if ((available() <= 0) && (valueSize == REMOVED_OBJECT_SIZE)) {
+                return Optional.empty();
+            }
+            byte[] value = readNBytes(valueSize);
+            SetDatabaseRecord datarecord = new SetDatabaseRecord(key, value);
 
-        return Optional.of(datarecord);
+            return Optional.of(datarecord);
+        } catch (EOFException ex) {
+          return Optional.empty();
+        }
     }
 }
