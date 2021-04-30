@@ -19,6 +19,7 @@ public class TableInitializationContextImpl implements TableInitializationContex
         this.tableIndex = tableIndex;
     }
 
+
     @Override
     public String getTableName() {
         return tableName;
