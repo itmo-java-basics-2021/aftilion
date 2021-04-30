@@ -20,6 +20,8 @@ public class SegmentInitializationContextImpl implements SegmentInitializationCo
         this.segmentIndex = index;
     }
 
+
+
     public SegmentInitializationContextImpl(String segmentName, Path tablePath, int currentSize) {
         this.segmentName = segmentName;
         this.segmentPath = Paths.get(tablePath.toString(),segmentName);

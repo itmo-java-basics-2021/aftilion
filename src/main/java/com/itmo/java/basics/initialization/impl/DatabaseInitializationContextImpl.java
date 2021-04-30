@@ -14,7 +14,10 @@ public class DatabaseInitializationContextImpl implements DatabaseInitialization
     private Path dbRoot;
     private Map<String, Table> tablesMap = new HashMap<>();
 
-    
+
+
+
+
 
     public DatabaseInitializationContextImpl(String dbName, Path databaseRoot) {
         this.dbName = dbName;
