@@ -4,6 +4,7 @@ import com.itmo.java.basics.initialization.DatabaseInitializationContext;
 import com.itmo.java.basics.logic.Table;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,12 +12,11 @@ public class DatabaseInitializationContextImpl implements DatabaseInitialization
 
     private final String dbName;
     private final Path dbRoot;
-    private final Map<String, Table> tablesMap;
+    private  Map<String, Table> tablesMap = new HashMap<>();
 
     public DatabaseInitializationContextImpl(String dbName, Path databaseRoot) {
         this.dbName = dbName;
         this.dbRoot = databaseRoot;
-        this.tablesMap = new HashMap<>();
     }
 
     @Override
@@ -26,7 +26,7 @@ public class DatabaseInitializationContextImpl implements DatabaseInitialization
 
     @Override
     public Path getDatabasePath() {
-        return dbRoot;
+        return Paths.get(dbRoot.toString(),dbName);
     }
 
     @Override
