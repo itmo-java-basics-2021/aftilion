@@ -36,7 +36,7 @@ public class DatabaseServerInitializer implements Initializer {
             try{
                 Files.createDirectory(path);
             }catch (IOException e){
-                throw new DatabaseException("Problems occurred while creating directory " + path.toString(), e);
+                throw new DatabaseException("Error while creating " + path.toString(), e);
             }
         }
         File curFile = new File(path.toString());
