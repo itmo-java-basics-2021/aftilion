@@ -14,9 +14,9 @@ public class DatabaseInitializationContextImpl implements DatabaseInitialization
     private final Path dbRoot;
     private  Map<String, Table> tablesMap = new HashMap<>();
 
-    public DatabaseInitializationContextImpl(String dbName, Path databaseRoot) {
+    public DatabaseInitializationContextImpl(String dbName, Path dbRoot) {
         this.dbName = dbName;
-        this.dbRoot = databaseRoot;
+        this.dbRoot = Paths.get(dbRoot.toString(),dbName);
     }
 
     @Override
