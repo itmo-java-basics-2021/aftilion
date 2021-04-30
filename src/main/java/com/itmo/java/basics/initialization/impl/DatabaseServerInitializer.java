@@ -29,6 +29,8 @@ public class DatabaseServerInitializer implements Initializer {
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
 
+
+
         ExecutionEnvironment ExecutionEnvironment = context.executionEnvironment();
         Path path = ExecutionEnvironment.getWorkingPath();
 
