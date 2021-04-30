@@ -18,17 +18,21 @@ import java.util.Optional;
 
 public class MainTest {
     public static void main(String[] args) throws DatabaseException, IOException {
-        Files.walk(Path.of("db", "anime"))
-                .sorted(Comparator.reverseOrder())
-                .map(Path::toFile)
-                .forEach(File::delete);
-        Database db = DatabaseImpl.create("anime", Path.of("db"));
-        db.createTableIfNotExists("naruto");
-        db.write("naruto", "key", "value".getBytes(StandardCharsets.UTF_8));
-        db.write("naruto", "key", "value2".getBytes(StandardCharsets.UTF_8));
-        db.write("naruto", "key", null);
-        db.write("naruto", "key1", "value1".getBytes(StandardCharsets.UTF_8));
-        db.write("naruto", "key2", "".getBytes(StandardCharsets.UTF_8));
+//        Files.walk(Path.of("db", "anime"))
+//                .sorted(Comparator.reverseOrder())
+//                .map(Path::toFile)
+//                .forEach(File::delete);
+        try {
+            Database db = DatabaseImpl.create("anime", Path.of("db"));
+            db.createTableIfNotExists("naruto");
+            db.write("naruto", "key", "value".getBytes(StandardCharsets.UTF_8));
+            db.write("naruto", "key", "value2".getBytes(StandardCharsets.UTF_8));
+            db.write("naruto", "key", null);
+            db.write("naruto", "key1", "value1".getBytes(StandardCharsets.UTF_8));
+            db.write("naruto", "key2", "".getBytes(StandardCharsets.UTF_8));
+        }
+        catch (DatabaseException ex)
+        {throw  new DatabaseException(ex);}
 // System.out.printf(
 // "get = %s expected = %s\n",
 // new String(db.read("naruto", "saske").get()),
@@ -48,17 +52,17 @@ public class MainTest {
 // "ora"
 // );
 
-        Initializer initializer =
-                new DatabaseServerInitializer(
-                        new DatabaseInitializer(
-                                new TableInitializer(
-                                        new SegmentInitializer())));
-        var execEnv = new ExecutionEnvironmentImpl(
-                new DatabaseConfig("db")
-        );
-        var context = new InitializationContextImpl(
-                execEnv, null, null, null
-        );
-        initializer.perform(context);
+//        Initializer initializer =
+//                new DatabaseServerInitializer(
+//                        new DatabaseInitializer(
+//                                new TableInitializer(
+//                                        new SegmentInitializer())));
+//        var execEnv = new ExecutionEnvironmentImpl(
+//                new DatabaseConfig("db")
+//        );
+//        var context = new InitializationContextImpl(
+//                execEnv, null, null, null
+//        );
+//        initializer.perform(context);
     }
 }
