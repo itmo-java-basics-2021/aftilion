@@ -46,10 +46,13 @@ public class DatabaseInputStream extends DataInputStream {
             if ((available() <= 0) && (valueSize == REMOVED_OBJECT_SIZE)) {
                 return Optional.empty();
             }
-            byte[] value = readNBytes(valueSize);
-            SetDatabaseRecord datarecord = new SetDatabaseRecord(key, value);
-
-            return Optional.of(datarecord);
+                if (valueSize != REMOVED_OBJECT_SIZE) {
+                    byte[] value = readNBytes(valueSize);
+                    Optional<DatabaseRecord> res = Optional.of(new SetDatabaseRecord(key, value));
+                    return res;
+                } else {
+                    return Optional.empty();
+                }
         } catch (EOFException ex) {
           return Optional.empty();
         }
