@@ -44,9 +44,8 @@ public class DatabaseServerInitializer implements Initializer {
         if(files == null){
             throw new DatabaseException("Error while working with" + curFile.toString());
         }
-
-        for (File i : files) {
-            DatabaseInitializationContextImpl dbContext = new DatabaseInitializationContextImpl(i.getName(), path);
+        for (File in : files) {
+            DatabaseInitializationContextImpl dbContext = new DatabaseInitializationContextImpl(in.getName(), path);
             databaseInitializer.perform(new InitializationContextImpl(context.executionEnvironment(), dbContext, null, null));
         }
     }
