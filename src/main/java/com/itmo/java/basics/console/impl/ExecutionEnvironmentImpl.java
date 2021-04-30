@@ -14,7 +14,7 @@ public class ExecutionEnvironmentImpl implements ExecutionEnvironment {
     private DatabaseConfig dbConfig;
     private HashMap<String,Database> dataBase = new HashMap<String,Database>();
     public ExecutionEnvironmentImpl(DatabaseConfig config) {
-        this.dbConfig = config;
+        dbConfig = config;
     }
 
     @Override
