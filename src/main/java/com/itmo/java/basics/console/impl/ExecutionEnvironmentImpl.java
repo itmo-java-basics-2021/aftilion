@@ -18,7 +18,7 @@ public class ExecutionEnvironmentImpl implements ExecutionEnvironment {
     }
 
 
-    
+
     @Override
     public Optional<Database> getDatabase(String name) {
         return Optional.ofNullable(dataBase.get(name));
