@@ -120,7 +120,7 @@ public class SegmentImpl implements Segment {
                 return Optional.empty();
             }
 
-            return Optional.ofNullable(value.get().getValue());
+            return Optional.of(value.get().getValue());
 
         } catch (IOException exception) {
             throw new IOException("Error while creating a Segment file " + segmentName, exception);
@@ -137,7 +137,7 @@ public class SegmentImpl implements Segment {
             outStream.close();
             return false;
         }
-        
+
         RemoveDatabaseRecord newSeg = new RemoveDatabaseRecord(objectKey.getBytes());
         segmentIndex.onIndexedEntityUpdated(objectKey, new SegmentOffsetInfoImpl(segmentSize));
         segmentSize += outStream.write(newSeg);
