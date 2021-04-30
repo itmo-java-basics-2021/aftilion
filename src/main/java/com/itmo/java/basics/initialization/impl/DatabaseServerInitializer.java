@@ -50,20 +50,8 @@ public class DatabaseServerInitializer implements Initializer {
             DatabaseInitializationContextImpl dbContext = new DatabaseInitializationContextImpl(i.getName(), path);
             databaseInitializer.perform(new InitializationContextImpl(context.executionEnvironment(), dbContext, null, null));
         }
-//
-//        File directory = context.executionEnvironment().getWorkingPath().toFile();
-//        if (directory.listFiles() == null) {
-//            return;
-//        }
-//        File[] files = directory.listFiles();
-//        for (File file : files) {
-//            if (file.isDirectory()) {
-//                InitializationContext init = InitializationContextImpl.builder()
-//                        .executionEnvironment(context.executionEnvironment())
-//                        .currentDatabaseContext(new DatabaseInitializationContextImpl(file.getName(), file.toPath())).build();
-//                databaseInitializer.perform(init);
-            }
-        }
+    }
+}
 
 
 
