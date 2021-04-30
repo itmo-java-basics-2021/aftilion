@@ -10,10 +10,11 @@ public class CachingTable implements Table {
 
     private final Table cacheTable;
     private final DatabaseCache dbCache;
+    private final int maxCache = 10000;
 
     public CachingTable(Table myTable) {
         this.cacheTable = myTable;
-        this.dbCache = new DatabaseCacheImpl();
+        this.dbCache = new DatabaseCacheImpl(maxCache);
     }
 
     @Override
@@ -29,9 +30,9 @@ public class CachingTable implements Table {
 
     @Override
     public Optional<byte[]> read(String objectKey) throws DatabaseException {
-        byte[] tryReadValueFromCache = dbCache.get(objectKey);
-        if (tryReadValueFromCache != null) {
-            return Optional.of(tryReadValueFromCache);
+        byte[] tryRead = dbCache.get(objectKey);
+        if (tryRead != null) {
+            return Optional.of(tryRead);
         }
         else {
             return cacheTable.read(objectKey);
