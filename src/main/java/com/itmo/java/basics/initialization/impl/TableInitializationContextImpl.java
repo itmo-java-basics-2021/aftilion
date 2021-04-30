@@ -42,6 +42,6 @@ public class TableInitializationContextImpl implements TableInitializationContex
 
     @Override
     public void updateCurrentSegment(Segment segment) {
-        this.lastSegment = segment;
+        lastSegment = segment;
     }
 }
