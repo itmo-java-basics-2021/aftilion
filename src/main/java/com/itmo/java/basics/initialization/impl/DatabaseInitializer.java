@@ -5,6 +5,7 @@ import com.itmo.java.basics.index.impl.TableIndex;
 import com.itmo.java.basics.initialization.DatabaseInitializationContext;
 import com.itmo.java.basics.initialization.InitializationContext;
 import com.itmo.java.basics.initialization.Initializer;
+import com.itmo.java.basics.logic.Database;
 import com.itmo.java.basics.logic.impl.DatabaseImpl;
 
 import java.io.File;
@@ -47,12 +48,10 @@ public class DatabaseInitializer implements Initializer {
             return;
         }
         for (File table : tables) {
-            InitializationContext init = new InitializationContextImpl(initialContext.executionEnvironment(),
-                    initialContext.currentDbContext(),
-                    new TableInitializationContextImpl(table.getName(), table.toPath(), new TableIndex()),
-                    initialContext.currentSegmentContext());
-            tableInitializer.perform(init);
+            TableInitializationContextImpl tableContext = new TableInitializationContextImpl(table.getName(), dbInitializationContext.getDatabasePath(), new TableIndex());
+            tableInitializer.perform(new InitializationContextImpl(initialContext.executionEnvironment(), dbInitializationContext, tableContext,null));
         }
-        initialContext.executionEnvironment().addDatabase(DatabaseImpl.initializeFromContext(initialContext.currentDbContext()));
+        Database database = DatabaseImpl.initializeFromContext(dbInitializationContext);
+        initialContext.executionEnvironment().addDatabase(database);
     }
 }
