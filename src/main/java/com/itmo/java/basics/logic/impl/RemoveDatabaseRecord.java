@@ -31,6 +31,8 @@ public class RemoveDatabaseRecord implements WritableDatabaseRecord {
     @Override
     public boolean isValuePresented() { return false; }
 
+
+
     @Override
     public int getKeySize() {
         return key.length;

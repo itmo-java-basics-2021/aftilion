@@ -31,6 +31,8 @@ public class TableInitializer implements Initializer {
      */
     @Override
 
+
+
     public void perform(InitializationContext context) throws DatabaseException {
         TableInitializationContext tbinitalContext = context.currentTableContext();
         File curFile = new File(tbinitalContext.getTablePath().toString());

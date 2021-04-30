@@ -30,6 +30,8 @@ public class DatabaseInitializer implements Initializer {
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
 
+
+
         DatabaseInitializationContext dbinitialContext = context.currentDbContext();
         if(!Files.exists(dbinitialContext.getDatabasePath())){
             throw new DatabaseException("We dont have this " + dbinitialContext.getDbName());

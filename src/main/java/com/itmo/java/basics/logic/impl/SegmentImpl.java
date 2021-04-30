@@ -51,6 +51,8 @@ public class SegmentImpl implements Segment {
         this.outStream = new DatabaseOutputStream(outStream);
     }
 
+
+
     public static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
         Path segmentRoot = Paths.get(tableRootPath.toString(), segmentName);
         boolean isCreated;
