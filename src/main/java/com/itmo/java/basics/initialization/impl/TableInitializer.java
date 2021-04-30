@@ -27,34 +27,31 @@ public class TableInitializer implements Initializer {
      *
      * @param context контекст с информацией об инициализируемой бд, окружении, таблицы
      * @throws DatabaseException если в контексте лежит неправильный путь к таблице, невозможно прочитать содержимого папки,
-     *  или если возникла ошибка ошибка дочерних инициализаторов
+     *                           или если возникла ошибка ошибка дочерних инициализаторов
      */
     @Override
 
     public void perform(InitializationContext context) throws DatabaseException {
-        if (context.currentTableContext() == null) {
-            throw new DatabaseException("Error with ContextTable"+ context.currentTableContext());
-        }
-        if (context.currentDbContext() == null) {
-            throw new DatabaseException("Error with ContextTable"+context.currentTableContext());
-        }
         TableInitializationContext tbinitalContext = context.currentTableContext();
         File curFile = new File(tbinitalContext.getTablePath().toString());
-        if(!curFile.exists()){
+
+        if (!curFile.exists()) {
             throw new DatabaseException("Directory " + tbinitalContext.getTableName() + " does not exist");
         }
         File[] files = curFile.listFiles();
-        if(files == null){
+
+        if (files == null) {
             throw new DatabaseException("Error while working " + curFile.toString());
         }
+
         List<File> filesList = Arrays.asList(files);
         Collections.sort(filesList);
-        for (File i : filesList){
+
+        for (File i : filesList) {
             SegmentInitializationContext segmentContext = new SegmentInitializationContextImpl(i.getName(), tbinitalContext.getTablePath(), 0);
             segmentInitializer.perform(new InitializationContextImpl(context.executionEnvironment(), context.currentDbContext(), context.currentTableContext(), segmentContext));
         }
-        Table table = TableImpl.initializeFromContext(tbinitalContext);
-        context.currentDbContext().addTable(table);
-
+        Table newTable = TableImpl.initializeFromContext(tbinitalContext);
+        context.currentDbContext().addTable(newTable);
     }
 }
