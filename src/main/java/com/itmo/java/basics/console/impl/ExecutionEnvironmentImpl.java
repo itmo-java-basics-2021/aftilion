@@ -11,10 +11,10 @@ import java.util.Optional;
 
 public class ExecutionEnvironmentImpl implements ExecutionEnvironment {
 
-    private final Map<String, Database> dataBase = new HashMap<>();
-    private final Path workingPath;
+    private DatabaseConfig dbConfig;
+    private HashMap<String,Database> dataBase = new HashMap<String,Database>();
     public ExecutionEnvironmentImpl(DatabaseConfig config) {
-        this.workingPath = Path.of("" , config.getWorkingPath());
+        this.dbConfig = config;
     }
 
     @Override
@@ -29,6 +29,6 @@ public class ExecutionEnvironmentImpl implements ExecutionEnvironment {
 
     @Override
     public Path getWorkingPath() {
-        return workingPath;
+        return Path.of(dbConfig.getWorkingPath());
     }
 }
