@@ -37,9 +37,6 @@ public class SegmentInitializer implements Initializer {
         throw new DatabaseException("");
         }
 
-        if (context.currentDbContext() == null) {
-            throw new DatabaseException("Error with ContextTable"+ context.currentTableContext());
-        }
         SegmentInitializationContext segmentInContext = context.currentSegmentContext();
         Path segmentPath = segmentInContext.getSegmentPath();
         Segment segmentIn =  SegmentImpl.initializeFromContext(segmentInContext);
