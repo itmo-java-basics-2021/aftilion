@@ -8,40 +8,41 @@ import java.util.Optional;
 
 public class CachingTable implements Table {
 
-    private Table myTable;
-    private DatabaseCache myDataBaseCache;
+    private final Table cacheTable;
+    private final DatabaseCache dbCache;
 
-    static final int MAX_CACHE_CAPACITY = 10000;
+    static final int maxCache = 100_000;
 
     public CachingTable(Table myTable) {
-        this.myTable = myTable;
-        this.myDataBaseCache = new DatabaseCacheImpl(MAX_CACHE_CAPACITY);
+        this.cacheTable = myTable;
+        this.dbCache = new DatabaseCacheImpl(maxCache);
     }
 
     @Override
     public String getName() {
-        return myTable.getName();
+        return cacheTable.getName();
     }
 
     @Override
     public void write(String objectKey, byte[] objectValue) throws DatabaseException {
-        myTable.write(objectKey, objectValue);
-        myDataBaseCache.set(objectKey, objectValue);
+        cacheTable.write(objectKey, objectValue);
+        dbCache.set(objectKey, objectValue);
     }
 
     @Override
     public Optional<byte[]> read(String objectKey) throws DatabaseException {
-        byte[] tryReadValueFromCache = myDataBaseCache.get(objectKey);
+        byte[] tryReadValueFromCache = dbCache.get(objectKey);
         if (tryReadValueFromCache != null) {
             return Optional.of(tryReadValueFromCache);
-        } else {
-            return myTable.read(objectKey);
+        }
+        else {
+            return cacheTable.read(objectKey);
         }
     }
 
     @Override
     public void delete(String objectKey) throws DatabaseException {
-        myTable.delete(objectKey);
-        myDataBaseCache.delete(objectKey);
+        cacheTable.delete(objectKey);
+        dbCache.delete(objectKey);
     }
 }
