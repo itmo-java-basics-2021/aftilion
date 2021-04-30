@@ -21,21 +21,19 @@ public class DatabaseInitializer implements Initializer {
      * Добавляет в контекст информацию об инициализируемой бд.
      * Запускает инициализацию всех таблиц это базы
      *
-     * @param initialContext контекст с информацией об инициализируемой бд и об окружении
+     * @param context контекст с информацией об инициализируемой бд и об окружении
      * @throws DatabaseException если в контексте лежит неправильный путь к базе, невозможно прочитать содержимого папки,
      *  или если возникла ошибка дочерних инициализаторов
      */
     @Override
-    public void perform(InitializationContext initialContext) throws DatabaseException {
+    public void perform(InitializationContext context) throws DatabaseException {
 
-        DatabaseInitializationContext dbInitializationContext = initialContext.currentDbContext();
+        DatabaseInitializationContext dbInitializationContext = context.currentDbContext();
         if(!Files.exists(dbInitializationContext.getDatabasePath())){
             throw new DatabaseException("We dont have this DataBase" + dbInitializationContext.getDbName());
         }
         File directory = new File(dbInitializationContext.getDatabasePath().toString());
-        if (initialContext.currentDbContext() == null) {
-            throw new DatabaseException("Error with ContextTable"+ initialContext.currentTableContext());
-        }
+        
         if(!directory.exists()){
             throw new DatabaseException(dbInitializationContext.getDbName() + "doesnt exists");
         }
@@ -43,15 +41,11 @@ public class DatabaseInitializer implements Initializer {
         if(tables == null){
             throw new DatabaseException("Error with working" + directory.toString());
       }
-
-        if (directory.listFiles() == null) {
-            return;
-        }
         for (File table : tables) {
             TableInitializationContextImpl tableContext = new TableInitializationContextImpl(table.getName(), dbInitializationContext.getDatabasePath(), new TableIndex());
-            tableInitializer.perform(new InitializationContextImpl(initialContext.executionEnvironment(), dbInitializationContext, tableContext,null));
+            tableInitializer.perform(new InitializationContextImpl(context.executionEnvironment(), dbInitializationContext, tableContext,null));
         }
         Database database = DatabaseImpl.initializeFromContext(dbInitializationContext);
-        initialContext.executionEnvironment().addDatabase(database);
+        context.executionEnvironment().addDatabase(database);
     }
 }
