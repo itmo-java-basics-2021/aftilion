@@ -11,8 +11,8 @@ import java.util.Optional;
 
 public class ExecutionEnvironmentImpl implements ExecutionEnvironment {
 
-    private DatabaseConfig dbConfig;
-    private HashMap<String,Database> dataBase = new HashMap<String,Database>();
+     DatabaseConfig dbConfig;
+     HashMap<String,Database> dataBase = new HashMap<String,Database>();
     public ExecutionEnvironmentImpl(DatabaseConfig config) {
         dbConfig = config;
     }
