@@ -29,9 +29,6 @@ public class DatabaseServerInitializer implements Initializer {
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
 
-        if (context.executionEnvironment() == null) {
-            throw new DatabaseException("Context Env is null");
-        }
         ExecutionEnvironment exEnvironment = context.executionEnvironment();
         Path path = exEnvironment.getWorkingPath();
         
@@ -42,7 +39,7 @@ public class DatabaseServerInitializer implements Initializer {
                 throw new DatabaseException("Error while creating directory " + path.toString(), ex);
             }
         }
-        File curFile = new File(path.toString());
+        File curFile = context.executionEnvironment().getWorkingPath().toFile();
         File[] files = curFile.listFiles();
         if(files == null){
             throw new DatabaseException("Error while working with" + curFile.toString());
