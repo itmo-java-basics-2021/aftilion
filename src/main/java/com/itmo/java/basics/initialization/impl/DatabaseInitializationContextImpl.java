@@ -16,7 +16,7 @@ public class DatabaseInitializationContextImpl implements DatabaseInitialization
 
     public DatabaseInitializationContextImpl(String dbName, Path databaseRoot) {
         this.dbName = dbName;
-        this.dbRoot = Path.of(databaseRoot.toString(),dbName);
+        this.dbRoot = databaseRoot;
     }
 
     @Override
