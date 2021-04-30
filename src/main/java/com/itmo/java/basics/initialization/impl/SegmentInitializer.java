@@ -15,7 +15,9 @@ import com.itmo.java.basics.logic.io.DatabaseOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Optional;
 
 
@@ -34,32 +36,59 @@ public class SegmentInitializer implements Initializer {
     public void perform(InitializationContext context) throws DatabaseException {
 
         if (context.currentSegmentContext() == null) {
-        throw new DatabaseException("");
+        throw new DatabaseException("Why" +  context.currentSegmentContext() + "is null?");
         }
-
-        SegmentInitializationContext segmentInContext = context.currentSegmentContext();
-        Path segmentPath = segmentInContext.getSegmentPath();
-        Segment segmentIn =  SegmentImpl.initializeFromContext(segmentInContext);
-        SegmentIndex segmentIndex =  segmentInContext.getIndex();
-        int offSet = 0;
-        try (DatabaseInputStream inputStream = new DatabaseInputStream( new FileInputStream(segmentPath.toString()))) {
-            Optional<DatabaseRecord> dbUn = inputStream.readDbUnit();
-            while(dbUn.isPresent()){
-                DatabaseRecord databaseUnit = dbUn.get();
-                if ( databaseUnit.isValuePresented()) {
-                    segmentIndex.onIndexedEntityUpdated(new String(databaseUnit.getKey()), new SegmentOffsetInfoImpl(offSet));
-                }
-                else {
-                    segmentIndex.onIndexedEntityUpdated(new String(databaseUnit.getKey()) , null);
-                }
-                context.currentTableContext().getTableIndex().onIndexedEntityUpdated(new String(databaseUnit.getKey()) , segmentIn);
-                offSet += databaseUnit.size();
-                dbUn = inputStream.readDbUnit();
-                }
+        int offset = 0;
+        SegmentInitializationContext segmentinitialContext = context.currentSegmentContext();
+        SegmentIndex segmentIndex = segmentinitialContext.getIndex();
+        Path segmentPath = segmentinitialContext.getSegmentPath();
+        Segment segment = SegmentImpl.initializeFromContext(segmentinitialContext);
+        if (!Files.exists(segmentPath)) {
+            throw new DatabaseException(segmentinitialContext.getSegmentName() + " does not exist");
         }
-        catch (IOException ex) {
-            throw new DatabaseException("Error while InitializationContext " , ex);
+        ArrayList<String> keys= new ArrayList<>();
+        try (DatabaseInputStream InputStream = new DatabaseInputStream(new FileInputStream(segmentPath.toFile()))) {
+            Optional<DatabaseRecord> dbUnitOptional = InputStream.readDbUnit();
+            while (dbUnitOptional.isPresent()) {
+                DatabaseRecord dbUnit = dbUnitOptional.get();
+                segmentIndex.onIndexedEntityUpdated(new String(dbUnit.getKey()), new SegmentOffsetInfoImpl(offset));
+                offset += dbUnit.size();
+                keys.add(new String(dbUnit.getKey()));
+                dbUnitOptional = InputStream.readDbUnit();
+            }
+        } catch (IOException ex) {
+            throw new DatabaseException("Erro while initialisation segment", ex);
         }
+        Segment newSegment = SegmentImpl.initializeFromContext(new SegmentInitializationContextImpl(segmentinitialContext.getSegmentName(),
+                segmentinitialContext.getSegmentPath(), offset, segmentIndex));
+        for (String key : keys){
+            context.currentTableContext().getTableIndex().onIndexedEntityUpdated(key, segment);
+        }
+        context.currentTableContext().updateCurrentSegment(newSegment);
     }
-}
+//        SegmentInitializationContext segmentInContext = context.currentSegmentContext();
+//        Path segmentPath = segmentInContext.getSegmentPath();
+//        Segment segmentIn =  SegmentImpl.initializeFromContext(segmentInContext);
+//        SegmentIndex segmentIndex =  segmentInContext.getIndex();
+//        int offSet = 0;
+//        try (DatabaseInputStream inputStream = new DatabaseInputStream( new FileInputStream(segmentPath.toString()))) {
+//            Optional<DatabaseRecord> dbUn = inputStream.readDbUnit();
+//            while(dbUn.isPresent()){
+//                DatabaseRecord databaseUnit = dbUn.get();
+//                if ( databaseUnit.isValuePresented()) {
+//                    segmentIndex.onIndexedEntityUpdated(new String(databaseUnit.getKey()), new SegmentOffsetInfoImpl(offSet));
+//                }
+//                else {
+//                    segmentIndex.onIndexedEntityUpdated(new String(databaseUnit.getKey()) , null);
+//                }
+//                context.currentTableContext().getTableIndex().onIndexedEntityUpdated(new String(databaseUnit.getKey()) , segmentIn);
+//                offSet += databaseUnit.size();
+//                dbUn = inputStream.readDbUnit();
+//                }
+//        }
+//        catch (IOException ex) {
+//            throw new DatabaseException("Error while InitializationContext " , ex);
+//        }
+    }
+
 
