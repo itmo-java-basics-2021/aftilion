@@ -29,25 +29,34 @@ public class DatabaseServerInitializer implements Initializer {
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
 
-        ExecutionEnvironment exEnvironment = context.executionEnvironment();
-        Path path = exEnvironment.getWorkingPath();
-        
-        if(!Files.exists(path)){
-            try{
-                Files.createDirectory(path);
-            }catch (IOException ex){
-                throw new DatabaseException("Error while creating directory " + path.toString(), ex);
-            }
-        }
-        File curFile = context.executionEnvironment().getWorkingPath().toFile();
-        File[] files = curFile.listFiles();
-        if(files == null){
-            throw new DatabaseException("Error while working with" + curFile.toString());
+        if (context.executionEnvironment() == null) {
+            throw new DatabaseException("Context Env is null");
         }
 
-        for (File i : files) {
-            DatabaseInitializationContextImpl dbContext = new DatabaseInitializationContextImpl(i.getName(), path);
-            databaseInitializer.perform(new InitializationContextImpl(context.executionEnvironment(), dbContext, null, null));
+        if (!Files.exists(context.executionEnvironment().getWorkingPath())) {
+            try {
+                Files.createDirectory(context.executionEnvironment().getWorkingPath());
+            } catch (Exception ex) {
+                throw new DatabaseException("Error while creating directory");
+            }
+        }
+
+        File dir = context.executionEnvironment().getWorkingPath().toFile();
+
+        if (dir.listFiles() == null) {
+            return;
+        }
+
+        File[] files = dir.listFiles();
+        for (File file : files) {
+            if (file.isDirectory()) {
+                InitializationContext init = InitializationContextImpl.builder()
+                        .executionEnvironment(context.executionEnvironment())
+                        .currentDatabaseContext(new DatabaseInitializationContextImpl(file.getName(), context.executionEnvironment().getWorkingPath())).build();
+
+
+                databaseInitializer.perform(init);
+            }
         }
     }
 }
