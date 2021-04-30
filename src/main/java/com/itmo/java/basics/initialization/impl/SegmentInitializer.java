@@ -35,9 +35,6 @@ public class SegmentInitializer implements Initializer {
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
 
-        if (context.currentSegmentContext() == null) {
-        throw new DatabaseException("Why" +  context.currentSegmentContext() + "is null?");
-        }
         int offset = 0;
         SegmentInitializationContext segmentinitialContext = context.currentSegmentContext();
         SegmentIndex segmentIndex = segmentinitialContext.getIndex();
@@ -57,7 +54,7 @@ public class SegmentInitializer implements Initializer {
                 dbUnitOptional = InputStream.readDbUnit();
             }
         } catch (IOException ex) {
-            throw new DatabaseException("Erro while initialisation segment", ex);
+            throw new DatabaseException("Error while initialisation segment", ex);
         }
         Segment newSegment = SegmentImpl.initializeFromContext(new SegmentInitializationContextImpl(segmentinitialContext.getSegmentName(),
                 segmentinitialContext.getSegmentPath(), offset, segmentIndex));
