@@ -1,12 +1,18 @@
 package com.itmo.java.basics.initialization.impl;
 
 import com.itmo.java.basics.exceptions.DatabaseException;
-import com.itmo.java.basics.index.impl.SegmentIndex;
 import com.itmo.java.basics.initialization.InitializationContext;
 import com.itmo.java.basics.initialization.Initializer;
+import com.itmo.java.basics.initialization.SegmentInitializationContext;
+import com.itmo.java.basics.initialization.TableInitializationContext;
+import com.itmo.java.basics.logic.Table;
 import com.itmo.java.basics.logic.impl.TableImpl;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 public class TableInitializer implements Initializer {
 
     private final Initializer segmentInitializer;
@@ -32,22 +38,34 @@ public class TableInitializer implements Initializer {
         if (context.currentDbContext() == null) {
             throw new DatabaseException("Error with ContextTable"+context.currentTableContext());
         }
-        File directory = context.currentTableContext().getTablePath().toFile();
-        if (directory.listFiles() == null) {
-            return;
+        TableInitializationContext tbinitalContext = context.currentTableContext();
+        File curFile = new File(tbinitalContext.getTablePath().toString());
+        if(!curFile.exists()){
+            throw new DatabaseException("Directory " + tbinitalContext.getTableName() + " does not exist");
         }
-        File[] segments = directory.listFiles();
-        for (File seg : segments) {
-            InitializationContext init = InitializationContextImpl.builder()
-                    .executionEnvironment(context.executionEnvironment())
-                    .currentDatabaseContext(context.currentDbContext())
-                    .currentTableContext(context.currentTableContext())
-                    .currentSegmentContext(new SegmentInitializationContextImpl(
-                            seg.getName(), seg.toPath(), (int)seg.length(),
-                            new SegmentIndex()))
-                    .build();
-            segmentInitializer.perform(init);
+        File[] files = curFile.listFiles();
+        if(files == null){
+            throw new DatabaseException("Error while working " + curFile.toString());
         }
-        context.currentDbContext().addTable(TableImpl.initializeFromContext(context.currentTableContext()));
+        List<File> filesList = Arrays.asList(files);
+        Collections.sort(filesList);
+        for (File i : filesList){
+            SegmentInitializationContext segmentContext = new SegmentInitializationContextImpl(i.getName(), tbinitalContext.getTablePath(), 0);
+            segmentInitializer.perform(new InitializationContextImpl(context.executionEnvironment(), context.currentDbContext(), context.currentTableContext(), segmentContext));
+        }
+        Table table = TableImpl.initializeFromContext(tbinitalContext);
+        context.currentDbContext().addTable(table);
+//        for (File seg : segments) {
+//            InitializationContext init = InitializationContextImpl.builder()
+//                    .executionEnvironment(context.executionEnvironment())
+//                    .currentDatabaseContext(context.currentDbContext())
+//                    .currentTableContext(context.currentTableContext())
+//                    .currentSegmentContext(new SegmentInitializationContextImpl(
+//                            seg.getName(), seg.toPath(), (int)seg.length(),
+//                            new SegmentIndex()))
+//                    .build();
+//            segmentInitializer.perform(init);
+//        }
+//        context.currentDbContext().addTable(TableImpl.initializeFromContext(context.currentTableContext()));
     }
 }
