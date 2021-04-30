@@ -22,7 +22,7 @@ public class RemoveDatabaseRecord implements WritableDatabaseRecord {
 
     @Override
     public long size() {
-        return getKeySize() + getValueSize() + 4 + 4;
+        return getKeySize() + 4 + 4;
     }
 
     @Override
