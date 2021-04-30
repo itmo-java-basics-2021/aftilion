@@ -7,10 +7,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class SegmentInitializationContextImpl implements SegmentInitializationContext {
+
     private final String segmentName;
     private final Path segmentPath;
     private final int currentSize;
     private final SegmentIndex segmentIndex;
+
     public SegmentInitializationContextImpl(String segmentName, Path segmentPath, int currentSize, SegmentIndex index) {
         this.segmentName = segmentName;
         this.segmentPath = segmentPath;
@@ -20,7 +22,7 @@ public class SegmentInitializationContextImpl implements SegmentInitializationCo
 
     public SegmentInitializationContextImpl(String segmentName, Path tablePath, int currentSize) {
         this.segmentName = segmentName;
-        this.segmentPath = Paths.get(tablePath + segmentName);
+        this.segmentPath = Paths.get(tablePath.toString(),segmentName);
         this.currentSize = currentSize;
         this.segmentIndex = new SegmentIndex();
     }
