@@ -31,17 +31,21 @@ public class DatabaseInitializer implements Initializer {
         if(!Files.exists(dbInitializationContext.getDatabasePath())){
             throw new DatabaseException("We dont have this DataBase" + dbInitializationContext.getDbName());
         }
-
+        File directory = new File(dbInitializationContext.getDatabasePath().toString());
         if (initialContext.currentDbContext() == null) {
             throw new DatabaseException("Error with ContextTable"+ initialContext.currentTableContext());
         }
+        if(!directory.exists()){
+            throw new DatabaseException(dbInitializationContext.getDbName() + "doesnt exists");
+        }
+        File[] tables = directory.listFiles();
+        if(tables == null){
+            throw new DatabaseException("Error with working" + directory.toString());
+      }
 
-
-        File directory = initialContext.currentDbContext().getDatabasePath().toFile();
         if (directory.listFiles() == null) {
             return;
         }
-        File[] tables = directory.listFiles();
         for (File table : tables) {
             InitializationContext init = new InitializationContextImpl(initialContext.executionEnvironment(),
                     initialContext.currentDbContext(),
