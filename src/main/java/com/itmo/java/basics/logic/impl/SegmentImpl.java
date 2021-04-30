@@ -22,9 +22,9 @@ import java.util.Optional;
 
 public class SegmentImpl implements Segment {
 
-    private Path tableRootPath;
-    private String segmentName;
-    private SegmentIndex segmentIndex;
+    private final Path tableRootPath;
+    private final  String segmentName;
+    private final  SegmentIndex segmentIndex;
     private final long sizeMaximum = 100000;
     private long segmentSize = 0;
 
