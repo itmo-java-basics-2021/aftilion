@@ -27,6 +27,7 @@ public class SegmentImpl implements Segment {
     private SegmentIndex segmentIndex;
     private final long sizeMaximum = 100000;
     private long segmentSize = 0;
+
     private final DatabaseOutputStream outStream;
 
     public SegmentImpl(Path tableRootPath, String segmentName, OutputStream outStream) {
