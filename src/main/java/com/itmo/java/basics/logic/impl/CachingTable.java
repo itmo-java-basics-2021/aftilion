@@ -3,7 +3,7 @@ package com.itmo.java.basics.logic.impl;
 import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.logic.DatabaseCache;
 import com.itmo.java.basics.logic.Table;
-
+import static java.nio.file.StandardOpenOption.APPEND;
 import java.util.Optional;
 
 /**
