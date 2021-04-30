@@ -29,14 +29,14 @@ public class DatabaseServerInitializer implements Initializer {
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
 
-        ExecutionEnvironment exEnvironment = context.executionEnvironment();
-        Path path = exEnvironment.getWorkingPath();
+        ExecutionEnvironment ExecutionEnvironment = context.executionEnvironment();
+        Path path = ExecutionEnvironment.getWorkingPath();
 
         if(!Files.exists(path)){
             try{
                 Files.createDirectory(path);
-            }catch (IOException ex){
-                throw new DatabaseException("Error while creating directory " + path.toString(), ex);
+            }catch (IOException e){
+                throw new DatabaseException("Problems occurred while creating directory " + path.toString(), e);
             }
         }
         File curFile = new File(path.toString());

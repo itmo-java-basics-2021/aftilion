@@ -10,13 +10,13 @@ import java.util.Map;
 
 public class DatabaseInitializationContextImpl implements DatabaseInitializationContext {
 
-    private final String dbName;
-    private final Path dbRoot;
-    private  Map<String, Table> tablesMap = new HashMap<>();
+    private String dbName;
+    private Path dbRoot;
+    private Map<String, Table> tablesMap = new HashMap<>();
 
-    public DatabaseInitializationContextImpl(String dbName, Path dbRoot) {
+    public DatabaseInitializationContextImpl(String dbName, Path databaseRoot) {
         this.dbName = dbName;
-        this.dbRoot = Paths.get(dbRoot.toString(),dbName);
+        this.dbRoot = Path.of(databaseRoot.toString(), dbName);
     }
 
     @Override
@@ -26,7 +26,7 @@ public class DatabaseInitializationContextImpl implements DatabaseInitialization
 
     @Override
     public Path getDatabasePath() {
-        return Paths.get(dbRoot.toString(),dbName);
+        return Paths.get(dbRoot.toString());
     }
 
     @Override
