@@ -33,7 +33,7 @@ public class TableImpl implements Table {
         this.tableIndex = context.getTableIndex();
     }
 
-   public static Table create(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
+    public static Table create(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
 
         if (tableName == null) {
             throw new DatabaseException("Why tableBase name is null?");
@@ -46,16 +46,15 @@ public class TableImpl implements Table {
         } catch (IOException ex) {
             throw new DatabaseException("Error while creating a Table(" + tableName + ") directory");
         }
-        TableImpl newTb = new TableImpl(tableName , pathToTableRoot , tableIndex);
+        TableImpl newTb = new TableImpl(tableName, pathToTableRoot, tableIndex);
         return new CachingTable(newTb);
     }
-
 
 
     public static Table initializeFromContext(TableInitializationContext context) {
         try {
             return new CachingTable(new TableImpl(context));
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             return null;
         }
     }
