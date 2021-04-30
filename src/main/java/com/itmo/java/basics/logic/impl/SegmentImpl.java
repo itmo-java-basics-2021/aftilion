@@ -137,12 +137,7 @@ public class SegmentImpl implements Segment {
             outStream.close();
             return false;
         }
-
-        if (segmentIndex.searchForKey(objectKey).isEmpty()){
-            outStream.close();
-            return false;
-        }
-
+        
         RemoveDatabaseRecord newSeg = new RemoveDatabaseRecord(objectKey.getBytes());
         segmentIndex.onIndexedEntityUpdated(objectKey, new SegmentOffsetInfoImpl(segmentSize));
         segmentSize += outStream.write(newSeg);
