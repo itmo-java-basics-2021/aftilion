@@ -2,11 +2,13 @@ package com.itmo.java.basics.initialization.impl;
 
 import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.index.impl.TableIndex;
+import com.itmo.java.basics.initialization.DatabaseInitializationContext;
 import com.itmo.java.basics.initialization.InitializationContext;
 import com.itmo.java.basics.initialization.Initializer;
 import com.itmo.java.basics.logic.impl.DatabaseImpl;
 
 import java.io.File;
+import java.nio.file.Files;
 
 public class DatabaseInitializer implements Initializer {
     private final Initializer tableInitializer;
@@ -24,9 +26,17 @@ public class DatabaseInitializer implements Initializer {
      */
     @Override
     public void perform(InitializationContext initialContext) throws DatabaseException {
+
+        DatabaseInitializationContext dbInitializationContext = initialContext.currentDbContext();
+        if(!Files.exists(dbInitializationContext.getDatabasePath())){
+            throw new DatabaseException("We dont have this DataBase" + dbInitializationContext.getDbName());
+        }
+
         if (initialContext.currentDbContext() == null) {
             throw new DatabaseException("Error with ContextTable"+ initialContext.currentTableContext());
         }
+
+
         File directory = initialContext.currentDbContext().getDatabasePath().toFile();
         if (directory.listFiles() == null) {
             return;
