@@ -8,14 +8,12 @@ import java.util.Optional;
 public class CachingTable implements Table {
 
 
-
-    private  Table cacheTable;
-    private  DatabaseCache dbCache;
-   static private final int maxCache = 10000;
+    private final Table cacheTable;
+    private final DatabaseCache dbCache;
 
     public CachingTable(Table myTable) {
         this.cacheTable = myTable;
-        this.dbCache = new DatabaseCacheImpl(maxCache);
+        this.dbCache = new DatabaseCacheImpl();
     }
 
     @Override
