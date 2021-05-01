@@ -36,6 +36,10 @@ public class SegmentInitializer implements Initializer {
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
 
+        if (context.currentSegmentContext() == null) {
+            throw new DatabaseException("Context segment is null");
+        }
+
         int size = 0;
         SegmentInitializationContext segmentinitialContext = context.currentSegmentContext();
         SegmentIndex segIndex = segmentinitialContext.getIndex();

@@ -35,6 +35,10 @@ public class TableInitializer implements Initializer {
 
     public void perform(InitializationContext context) throws DatabaseException {
 
+        if (context.currentDbContext() == null) {
+            throw new DatabaseException("Context Db is null");
+        }
+
         TableInitializationContext tbinitalContext = context.currentTableContext();
         File curFile = new File(tbinitalContext.getTablePath().toString());
 
@@ -44,9 +48,9 @@ public class TableInitializer implements Initializer {
 
         File[] files = curFile.listFiles();
 
-        if (files == null) {
-            throw new DatabaseException("Error while working " + curFile.toString());
-        }
+//        if (files == null) {
+//            throw new DatabaseException("Error while working " + curFile.toString());
+//        }
 
         List<File> segments = Arrays.asList(files);
         Collections.sort(segments);
@@ -55,7 +59,7 @@ public class TableInitializer implements Initializer {
             SegmentInitializationContext segmentContext = new SegmentInitializationContextImpl(seg.getName(), tbinitalContext.getTablePath(), 0);
             segmentInitializer.perform(new InitializationContextImpl(context.executionEnvironment(), context.currentDbContext(), context.currentTableContext(), segmentContext));
         }
-        
+
         Table newTable = TableImpl.initializeFromContext(tbinitalContext);
         context.currentDbContext().addTable(newTable);
     }

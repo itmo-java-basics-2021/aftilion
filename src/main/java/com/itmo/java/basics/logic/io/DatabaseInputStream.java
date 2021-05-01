@@ -39,7 +39,7 @@ public class DatabaseInputStream extends DataInputStream {
             } else {
                 return Optional.of(new RemoveDatabaseRecord(key));
             }
-        } catch (EOFException ex) {
+        } catch (IOException ex) {
             return Optional.empty();
         }
     }
