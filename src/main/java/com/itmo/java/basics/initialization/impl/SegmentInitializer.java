@@ -53,10 +53,10 @@ public class SegmentInitializer implements Initializer {
         try (DatabaseInputStream InputStream = new DatabaseInputStream(new FileInputStream(segPath.toFile()))) {
             Optional<DatabaseRecord> dbUnitOp = InputStream.readDbUnit();
             while (dbUnitOp.isPresent()) {
-                DatabaseRecord dbUnit = dbUnitOp.get();
-                segIndex.onIndexedEntityUpdated(new String(dbUnit.getKey()), new SegmentOffsetInfoImpl(size));
-                size += dbUnit.size();
-                keys.add(new String(dbUnit.getKey()));
+                DatabaseRecord dbUnits = dbUnitOp.get();
+                segIndex.onIndexedEntityUpdated(new String(dbUnits.getKey()), new SegmentOffsetInfoImpl(size));
+                size += dbUnits.size();
+                keys.add(new String(dbUnits.getKey()));
                 dbUnitOp = InputStream.readDbUnit();
             }
         } catch (IOException ex) {
