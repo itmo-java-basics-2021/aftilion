@@ -30,6 +30,10 @@ public class DatabaseInitializer implements Initializer {
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
 
+        if (context.executionEnvironment() == null) {
+            throw new DatabaseException("Context executionEnvironment is null");
+        }
+
         DatabaseInitializationContext dbinitialContext = context.currentDbContext();
         if (!Files.exists(dbinitialContext.getDatabasePath())) {
             throw new DatabaseException("We dont have this " + dbinitialContext.getDbName());
@@ -43,9 +47,9 @@ public class DatabaseInitializer implements Initializer {
 
         File[] directory = curFile.listFiles();
 
-        if (directory == null) {
-            throw new DatabaseException("Error while working with " + curFile.toString());
-        }
+//        if (directory == null) {
+//            throw new DatabaseException("Error while working with " + curFile.toString());
+//        }
         for (File table : directory) {
             TableInitializationContextImpl tableContext = new TableInitializationContextImpl(table.getName(), dbinitialContext.getDatabasePath(), new TableIndex());
             tableInitializer.perform(new InitializationContextImpl(context.executionEnvironment(), dbinitialContext, tableContext, null));

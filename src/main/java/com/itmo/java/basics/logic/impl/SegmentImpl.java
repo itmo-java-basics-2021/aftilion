@@ -26,9 +26,8 @@ public class SegmentImpl implements Segment {
     private final  String segmentName;
     private final  SegmentIndex segmentIndex;
     private final long sizeMaximum = 100000;
-    private long segmentSize = 0;
-
     private final DatabaseOutputStream outStream;
+    private long segmentSize = 0;
 
     public SegmentImpl(Path tableRootPath, String segmentName, OutputStream outStream) {
         this.tableRootPath = tableRootPath;
@@ -44,9 +43,8 @@ public class SegmentImpl implements Segment {
         this.outStream = new DatabaseOutputStream(outStream);
     }
 
-
-
     public static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
+
         Path segmentRoot = Paths.get(tableRootPath.toString(), segmentName);
         boolean isCreated;
         OutputStream output;
@@ -63,7 +61,8 @@ public class SegmentImpl implements Segment {
         return new SegmentImpl(segmentRoot, segmentName, output);
     }
 
-    public static Segment initializeFromContext(SegmentInitializationContext context)  {
+    public static Segment initializeFromContext(SegmentInitializationContext context) {
+
         OutputStream output;
         try{
             output = Files.newOutputStream(context.getSegmentPath(),APPEND);
