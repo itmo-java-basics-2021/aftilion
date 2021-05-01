@@ -6,7 +6,6 @@ import com.itmo.java.basics.logic.impl.RemoveDatabaseRecord;
 import com.itmo.java.basics.logic.impl.SetDatabaseRecord;
 
 import java.io.DataInputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;

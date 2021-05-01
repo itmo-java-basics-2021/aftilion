@@ -10,9 +10,7 @@ import com.itmo.java.basics.logic.DatabaseRecord;
 import com.itmo.java.basics.logic.Segment;
 import com.itmo.java.basics.logic.impl.SegmentImpl;
 import com.itmo.java.basics.logic.io.DatabaseInputStream;
-import com.itmo.java.basics.logic.io.DatabaseOutputStream;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
