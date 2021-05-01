@@ -49,28 +49,29 @@ public class SegmentImpl implements Segment {
     public static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
         Path segmentRoot = Paths.get(tableRootPath.toString(), segmentName);
         boolean isCreated;
-        OutputStream outputStream;
+        OutputStream output;
 
         try{
             isCreated = segmentRoot.toFile().createNewFile();
-            outputStream = Files.newOutputStream(segmentRoot);
-        }catch(IOException exception){
-            throw new DatabaseException("Error while creating a Segment file " + segmentName, exception);
+            output = Files.newOutputStream(segmentRoot);
+        }catch(IOException ex){
+            throw new DatabaseException("Error while creating segment " + segmentName, ex);
         }
         if(!isCreated){
-            throw new DatabaseException("Error while creating a Segment file " + segmentName + "as it already exists");
+            throw new DatabaseException("Error while creating segment " + segmentName + "as it already exists");
         }
-        return new SegmentImpl(segmentRoot, segmentName, outputStream);
+        return new SegmentImpl(segmentRoot, segmentName, output);
     }
 
     public static Segment initializeFromContext(SegmentInitializationContext context)  {
-        OutputStream outputStream;
+        OutputStream output;
         try{
-            outputStream = Files.newOutputStream(context.getSegmentPath(),APPEND);
+            output = Files.newOutputStream(context.getSegmentPath(),APPEND);
         }catch(IOException ex){
-          outputStream = null;
+          output = null;
         }
-        SegmentImpl newSegment = new SegmentImpl(context , outputStream);
+
+        SegmentImpl newSegment = new SegmentImpl(context ,output);
         newSegment.segmentSize = context.getCurrentSize();
         return newSegment;
     }
@@ -109,19 +110,16 @@ public class SegmentImpl implements Segment {
         }
 
         long myOf = offsetInfo.get().getOffset();
-        try (DatabaseInputStream in = new DatabaseInputStream(Files.newInputStream(tableRootPath))) {
-            long skipped = in.skip(myOf);
+        try (DatabaseInputStream input = new DatabaseInputStream(Files.newInputStream(tableRootPath))) {
+            long skipped = input.skip(myOf);
             if (skipped != myOf) {
                 throw new IOException("Error while skipping bytes in segment called " + segmentName);
             }
-            Optional<DatabaseRecord> value = in.readDbUnit();
-
+            Optional<DatabaseRecord> value = input.readDbUnit();
             if (value.isEmpty()) {
                 return Optional.empty();
             }
-
             return Optional.ofNullable(value.get().getValue());
-
         } catch (IOException exception) {
             throw new IOException("Error while creating a Segment file " + segmentName, exception);
         }

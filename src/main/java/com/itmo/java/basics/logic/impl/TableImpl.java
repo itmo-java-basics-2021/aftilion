@@ -34,13 +34,10 @@ public class TableImpl implements Table {
     }
 
     public static Table create(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
-
         if (tableName == null) {
             throw new DatabaseException("Why tableBase name is null?");
         }
-
         Path pathToTableRoot = Paths.get(pathToDatabaseRoot.toString(), tableName);
-
         try {
             Files.createDirectory(pathToTableRoot);
         } catch (IOException ex) {
@@ -67,7 +64,6 @@ public class TableImpl implements Table {
 
     @Override
     public void write(String objectKey, byte[] objectValue) throws DatabaseException {
-
         try {
             boolean canWewrite = lastSegment.write(objectKey, objectValue);
 
@@ -83,7 +79,6 @@ public class TableImpl implements Table {
 
     @Override
     public Optional<byte[]> read(String objectKey) throws DatabaseException {
-
         try {
             Optional<Segment> segmentRead = tableIndex.searchForKey(objectKey);
 
@@ -98,10 +93,8 @@ public class TableImpl implements Table {
 
     @Override
     public void delete(String objectKey) throws DatabaseException {
-
         try {
             boolean canDel = lastSegment.delete(objectKey);
-
             if (!canDel) {
                 lastSegment = SegmentImpl.create(SegmentImpl.createSegmentName(tableName), pathToDatabaseRoot);
                 lastSegment.delete(objectKey);
