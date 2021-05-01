@@ -51,8 +51,6 @@ public class DatabaseImpl implements Database {
         return new DatabaseImpl(context);
     }
 
-
-
     @Override
     public String getName() {
         return dbName;
@@ -75,12 +73,14 @@ public class DatabaseImpl implements Database {
 
     @Override
     public void write(String tableName, String objectKey, byte[] objectValue) throws DatabaseException {
-        if (!tableDictionary.containsKey(tableName)) {
-            throw new DatabaseException("Table " + tableName + " doesn't exist in database" + dbName);
-        }
+
         if (tableName == null) {
             throw new DatabaseException("Error while writing in , null name");
         }
+        if (!tableDictionary.containsKey(tableName)) {
+            throw new DatabaseException("Table " + tableName + " doesn't exist in database" + dbName);
+        }
+
         Table table = tableDictionary.get(tableName);
         table.write(objectKey, objectValue);
     }
@@ -97,7 +97,7 @@ public class DatabaseImpl implements Database {
     @Override
     public void delete(String tableName, String objectKey) throws DatabaseException {
         if (!tableDictionary.containsKey(tableName)) {
-            throw new DatabaseException("Table " + tableName + " doesn't exist in database" + dbName);
+            throw new DatabaseException("Table " + tableName + " doesnt exist in database" + dbName);
         }
         if (tableName == null) {
             throw new DatabaseException("Writing in database error");
