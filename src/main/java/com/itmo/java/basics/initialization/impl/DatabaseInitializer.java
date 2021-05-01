@@ -34,7 +34,9 @@ public class DatabaseInitializer implements Initializer {
         if (!Files.exists(dbinitialContext.getDatabasePath())) {
             throw new DatabaseException("We dont have this " + dbinitialContext.getDbName());
         }
+
         File curFile = new File(dbinitialContext.getDatabasePath().toString());
+
         if (!curFile.exists()) {
             throw new DatabaseException(dbinitialContext.getDbName() + " does not exist");
         }
