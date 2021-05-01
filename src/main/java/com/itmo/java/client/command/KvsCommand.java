@@ -1,13 +1,13 @@
 package com.itmo.java.client.command;
 
-import com.itmo.java.protocol.model.RespArray;
+import com.itmo.java.protocol.model.RespObject;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 public interface KvsCommand {
     /**
      * Счетчик для команды. Каждая созданная команда использует это поле для создания id, инкрементирует значение
-     * Первая команда создается с id 0
+     * Первая комада создается с id 0
      */
     AtomicInteger idGen = new AtomicInteger();
 
@@ -16,7 +16,7 @@ public interface KvsCommand {
      *
      * @return RESP объект
      */
-    RespArray serialize();
+    RespObject serialize();
 
     /**
      * Id команды

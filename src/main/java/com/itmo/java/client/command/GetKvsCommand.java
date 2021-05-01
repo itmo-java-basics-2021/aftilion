@@ -4,21 +4,12 @@ import com.itmo.java.protocol.model.RespArray;
 import com.itmo.java.protocol.model.RespBulkString;
 import com.itmo.java.protocol.model.RespCommandId;
 
-import java.nio.charset.StandardCharsets;
-
 public class GetKvsCommand implements KvsCommand {
 
     private static final String COMMAND_NAME = "GET_KEY";
-    private final String dbName;
-    private final String tbName;
-    private final String Key;
-    private final int getID;
 
     public GetKvsCommand(String databaseName, String tableName, String key) {
-        dbName = databaseName;
-        tbName = tableName;
-        Key = key;
-        getID = idGen.get();
+        //TODO implement
     }
 
     /**
@@ -28,15 +19,13 @@ public class GetKvsCommand implements KvsCommand {
      */
     @Override
     public RespArray serialize() {
-        return new RespArray(new RespCommandId(getID),
-                new RespBulkString(COMMAND_NAME.getBytes(StandardCharsets.UTF_8)),
-                new RespBulkString(dbName.getBytes(StandardCharsets.UTF_8)),
-                new RespBulkString(tbName.getBytes(StandardCharsets.UTF_8)),
-                new RespBulkString(Key.getBytes(StandardCharsets.UTF_8)));
+        //TODO implement
+        return null;
     }
 
     @Override
     public int getCommandId() {
-        return getID;
+        //TODO implement
+        return 0;
     }
 }

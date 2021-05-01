@@ -1,7 +1,6 @@
 package com.itmo.java.client.connection;
 
 import com.itmo.java.client.exception.ConnectionException;
-import com.itmo.java.protocol.model.RespArray;
 import com.itmo.java.protocol.model.RespObject;
 
 /**
@@ -16,5 +15,5 @@ public interface KvsConnection extends AutoCloseable {
      * @return Результат исполнения
      * @throws ConnectionException если не удалось прочитать ответ
      */
-    RespObject send(int commandId, RespArray command) throws ConnectionException;
+    RespObject send(int commandId, RespObject command) throws ConnectionException;
 }

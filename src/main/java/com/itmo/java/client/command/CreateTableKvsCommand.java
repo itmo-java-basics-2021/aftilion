@@ -1,25 +1,19 @@
 package com.itmo.java.client.command;
 
+import com.itmo.java.basics.console.DatabaseCommands;
 import com.itmo.java.protocol.model.RespArray;
 import com.itmo.java.protocol.model.RespBulkString;
 import com.itmo.java.protocol.model.RespCommandId;
-
-import java.nio.charset.StandardCharsets;
+import com.itmo.java.protocol.model.RespObject;
 
 /**
  * Команда для создания таблицы
  */
 public class CreateTableKvsCommand implements KvsCommand {
-
-    private static final String COMMAND_NAME = "CREATE_TABLE";
-    private final String dbName;
-    private final int tbID;
-    private final String tbName;
+    private static final DatabaseCommands COMMAND_NAME = DatabaseCommands.CREATE_TABLE;
 
     public CreateTableKvsCommand(String databaseName, String tableName) {
-        dbName = databaseName;
-        tbName = tableName;
-        tbID = idGen.get();
+        //TODO implement
     }
 
     /**
@@ -28,15 +22,14 @@ public class CreateTableKvsCommand implements KvsCommand {
      * @return объект
      */
     @Override
-    public RespArray serialize() {
-        return new RespArray(new RespCommandId(tbID),
-                new RespBulkString(COMMAND_NAME.getBytes(StandardCharsets.UTF_8)),
-                new RespBulkString(dbName.getBytes(StandardCharsets.UTF_8)),
-                new RespBulkString(tbName.getBytes(StandardCharsets.UTF_8)));
+    public RespObject serialize() {
+        //TODO implement
+        return null;
     }
 
     @Override
     public int getCommandId() {
-        return tbID;
+        //TODO implement
+        return 0;
     }
 }
