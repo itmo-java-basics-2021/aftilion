@@ -25,7 +25,7 @@ public class DatabaseImpl implements Database {
         this.databaseRoot = databaseRoot;
     }
 
-    private DatabaseImpl(DatabaseInitializationContext context){
+    private DatabaseImpl(DatabaseInitializationContext context) {
         this.dbName = context.getDbName();
         this.databaseRoot = context.getDatabasePath();
         this.tableDictionary = context.getTables();
@@ -42,7 +42,7 @@ public class DatabaseImpl implements Database {
         try {
             Files.createDirectory(Paths.get(databaseRoot.toString(), dbName));
         } catch (IOException ex) {
-            throw new DatabaseException("Error while creating a DataBase(" + dbName + ") directory" , ex);
+            throw new DatabaseException("Error while creating a DataBase(" + dbName + ") directory", ex);
         }
         return new DatabaseImpl(dbName, databaseRoot);
     }

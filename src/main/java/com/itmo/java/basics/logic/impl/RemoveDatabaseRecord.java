@@ -26,8 +26,9 @@ public class RemoveDatabaseRecord implements WritableDatabaseRecord {
     }
 
     @Override
-    public boolean isValuePresented() { return false; }
-
+    public boolean isValuePresented() {
+        return false;
+    }
 
 
     @Override
