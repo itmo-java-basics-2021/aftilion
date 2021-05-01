@@ -1,12 +1,12 @@
 package com.itmo.java.basics.logic.impl;
 
-import com.itmo.java.basics.initialization.SegmentInitializationContext;
-import com.itmo.java.basics.logic.Segment;
 import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.index.SegmentOffsetInfo;
 import com.itmo.java.basics.index.impl.SegmentIndex;
 import com.itmo.java.basics.index.impl.SegmentOffsetInfoImpl;
+import com.itmo.java.basics.initialization.SegmentInitializationContext;
 import com.itmo.java.basics.logic.DatabaseRecord;
+import com.itmo.java.basics.logic.Segment;
 import com.itmo.java.basics.logic.io.DatabaseInputStream;
 import com.itmo.java.basics.logic.io.DatabaseOutputStream;
 
@@ -17,12 +17,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+
 import static java.nio.file.StandardOpenOption.APPEND;
+
 public class SegmentImpl implements Segment {
 
     private final Path tableRootPath;
-    private final  String segmentName;
-    private final  SegmentIndex segmentIndex;
+    private final String segmentName;
+    private final SegmentIndex segmentIndex;
     private final long sizeMaximum = 100000;
     private final DatabaseOutputStream outStream;
     private long segmentSize = 0;
@@ -34,7 +36,7 @@ public class SegmentImpl implements Segment {
         this.outStream = new DatabaseOutputStream(outStream);
     }
 
-    private SegmentImpl(SegmentInitializationContext context , OutputStream outStream) {
+    private SegmentImpl(SegmentInitializationContext context, OutputStream outStream) {
         this.tableRootPath = context.getSegmentPath();
         this.segmentName = context.getSegmentName();
         this.segmentIndex = context.getIndex();
@@ -47,13 +49,13 @@ public class SegmentImpl implements Segment {
         boolean isCreated;
         OutputStream output;
 
-        try{
+        try {
             isCreated = segmentRoot.toFile().createNewFile();
             output = Files.newOutputStream(segmentRoot);
-        }catch(IOException ex){
+        } catch (IOException ex) {
             throw new DatabaseException("Error while creating segment " + segmentName, ex);
         }
-        if(!isCreated){
+        if (!isCreated) {
             throw new DatabaseException("Error while creating segment " + segmentName + "as it already exists");
         }
         return new SegmentImpl(segmentRoot, segmentName, output);
@@ -62,13 +64,13 @@ public class SegmentImpl implements Segment {
     public static Segment initializeFromContext(SegmentInitializationContext context) {
 
         OutputStream output;
-        try{
-            output = Files.newOutputStream(context.getSegmentPath(),APPEND);
-        }catch(IOException ex){
-          output = null;
+        try {
+            output = Files.newOutputStream(context.getSegmentPath(), APPEND);
+        } catch (IOException ex) {
+            output = null;
         }
 
-        SegmentImpl newSegment = new SegmentImpl(context ,output);
+        SegmentImpl newSegment = new SegmentImpl(context, output);
         newSegment.segmentSize = context.getCurrentSize();
         return newSegment;
     }
@@ -123,7 +125,9 @@ public class SegmentImpl implements Segment {
     }
 
     @Override
-    public boolean isReadOnly() { return segmentSize >= sizeMaximum;}
+    public boolean isReadOnly() {
+        return segmentSize >= sizeMaximum;
+    }
 
     @Override
     public boolean delete(String objectKey) throws IOException {

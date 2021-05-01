@@ -20,8 +20,6 @@ public class DatabaseCacheImpl implements DatabaseCache {
         };
     }
 
-
-
     @Override
     public byte[] get(String key) {
         return dbCache.get(key);
