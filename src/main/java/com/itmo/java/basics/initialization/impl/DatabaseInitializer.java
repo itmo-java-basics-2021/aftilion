@@ -46,10 +46,6 @@ public class DatabaseInitializer implements Initializer {
         }
 
         File[] directory = curFile.listFiles();
-
-//        if (directory == null) {
-//            throw new DatabaseException("Error while working with " + curFile.toString());
-//        }
         for (File table : directory) {
             TableInitializationContextImpl tableContext = new TableInitializationContextImpl(table.getName(), dbinitialContext.getDatabasePath(), new TableIndex());
             tableInitializer.perform(new InitializationContextImpl(context.executionEnvironment(), dbinitialContext, tableContext, null));

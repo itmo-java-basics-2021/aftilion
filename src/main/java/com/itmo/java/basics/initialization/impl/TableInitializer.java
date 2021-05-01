@@ -47,11 +47,6 @@ public class TableInitializer implements Initializer {
         }
 
         File[] files = curFile.listFiles();
-
-//        if (files == null) {
-//            throw new DatabaseException("Error while working " + curFile.toString());
-//        }
-
         List<File> segments = Arrays.asList(files);
         Collections.sort(segments);
 
