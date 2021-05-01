@@ -7,11 +7,11 @@ import java.util.Map;
 
 public class DatabaseCacheImpl implements DatabaseCache {
 
-    private final int dbCapacity ;
+    private static final int dbCapacity = 5000;
     private final Map<String, byte[]> dbCache;
 
-    public DatabaseCacheImpl(int dbCapacity) {
-        this.dbCapacity = dbCapacity;
+    public DatabaseCacheImpl() {
+
         this.dbCache = new LinkedHashMap<String, byte[]>(dbCapacity, 1f, true) {
             @Override
             protected boolean removeEldestEntry(Map.Entry<String, byte[]> eldest) {
