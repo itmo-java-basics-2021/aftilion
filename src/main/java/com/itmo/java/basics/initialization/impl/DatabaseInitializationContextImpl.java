@@ -10,9 +10,9 @@ import java.util.Map;
 
 public class DatabaseInitializationContextImpl implements DatabaseInitializationContext {
 
-    private String dbName;
-    private Path dbRoot;
-    private Map<String, Table> tablesMap = new HashMap<>();
+    private final String dbName;
+    private final Path dbRoot;
+    private final Map<String, Table> tablesMap = new HashMap<>();
 
     public DatabaseInitializationContextImpl(String dbName, Path databaseRoot) {
         this.dbName = dbName;
