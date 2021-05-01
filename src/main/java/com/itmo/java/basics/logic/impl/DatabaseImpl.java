@@ -19,6 +19,7 @@ public class DatabaseImpl implements Database {
     private String dbName;
     private Path databaseRoot;
     private Map<String, Table> tableDictionary = new HashMap<String, Table>();
+
     private DatabaseImpl(String dbName, Path databaseRoot) {
         this.dbName = dbName;
         this.databaseRoot = databaseRoot;
@@ -30,7 +31,6 @@ public class DatabaseImpl implements Database {
         this.tableDictionary = context.getTables();
     }
 
-
     public static Database create(String dbName, Path databaseRoot) throws DatabaseException {
 
         if (dbName == null) {
@@ -39,7 +39,6 @@ public class DatabaseImpl implements Database {
         if (Files.exists(Paths.get(databaseRoot.toString(), dbName))) {
             throw new DatabaseException("This" + dbName + "already exists");
         }
-
         try {
             Files.createDirectory(Paths.get(databaseRoot.toString(), dbName));
         } catch (IOException ex) {
@@ -68,7 +67,6 @@ public class DatabaseImpl implements Database {
         if ((tableDictionary.containsKey(tableName)) || (Files.exists(Paths.get(databaseRoot.toString(), dbName, tableName)))) {
             throw new DatabaseException("We have " + tableName + " in " + dbName + "directory");
         }
-
         TableIndex newTableIndex = new TableIndex();
         Path pathToTableRoot = Paths.get(databaseRoot.toString(), dbName);
         Table newTable = TableImpl.create(tableName, pathToTableRoot, newTableIndex);
@@ -89,9 +87,7 @@ public class DatabaseImpl implements Database {
 
     @Override
     public Optional<byte[]> read(String tableName, String objectKey) throws DatabaseException {
-
         Table table = tableDictionary.get(tableName);
-
         if (tableName == null) {
             throw new DatabaseException("Error while reading in database , null name");
         }
@@ -100,7 +96,6 @@ public class DatabaseImpl implements Database {
 
     @Override
     public void delete(String tableName, String objectKey) throws DatabaseException {
-
         if (!tableDictionary.containsKey(tableName)) {
             throw new DatabaseException("Table " + tableName + " doesn't exist in database" + dbName);
         }
