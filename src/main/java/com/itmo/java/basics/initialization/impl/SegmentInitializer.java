@@ -22,7 +22,6 @@ import java.util.Optional;
 
 public class SegmentInitializer implements Initializer {
 
-
     /**
      * Добавляет в контекст информацию об инициализируемом сегменте.
      * Составляет индекс сегмента
@@ -43,7 +42,7 @@ public class SegmentInitializer implements Initializer {
         SegmentIndex segIndex = segmentinitialContext.getIndex();
         Path segPath = segmentinitialContext.getSegmentPath();
         Segment segment = SegmentImpl.initializeFromContext(segmentinitialContext);
-        List<String> keys =  new ArrayList<>();
+        List<String> keys = new ArrayList<>();
 
         if (!Files.exists(segPath)) {
             throw new DatabaseException(segmentinitialContext.getSegmentName() + " does not exist");
@@ -63,7 +62,7 @@ public class SegmentInitializer implements Initializer {
 
         Segment newSegment = SegmentImpl.initializeFromContext(new SegmentInitializationContextImpl(segmentinitialContext.getSegmentName(), segmentinitialContext.getSegmentPath(), size, segIndex));
 
-        for (String in : keys){
+        for (String in : keys) {
             context.currentTableContext().getTableIndex().onIndexedEntityUpdated(in, segment);
         }
         context.currentTableContext().updateCurrentSegment(newSegment);
