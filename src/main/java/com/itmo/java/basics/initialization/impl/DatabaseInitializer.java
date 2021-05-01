@@ -29,25 +29,26 @@ public class DatabaseInitializer implements Initializer {
      */
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
-        if (context.currentDbContext() == null) {
-            throw new DatabaseException("Context Db is null");
+
+        DatabaseInitializationContext dbinitialContext = context.currentDbContext();
+        if (!Files.exists(dbinitialContext.getDatabasePath())) {
+            throw new DatabaseException("We dont have this " + dbinitialContext.getDbName());
         }
-        File dir = context.currentDbContext().getDatabasePath().toFile();
-
-        if (dir.listFiles() == null) {
-            return;
-        }
-
-        File[] tables = dir.listFiles();
-        for (File table : tables) {
-            InitializationContext init = new InitializationContextImpl(context.executionEnvironment(),
-                    context.currentDbContext(),
-                    new TableInitializationContextImpl(table.getName(), table.toPath(), new TableIndex()),
-                    context.currentSegmentContext());
-
-            tableInitializer.perform(init);
+        File curFile = new File(dbinitialContext.getDatabasePath().toString());
+        if (!curFile.exists()) {
+            throw new DatabaseException(dbinitialContext.getDbName() + " does not exist");
         }
 
-        context.executionEnvironment().addDatabase(DatabaseImpl.initializeFromContext(context.currentDbContext()));
+        File[] directory = curFile.listFiles();
+
+        if (directory == null) {
+            throw new DatabaseException("Error while working with " + curFile.toString());
+        }
+        for (File table : directory) {
+            TableInitializationContextImpl tableContext = new TableInitializationContextImpl(table.getName(), dbinitialContext.getDatabasePath(), new TableIndex());
+            tableInitializer.perform(new InitializationContextImpl(context.executionEnvironment(), dbinitialContext, tableContext, null));
+        }
+        Database database = DatabaseImpl.initializeFromContext(dbinitialContext);
+        context.executionEnvironment().addDatabase(database);
     }
 }
