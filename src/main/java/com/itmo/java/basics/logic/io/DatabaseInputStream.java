@@ -28,20 +28,27 @@ public class DatabaseInputStream extends DataInputStream {
      */
     public Optional<DatabaseRecord> readDbUnit() throws IOException {
 
-        try {
-            int keySize = readInt();
-            byte[] key = readNBytes(keySize);
-            int valueSize = readInt();
-
-            if (valueSize != REMOVED_OBJECT_SIZE) {
-                byte[] value = readNBytes(valueSize);
-                Optional<DatabaseRecord> res = Optional.of(new SetDatabaseRecord(key, value));
-                return res;
-            } else {
-                return Optional.of(new RemoveDatabaseRecord(key));
-            }
-        } catch (EOFException e) {
+        if (available() <= 4) {
             return Optional.empty();
         }
+        int keySize = readInt();
+
+        if (available() <= 0) {
+            return Optional.empty();
+        }
+        byte[] key = readNBytes(keySize);
+
+        if (available() <= 4) {
+            return Optional.empty();
+        }
+        int valueSize = readInt();
+
+        if ((available() <= 0) && (valueSize == REMOVED_OBJECT_SIZE)) {
+            return Optional.empty();
+        }
+        byte[] value = readNBytes(valueSize);
+        SetDatabaseRecord datarecord = new SetDatabaseRecord(key, value);
+
+        return Optional.of(datarecord);
     }
 }
