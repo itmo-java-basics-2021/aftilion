@@ -16,8 +16,8 @@ import java.util.Optional;
 
 public class DatabaseImpl implements Database {
 
-    private String dbName;
-    private Path databaseRoot;
+    private final String dbName;
+    private final Path databaseRoot;
     private Map<String, Table> tableDictionary = new HashMap<String, Table>();
 
     private DatabaseImpl(String dbName, Path databaseRoot) {

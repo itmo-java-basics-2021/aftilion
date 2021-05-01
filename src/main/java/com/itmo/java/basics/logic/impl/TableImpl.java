@@ -14,9 +14,9 @@ import java.util.Optional;
 
 public class TableImpl implements Table {
 
-    private String tableName;
-    private Path pathToDatabaseRoot;
-    private TableIndex tableIndex;
+    private final String tableName;
+    private final Path pathToDatabaseRoot;
+    private final TableIndex tableIndex;
     private Segment lastSegment;
 
     private TableImpl(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {

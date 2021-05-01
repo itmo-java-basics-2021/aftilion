@@ -29,6 +29,7 @@ public class DatabaseServerInitializer implements Initializer {
 
         ExecutionEnvironment ExecutionEnvironment = context.executionEnvironment();
         Path path = ExecutionEnvironment.getWorkingPath();
+
         if (!Files.exists(path)) {
             try {
                 Files.createDirectory(path);
@@ -37,11 +38,12 @@ public class DatabaseServerInitializer implements Initializer {
             }
         }
         File curFile = new File(path.toString());
-        File[] files = curFile.listFiles();
-        if (files == null) {
+        File[] directory = curFile.listFiles();
+        if (directory == null) {
             throw new DatabaseException("Error while working with" + curFile.toString());
         }
-        for (File in : files) {
+
+        for (File in : directory) {
             DatabaseInitializationContextImpl dbContext = new DatabaseInitializationContextImpl(in.getName(), path);
             databaseInitializer.perform(new InitializationContextImpl(context.executionEnvironment(), dbContext, null, null));
         }

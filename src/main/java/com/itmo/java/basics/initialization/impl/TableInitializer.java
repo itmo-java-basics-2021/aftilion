@@ -34,12 +34,14 @@ public class TableInitializer implements Initializer {
 
 
     public void perform(InitializationContext context) throws DatabaseException {
+
         TableInitializationContext tbinitalContext = context.currentTableContext();
         File curFile = new File(tbinitalContext.getTablePath().toString());
 
         if (!curFile.exists()) {
             throw new DatabaseException("Directory " + tbinitalContext.getTableName() + " does not exist");
         }
+
         File[] files = curFile.listFiles();
 
         if (files == null) {
@@ -53,6 +55,7 @@ public class TableInitializer implements Initializer {
             SegmentInitializationContext segmentContext = new SegmentInitializationContextImpl(seg.getName(), tbinitalContext.getTablePath(), 0);
             segmentInitializer.perform(new InitializationContextImpl(context.executionEnvironment(), context.currentDbContext(), context.currentTableContext(), segmentContext));
         }
+        
         Table newTable = TableImpl.initializeFromContext(tbinitalContext);
         context.currentDbContext().addTable(newTable);
     }
