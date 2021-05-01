@@ -46,11 +46,11 @@ public class TableInitializer implements Initializer {
             throw new DatabaseException("Error while working " + curFile.toString());
         }
 
-        List<File> filesList = Arrays.asList(files);
-        Collections.sort(filesList);
+        List<File> segments = Arrays.asList(files);
+        Collections.sort(segments);
 
-        for (File i : filesList) {
-            SegmentInitializationContext segmentContext = new SegmentInitializationContextImpl(i.getName(), tbinitalContext.getTablePath(), 0);
+        for (File seg : segments) {
+            SegmentInitializationContext segmentContext = new SegmentInitializationContextImpl(seg.getName(), tbinitalContext.getTablePath(), 0);
             segmentInitializer.perform(new InitializationContextImpl(context.executionEnvironment(), context.currentDbContext(), context.currentTableContext(), segmentContext));
         }
         Table newTable = TableImpl.initializeFromContext(tbinitalContext);

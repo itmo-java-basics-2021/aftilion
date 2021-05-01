@@ -35,33 +35,34 @@ public class SegmentInitializer implements Initializer {
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
 
+        int size = 0;
         SegmentInitializationContext segmentinitialContext = context.currentSegmentContext();
         SegmentIndex segmentIndex = segmentinitialContext.getIndex();
         Path segmentPath = segmentinitialContext.getSegmentPath();
         Segment segment = SegmentImpl.initializeFromContext(segmentinitialContext);
-        int offset = 0;
+        ArrayList<String> keys = new ArrayList<>();
 
         if (!Files.exists(segmentPath)) {
             throw new DatabaseException(segmentinitialContext.getSegmentName() + " does not exist");
         }
-        ArrayList<String> keys = new ArrayList<>();
         try (DatabaseInputStream InputStream = new DatabaseInputStream(new FileInputStream(segmentPath.toFile()))) {
-            Optional<DatabaseRecord> dbUnitOptional = InputStream.readDbUnit();
-            while (dbUnitOptional.isPresent()) {
-                DatabaseRecord dbUnit = dbUnitOptional.get();
-                segmentIndex.onIndexedEntityUpdated(new String(dbUnit.getKey()), new SegmentOffsetInfoImpl(offset));
-                offset += dbUnit.size();
+            Optional<DatabaseRecord> dbUnitOp = InputStream.readDbUnit();
+            while (dbUnitOp.isPresent()) {
+                DatabaseRecord dbUnit = dbUnitOp.get();
+                segmentIndex.onIndexedEntityUpdated(new String(dbUnit.getKey()), new SegmentOffsetInfoImpl(size));
+                size += dbUnit.size();
                 keys.add(new String(dbUnit.getKey()));
-                dbUnitOptional = InputStream.readDbUnit();
+                dbUnitOp = InputStream.readDbUnit();
             }
         } catch (IOException ex) {
             throw new DatabaseException("Error while initialisation segment", ex);
         }
-        Segment newSegment = SegmentImpl.initializeFromContext(new SegmentInitializationContextImpl(segmentinitialContext.getSegmentName(), segmentinitialContext.getSegmentPath(), offset, segmentIndex));
-        for (String i : keys){
-            context.currentTableContext().getTableIndex().onIndexedEntityUpdated(i, segment);
-        }
 
+        Segment newSegment = SegmentImpl.initializeFromContext(new SegmentInitializationContextImpl(segmentinitialContext.getSegmentName(), segmentinitialContext.getSegmentPath(), size, segmentIndex));
+
+        for (String in : keys){
+            context.currentTableContext().getTableIndex().onIndexedEntityUpdated(in, segment);
+        }
         context.currentTableContext().updateCurrentSegment(newSegment);
     }
 }
