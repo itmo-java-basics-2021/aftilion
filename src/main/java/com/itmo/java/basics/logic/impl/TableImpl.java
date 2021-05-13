@@ -49,11 +49,7 @@ public class TableImpl implements Table {
 
 
     public static Table initializeFromContext(TableInitializationContext context) {
-        try {
-            return new CachingTable(new TableImpl(context));
-        } catch (Exception ex) {
             return null;
-        }
     }
 
 
