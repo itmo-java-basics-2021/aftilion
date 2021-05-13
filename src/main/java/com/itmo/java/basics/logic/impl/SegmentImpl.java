@@ -40,6 +40,7 @@ public class SegmentImpl implements Segment {
         this.tableRootPath = context.getSegmentPath();
         this.segmentName = context.getSegmentName();
         this.segmentIndex = context.getIndex();
+        this.segmentSize = context.getCurrentSize();
         this.outStream = new DatabaseOutputStream(outStream);
     }
 
@@ -69,9 +70,7 @@ public class SegmentImpl implements Segment {
         } catch (IOException ex) {
             output = null;
         }
-
         SegmentImpl newSegment = new SegmentImpl(context, output);
-        newSegment.segmentSize = context.getCurrentSize();
         return newSegment;
     }
 
