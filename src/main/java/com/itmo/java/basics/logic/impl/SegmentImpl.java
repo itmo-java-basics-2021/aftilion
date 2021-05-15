@@ -68,7 +68,7 @@ public class SegmentImpl implements Segment {
         try {
             output = Files.newOutputStream(context.getSegmentPath(), APPEND);
         } catch (IOException ex) {
-            throw new RuntimeException("Error while newOpenFile in Segment initializeFromContext");
+            throw new RuntimeException("Error while newOpenFile in Segment initializeFromContext" , ex);
         }
         SegmentImpl newSegment = new SegmentImpl(context, output);
         return newSegment;
