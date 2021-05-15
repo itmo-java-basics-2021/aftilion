@@ -62,13 +62,13 @@ public class SegmentImpl implements Segment {
         return new SegmentImpl(segmentRoot, segmentName, output);
     }
 
-    public static Segment initializeFromContext(SegmentInitializationContext context) {
+    public static Segment initializeFromContext(SegmentInitializationContext context) throws RuntimeException{
 
         OutputStream output;
         try {
             output = Files.newOutputStream(context.getSegmentPath(), APPEND);
         } catch (IOException ex) {
-            output = null;
+            throw new RuntimeException("Error while newOpenFile in Segment initializeFromContext");
         }
         SegmentImpl newSegment = new SegmentImpl(context, output);
         return newSegment;
