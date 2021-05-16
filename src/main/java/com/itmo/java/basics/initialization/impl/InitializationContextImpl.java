@@ -13,10 +13,10 @@ public class InitializationContextImpl implements InitializationContext {
     private final TableInitializationContext currentTableContext;
     private final SegmentInitializationContext currentSegmentContext;
 
-    private InitializationContextImpl(ExecutionEnvironment executionEnvironment,
-                                      DatabaseInitializationContext currentDatabaseContext,
-                                      TableInitializationContext currentTableContext,
-                                      SegmentInitializationContext currentSegmentContext) {
+    public InitializationContextImpl(ExecutionEnvironment executionEnvironment,
+                                     DatabaseInitializationContext currentDatabaseContext,
+                                     TableInitializationContext currentTableContext,
+                                     SegmentInitializationContext currentSegmentContext) {
         this.executionEnvironment = executionEnvironment;
         this.currentDatabaseContext = currentDatabaseContext;
         this.currentTableContext = currentTableContext;

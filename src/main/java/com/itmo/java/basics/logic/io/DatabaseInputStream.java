@@ -2,6 +2,7 @@ package com.itmo.java.basics.logic.io;
 
 import com.itmo.java.basics.logic.DatabaseRecord;
 import com.itmo.java.basics.logic.WritableDatabaseRecord;
+import com.itmo.java.basics.logic.impl.RemoveDatabaseRecord;
 import com.itmo.java.basics.logic.impl.SetDatabaseRecord;
 
 import java.io.DataInputStream;
@@ -25,29 +26,21 @@ public class DatabaseInputStream extends DataInputStream {
      * @return следующую запись, если она существует. {@link Optional#empty()} - если конец файла достигнут
      */
     public Optional<DatabaseRecord> readDbUnit() throws IOException {
+        try {
+            int keySize = readInt();
+            byte[] key = readNBytes(keySize);
+            int valueSize = readInt();
 
-        if (available() <= 4) {
+            if (valueSize != REMOVED_OBJECT_SIZE) {
+                byte[] value = readNBytes(valueSize);
+                Optional<DatabaseRecord> result = Optional.of(new SetDatabaseRecord(key, value));
+                return result;
+            } else {
+                return Optional.of(new RemoveDatabaseRecord(key));
+            }
+        } catch (IOException ex) {
             return Optional.empty();
         }
-        int keySize = readInt();
-
-        if (available() <= 0) {
-            return Optional.empty();
-        }
-        byte[] key = readNBytes(keySize);
-
-        if (available() <= 4) {
-            return Optional.empty();
-        }
-        int valueSize = readInt();
-
-        if ((available() <= 0) && (valueSize == REMOVED_OBJECT_SIZE)) {
-            return Optional.empty();
-        }
-        byte[] value = readNBytes(valueSize);
-        SetDatabaseRecord datarecord = new SetDatabaseRecord(key, value);
-
-        return Optional.of(datarecord);
     }
 }
 
