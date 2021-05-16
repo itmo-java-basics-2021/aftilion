@@ -2,6 +2,7 @@ package com.itmo.java.protocol.model;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Строка
@@ -11,13 +12,12 @@ public class RespBulkString implements RespObject {
      * Код объекта
      */
     public static final byte CODE = '$';
-
     public static final int NULL_STRING_SIZE = -1;
+    private final byte[] data;
 
-    public static final RespBulkString NULL_STRING = new RespBulkString(null);
 
-    public RespBulkString(byte[] data) {
-        //TODO implement
+    public RespBulkString(byte[] inform) {
+        data = inform;
     }
 
     /**
@@ -37,12 +37,14 @@ public class RespBulkString implements RespObject {
      */
     @Override
     public String asString() {
-        //TODO implement
-        return null;
+        return new String(data);
     }
 
     @Override
-    public void write(OutputStream os) throws IOException {
-        //TODO implement
+    public void write(OutputStream output) throws IOException {
+        output.write(CODE);
+        output.write(Integer.toString(data.length).getBytes(StandardCharsets.UTF_8));
+        output.write(CRLF);
+        output.write(data);
     }
 }
