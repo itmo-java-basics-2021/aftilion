@@ -4,13 +4,18 @@ import com.itmo.java.basics.console.DatabaseCommandResult;
 import com.itmo.java.protocol.model.RespError;
 import com.itmo.java.protocol.model.RespObject;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Зафейленная команда
  */
 public class FailedDatabaseCommandResult implements DatabaseCommandResult {
 
-    public FailedDatabaseCommandResult(String payload) {
-        //TODO implement
+
+    private final String payLoad;
+
+    public FailedDatabaseCommandResult(String pload) {
+       payLoad = pload;
     }
 
     /**
@@ -18,8 +23,7 @@ public class FailedDatabaseCommandResult implements DatabaseCommandResult {
      */
     @Override
     public String getPayLoad() {
-        //TODO implement
-        return null;
+        return payLoad;
     }
 
     @Override
@@ -32,7 +36,6 @@ public class FailedDatabaseCommandResult implements DatabaseCommandResult {
      */
     @Override
     public RespObject serialize() {
-        //TODO implement
-        return null;
+        return new RespError(payLoad.getBytes(StandardCharsets.UTF_8));
     }
 }
