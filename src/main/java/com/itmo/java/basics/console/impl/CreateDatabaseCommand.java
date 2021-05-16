@@ -51,7 +51,7 @@ public class CreateDatabaseCommand implements DatabaseCommand {
        try{
            String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
            if(dbName == null){
-               throw new DatabaseException("Why dbname null? ");
+               throw new DatabaseException("Why dbname is null? ");
            }
            environment.addDatabase(dbfactory.createNonExistent(dbName,environment.getWorkingPath()));
            return DatabaseCommandResult.success(("Success add " + dbName).getBytes(StandardCharsets.UTF_8));
