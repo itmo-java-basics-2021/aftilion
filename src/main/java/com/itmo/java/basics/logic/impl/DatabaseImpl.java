@@ -45,17 +45,6 @@ public class DatabaseImpl implements Database {
             throw new DatabaseException("Error while creating a DataBase(" + dbName + ") directory", ex);
         }
         return new DatabaseImpl(dbName, databaseRoot);
-        return new DatabaseImpl(dbName,databaseRoot);
-    /**
-     * @param databaseRoot путь к директории, которая может содержать несколько БД,
-     *                     поэтому при создании БД необходимо создать директорию внутри databaseRoot.
-     */
-    public static Database create(String dbName, Path databaseRoot) throws DatabaseException {
-        return null;
-    }
-
-    public static Database initializeFromContext(DatabaseInitializationContext context) {
-        return null;
     }
 
     public static Database initializeFromContext(DatabaseInitializationContext context) {
