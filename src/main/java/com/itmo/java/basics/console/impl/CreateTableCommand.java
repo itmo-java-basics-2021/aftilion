@@ -33,7 +33,7 @@ public class CreateTableCommand implements DatabaseCommand {
      */
     public CreateTableCommand(ExecutionEnvironment env, List<RespObject> comArgs) {
         if (comArgs.size() != numberOfAgrguments){
-            throw new IllegalArgumentException("Why " + comArgs.size()+"!= 3 , in CreateTableCommand" );
+            throw new IllegalArgumentException("Why " + comArgs.size()+"!= 4 , in CreateTableCommand" );
         }
         environment = env;
         commandargs = comArgs;
@@ -49,11 +49,11 @@ public class CreateTableCommand implements DatabaseCommand {
         try{
             String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
             if(dbName == null){
-                throw new DatabaseException("Why dbname null?");
+                throw new DatabaseException("Why dbname is null?");
             }
             String tbName = commandargs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
             if(tbName == null){
-                throw new DatabaseException("Why tbName null?");
+                throw new DatabaseException("Why tbName is  null?");
             }
             Optional<Database> dataBase = environment.getDatabase(dbName);
             if(dataBase.isEmpty()){
