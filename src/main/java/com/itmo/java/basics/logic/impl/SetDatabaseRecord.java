@@ -12,6 +12,7 @@ public class SetDatabaseRecord implements WritableDatabaseRecord {
         this.value = value;
     }
 
+
     @Override
     public byte[] getKey() {
         return key;
@@ -28,7 +29,9 @@ public class SetDatabaseRecord implements WritableDatabaseRecord {
     }
 
     @Override
-    public boolean isValuePresented() { return true; }
+    public boolean isValuePresented() {
+        return true;
+    }
 
     @Override
     public int getKeySize() {

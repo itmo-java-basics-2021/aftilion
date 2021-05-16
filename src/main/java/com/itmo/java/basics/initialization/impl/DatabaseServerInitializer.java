@@ -1,12 +1,20 @@
 package com.itmo.java.basics.initialization.impl;
 
+import com.itmo.java.basics.console.ExecutionEnvironment;
 import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.initialization.InitializationContext;
 import com.itmo.java.basics.initialization.Initializer;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 public class DatabaseServerInitializer implements Initializer {
+    private final Initializer databaseInitializer;
 
     public DatabaseServerInitializer(DatabaseInitializer databaseInitializer) {
+        this.databaseInitializer = databaseInitializer;
     }
 
     /**
@@ -18,5 +26,36 @@ public class DatabaseServerInitializer implements Initializer {
      */
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
+
+        if (context.executionEnvironment() == null) {
+            throw new DatabaseException("Context executionEnvironment is null");
+        }
+
+        ExecutionEnvironment ExecutionEnvironment = context.executionEnvironment();
+        Path path = ExecutionEnvironment.getWorkingPath();
+
+        if (!Files.exists(path)) {
+            try {
+                Files.createDirectory(path);
+            } catch (IOException ex) {
+                throw new DatabaseException("Error while creating " + path.toString(), ex);
+            }
+        }
+        File curFile = new File(path.toString());
+        File[] directory = curFile.listFiles();
+        if (directory == null) {
+            throw new DatabaseException("Error while working with" + curFile.toString());
+        }
+
+        for (File in : directory) {
+            DatabaseInitializationContextImpl dbContext = new DatabaseInitializationContextImpl(in.getName(), path);
+            databaseInitializer.perform(new InitializationContextImpl(context.executionEnvironment(), dbContext, null, null));
+        }
     }
 }
+
+
+
+
+
+

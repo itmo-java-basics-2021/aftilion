@@ -1,11 +1,10 @@
 package com.itmo.java.basics.logic.impl;
 
-import com.itmo.java.basics.initialization.SegmentInitializationContext;
-import com.itmo.java.basics.logic.Segment;
 import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.index.SegmentOffsetInfo;
 import com.itmo.java.basics.index.impl.SegmentIndex;
 import com.itmo.java.basics.index.impl.SegmentOffsetInfoImpl;
+import com.itmo.java.basics.initialization.SegmentInitializationContext;
 import com.itmo.java.basics.logic.DatabaseRecord;
 import com.itmo.java.basics.logic.Segment;
 import com.itmo.java.basics.logic.io.DatabaseInputStream;
@@ -19,20 +18,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
+import static java.nio.file.StandardOpenOption.APPEND;
+
 public class SegmentImpl implements Segment {
-    public static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
-        throw new UnsupportedOperationException();
-    }
 
-    public static Segment initializeFromContext(SegmentInitializationContext context) {
-        return null;
-
-    private Path tableRootPath;
-    private String segmentName;
-    private SegmentIndex segmentIndex;
+    private final Path tableRootPath;
+    private final String segmentName;
+    private final SegmentIndex segmentIndex;
     private final long sizeMaximum = 100000;
-    private long segmentSize;
     private final DatabaseOutputStream outStream;
+    private long segmentSize = 0;
 
     public SegmentImpl(Path tableRootPath, String segmentName, OutputStream outStream) {
         this.tableRootPath = tableRootPath;
@@ -41,21 +36,42 @@ public class SegmentImpl implements Segment {
         this.outStream = new DatabaseOutputStream(outStream);
     }
 
-    static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
+    private SegmentImpl(SegmentInitializationContext context, OutputStream outStream) {
+        this.tableRootPath = context.getSegmentPath();
+        this.segmentName = context.getSegmentName();
+        this.segmentIndex = context.getIndex();
+        this.segmentSize = context.getCurrentSize();
+        this.outStream = new DatabaseOutputStream(outStream);
+    }
+
+    public static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
+
         Path segmentRoot = Paths.get(tableRootPath.toString(), segmentName);
         boolean isCreated;
-        OutputStream outputStream;
+        OutputStream output;
 
-        try{
+        try {
             isCreated = segmentRoot.toFile().createNewFile();
-            outputStream = Files.newOutputStream(segmentRoot);
-        }catch(IOException ex){
+            output = Files.newOutputStream(segmentRoot);
+        } catch (IOException ex) {
             throw new DatabaseException("Error while creating segment " + segmentName, ex);
         }
-        if(!isCreated){
+        if (!isCreated) {
             throw new DatabaseException("Error while creating segment " + segmentName + "as it already exists");
         }
-        return new SegmentImpl(segmentRoot, segmentName, outputStream);
+        return new SegmentImpl(segmentRoot, segmentName, output);
+    }
+
+    public static Segment initializeFromContext(SegmentInitializationContext context) throws RuntimeException{
+
+        OutputStream output;
+        try {
+            output = Files.newOutputStream(context.getSegmentPath(), APPEND);
+        } catch (IOException ex) {
+            throw new RuntimeException("Error while newOpenFile in Segment initializeFromContext" , ex);
+        }
+        SegmentImpl newSegment = new SegmentImpl(context, output);
+        return newSegment;
     }
 
     static String createSegmentName(String tableName) {
@@ -92,26 +108,25 @@ public class SegmentImpl implements Segment {
         }
 
         long myOf = offsetInfo.get().getOffset();
-        try (DatabaseInputStream in = new DatabaseInputStream(Files.newInputStream(tableRootPath))) {
-            long skipped = in.skip(myOf);
+        try (DatabaseInputStream input = new DatabaseInputStream(Files.newInputStream(tableRootPath))) {
+            long skipped = input.skip(myOf);
             if (skipped != myOf) {
                 throw new IOException("Error while skipping bytes in segment called " + segmentName);
             }
-            Optional<DatabaseRecord> value = in.readDbUnit();
-
+            Optional<DatabaseRecord> value = input.readDbUnit();
             if (value.isEmpty()) {
                 return Optional.empty();
             }
-
-            return Optional.of(value.get().getValue());
-
+            return Optional.ofNullable(value.get().getValue());
         } catch (IOException exception) {
             throw new IOException("Error while creating a Segment file " + segmentName, exception);
         }
     }
 
     @Override
-    public boolean isReadOnly() { return segmentSize >= sizeMaximum;}
+    public boolean isReadOnly() {
+        return segmentSize >= sizeMaximum;
+    }
 
     @Override
     public boolean delete(String objectKey) throws IOException {
@@ -120,12 +135,6 @@ public class SegmentImpl implements Segment {
             outStream.close();
             return false;
         }
-
-        if (segmentIndex.searchForKey(objectKey).isEmpty()){
-            outStream.close();
-            return false;
-        }
-
         RemoveDatabaseRecord newSeg = new RemoveDatabaseRecord(objectKey.getBytes());
         segmentIndex.onIndexedEntityUpdated(objectKey, new SegmentOffsetInfoImpl(segmentSize));
         segmentSize += outStream.write(newSeg);
