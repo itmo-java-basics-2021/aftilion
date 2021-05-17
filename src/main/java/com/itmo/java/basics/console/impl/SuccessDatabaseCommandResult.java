@@ -8,15 +8,16 @@ import com.itmo.java.protocol.model.RespObject;
  * Результат успешной команды
  */
 public class SuccessDatabaseCommandResult implements DatabaseCommandResult {
-    private final byte[] payload;
 
-    public SuccessDatabaseCommandResult(byte[] payload) {
-        this.payload = payload;
+    private final byte[] payLoad;
+
+    public SuccessDatabaseCommandResult(byte[] pload) {
+      payLoad = pload;
     }
 
     @Override
     public String getPayLoad() {
-        return payload != null ? new String(payload) : null;
+        return payLoad !=null ? new String(payLoad) : null;
     }
 
     @Override
@@ -29,6 +30,6 @@ public class SuccessDatabaseCommandResult implements DatabaseCommandResult {
      */
     @Override
     public RespObject serialize() {
-        return new RespBulkString(payload);
+        return new RespBulkString(payLoad);
     }
 }

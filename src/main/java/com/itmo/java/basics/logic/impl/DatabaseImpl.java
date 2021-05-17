@@ -1,8 +1,8 @@
 package com.itmo.java.basics.logic.impl;
 
 import com.itmo.java.basics.exceptions.DatabaseException;
-import com.itmo.java.basics.index.impl.TableIndex;
 import com.itmo.java.basics.initialization.DatabaseInitializationContext;
+import com.itmo.java.basics.index.impl.TableIndex;
 import com.itmo.java.basics.logic.Database;
 import com.itmo.java.basics.logic.Table;
 
@@ -15,94 +15,97 @@ import java.util.Map;
 import java.util.Optional;
 
 public class DatabaseImpl implements Database {
+    private final String name;
+    private final Path path;
+    private final Map<String, Table> tables;
 
-    private final String dbName;
-    private final Path databaseRoot;
-    private Map<String, Table> tableDictionary = new HashMap<String, Table>();
-
-    private DatabaseImpl(String dbName, Path databaseRoot) {
-        this.dbName = dbName;
-        this.databaseRoot = databaseRoot;
-    }
-
-    private DatabaseImpl(DatabaseInitializationContext context) {
-        this.dbName = context.getDbName();
-        this.databaseRoot = context.getDatabasePath();
-        this.tableDictionary = context.getTables();
-    }
-
+    /**
+     * @param databaseRoot путь к директории, которая может содержать несколько БД,
+     *                     поэтому при создании БД необходимо создать директорию внутри databaseRoot.
+     */
     public static Database create(String dbName, Path databaseRoot) throws DatabaseException {
-
         if (dbName == null) {
-            throw new DatabaseException("Why dataBase name is null?");
+            throw new DatabaseException("dbName is not stated");
         }
-        if (Files.exists(Paths.get(databaseRoot.toString(), dbName))) {
-            throw new DatabaseException("This" + dbName + "already exists");
+        if (!Files.exists(databaseRoot)) {
+            throw new DatabaseException(String.format("There is no directory with path %s, there you want to create database",
+                    databaseRoot));
         }
+        Path path = Paths.get(databaseRoot.toString(), dbName);
+
+        if (Files.exists(path)) {
+            throw new DatabaseException(String.format("Database with path %s is already exist",
+                    path));
+        }
+
         try {
-            Files.createDirectory(Paths.get(databaseRoot.toString(), dbName));
-        } catch (IOException ex) {
-            throw new DatabaseException("Error while creating a DataBase(" + dbName + ") directory", ex);
+            Files.createDirectory(path);
+        } catch (IOException e) {
+            throw new DatabaseException(e);
         }
-        return new DatabaseImpl(dbName, databaseRoot);
+
+        return new DatabaseImpl(dbName, path);
     }
+
+    private DatabaseImpl(String dbName, Path databaseRoot)
+    {
+        name = dbName;
+        path = databaseRoot;
+        tables = new HashMap<>();
+    }
+
+    private Table getTable(String tName) throws DatabaseException
+    {
+        if (!tables.containsKey(tName)) {
+            throw new DatabaseException(String.format("There is no table with name %s",
+                    tName));
+        }
+        return tables.get(tName);
+
+    }
+
+
+    private DatabaseImpl(String dbName, Path databaseRoot, Map<String, Table> tables) {
+        name = dbName;
+        path = databaseRoot;
+        this.tables = tables;
+    }
+
 
     public static Database initializeFromContext(DatabaseInitializationContext context) {
-        return new DatabaseImpl(context);
+        return new DatabaseImpl(context.getDbName(), context.getDatabasePath(), context.getTables());
     }
-
     @Override
     public String getName() {
-        return dbName;
+        return name;
     }
 
     @Override
     public void createTableIfNotExists(String tableName) throws DatabaseException {
-
         if (tableName == null) {
-            throw new DatabaseException("Why tableName name is null?");
+            throw new DatabaseException("Table name is not stated");
         }
-        if ((tableDictionary.containsKey(tableName)) || (Files.exists(Paths.get(databaseRoot.toString(), dbName, tableName)))) {
-            throw new DatabaseException("We have " + tableName + " in " + dbName + "directory");
+        if (!tables.containsKey(tableName)) {
+            tables.put(tableName, TableImpl.create(tableName, path,
+                    new TableIndex()));
+        } else {
+            throw new DatabaseException(String.format("Table with name %s already exists",
+                    tableName));
         }
-        TableIndex newTableIndex = new TableIndex();
-        Path pathToTableRoot = Paths.get(databaseRoot.toString(), dbName);
-        Table newTable = TableImpl.create(tableName, pathToTableRoot, newTableIndex);
-        tableDictionary.put(tableName, newTable);
     }
 
     @Override
     public void write(String tableName, String objectKey, byte[] objectValue) throws DatabaseException {
-
-        if (tableName == null) {
-            throw new DatabaseException("Error while writing in , null name");
-        }
-        if (!tableDictionary.containsKey(tableName)) {
-            throw new DatabaseException("Table " + tableName + " doesn't exist in database" + dbName);
-        }
-
-        Table table = tableDictionary.get(tableName);
-        table.write(objectKey, objectValue);
+        getTable(tableName).write(objectKey, objectValue);
     }
 
     @Override
     public Optional<byte[]> read(String tableName, String objectKey) throws DatabaseException {
-        Table table = tableDictionary.get(tableName);
-        if (tableName == null) {
-            throw new DatabaseException("Error while reading in database , null name");
-        }
-        return table.read(objectKey);
+        return getTable(tableName).read(objectKey);
     }
 
     @Override
     public void delete(String tableName, String objectKey) throws DatabaseException {
-        if (!tableDictionary.containsKey(tableName)) {
-            throw new DatabaseException("Table " + tableName + " doesnt exist in database" + dbName);
-        }
-        if (tableName == null) {
-            throw new DatabaseException("Writing in database error");
-        }
-        Table tableImpl = tableDictionary.get(tableName);
-        tableImpl.delete(objectKey);
+        getTable(tableName).delete(objectKey);
     }
 }

@@ -6,32 +6,36 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class DatabaseCacheImpl implements DatabaseCache {
-
-    private static final int dbCapacity = 5000;
-    private final Map<String, byte[]> dbCache;
-
-    public DatabaseCacheImpl() {
-
-        this.dbCache = new LinkedHashMap<String, byte[]>(dbCapacity, 1f, true) {
+    private static final int CAPACITY = 5_000;
+    private final LinkedHashMap<String, byte[]> cache;
+    public DatabaseCacheImpl(int capacity)
+    {
+        cache = new LinkedHashMap<>(capacity){
             @Override
             protected boolean removeEldestEntry(Map.Entry<String, byte[]> eldest) {
-                return size() > dbCapacity;
+                return size() > capacity;
             }
         };
     }
 
+    public DatabaseCacheImpl()
+    {
+        this(CAPACITY);
+    }
+
+
     @Override
     public byte[] get(String key) {
-        return dbCache.get(key);
+        return cache.get(key);
     }
 
     @Override
     public void set(String key, byte[] value) {
-        dbCache.put(key, value);
+        cache.put(key, value);
     }
 
     @Override
     public void delete(String key) {
-        dbCache.remove(key);
+        cache.remove(key);
     }
 }

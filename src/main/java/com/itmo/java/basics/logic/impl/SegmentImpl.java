@@ -1,143 +1,165 @@
 package com.itmo.java.basics.logic.impl;
 
 import com.itmo.java.basics.exceptions.DatabaseException;
+import com.itmo.java.basics.initialization.SegmentInitializationContext;
 import com.itmo.java.basics.index.SegmentOffsetInfo;
 import com.itmo.java.basics.index.impl.SegmentIndex;
 import com.itmo.java.basics.index.impl.SegmentOffsetInfoImpl;
-import com.itmo.java.basics.initialization.SegmentInitializationContext;
 import com.itmo.java.basics.logic.DatabaseRecord;
 import com.itmo.java.basics.logic.Segment;
+import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.logic.io.DatabaseInputStream;
 import com.itmo.java.basics.logic.io.DatabaseOutputStream;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-import static java.nio.file.StandardOpenOption.APPEND;
-
+/**
+ * Сегмент - append-only файл, хранящий пары ключ-значение, разделенные специальным символом.
+ * - имеет ограниченный размер, большие значения (>100000) записываются в последний сегмент, если он не read-only
+ * - при превышении размера сегмента создается новый сегмент и дальнейшие операции записи производятся в него
+ * - именование файла-сегмента должно позволять установить очередность их появления
+ * - является неизменяемым после появления более нового сегмента
+ */
 public class SegmentImpl implements Segment {
+    private final String name;
+    private final Path path;
+    private boolean isReadonly;
+    private final SegmentIndex index;
+    private static final int MAX_SIZE = 100_000;
+    private long size;
+    private final DatabaseOutputStream outputStream;
 
-    private final Path tableRootPath;
-    private final String segmentName;
-    private final SegmentIndex segmentIndex;
-    private final long sizeMaximum = 100000;
-    private final DatabaseOutputStream outStream;
-    private long segmentSize = 0;
-
-    public SegmentImpl(Path tableRootPath, String segmentName, OutputStream outStream) {
-        this.tableRootPath = tableRootPath;
-        this.segmentName = segmentName;
-        this.segmentIndex = new SegmentIndex();
-        this.outStream = new DatabaseOutputStream(outStream);
-    }
-
-    private SegmentImpl(SegmentInitializationContext context, OutputStream outStream) {
-        this.tableRootPath = context.getSegmentPath();
-        this.segmentName = context.getSegmentName();
-        this.segmentIndex = context.getIndex();
-        this.segmentSize = context.getCurrentSize();
-        this.outStream = new DatabaseOutputStream(outStream);
+    public static Segment initializeFromContext(SegmentInitializationContext context) {
+        if (context.getCurrentSize() < MAX_SIZE){
+            try {
+                DatabaseOutputStream outputStream = new DatabaseOutputStream(new FileOutputStream(context.getSegmentPath().toString(), true));
+                return new SegmentImpl(context.getSegmentName(), context.getSegmentPath(), context.getCurrentSize(),
+                        context.getIndex(), outputStream, false);
+            }
+            catch (IOException ignored){
+            }
+        }
+        return new SegmentImpl(context.getSegmentName(), context.getSegmentPath(), context.getCurrentSize(),
+                context.getIndex(), null, true);
     }
 
     public static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
+        Path path = Paths.get(tableRootPath.toString(), segmentName);
+        DatabaseOutputStream stream;
 
-        Path segmentRoot = Paths.get(tableRootPath.toString(), segmentName);
-        boolean isCreated;
-        OutputStream output;
+        /*
+          Здесь я не использую try with resources, потому что я оставляю открытым поток на запись в актуальном сегменте
+         */
 
         try {
-            isCreated = segmentRoot.toFile().createNewFile();
-            output = Files.newOutputStream(segmentRoot);
-        } catch (IOException ex) {
-            throw new DatabaseException("Error while creating segment " + segmentName, ex);
+            Files.createFile(path);
+            stream = new DatabaseOutputStream(new FileOutputStream(
+                    path.toString(), true));
+            return new SegmentImpl(segmentName, path, stream);
+        } catch (IOException e) {
+            throw new DatabaseException(e);
         }
-        if (!isCreated) {
-            throw new DatabaseException("Error while creating segment " + segmentName + "as it already exists");
-        }
-        return new SegmentImpl(segmentRoot, segmentName, output);
     }
 
-    public static Segment initializeFromContext(SegmentInitializationContext context) throws RuntimeException{
-
-        OutputStream output;
-        try {
-            output = Files.newOutputStream(context.getSegmentPath(), APPEND);
-        } catch (IOException ex) {
-            throw new RuntimeException("Error while newOpenFile in Segment initializeFromContext" , ex);
-        }
-        SegmentImpl newSegment = new SegmentImpl(context, output);
-        return newSegment;
+    private SegmentImpl(String segmentName, Path path, DatabaseOutputStream stream) {
+        name = segmentName;
+        this.path = path;
+        size = 0;
+        index = new SegmentIndex();
+        isReadonly = false;
+        outputStream = stream;
     }
 
+    private SegmentImpl(String segmentName, Path path, long size, SegmentIndex index, DatabaseOutputStream stream, boolean isReadonly){
+        name = segmentName;
+        this.path = path;
+        this.size = size;
+        this.index = index;
+        this.outputStream = stream;
+        this.isReadonly = isReadonly;
+    }
     static String createSegmentName(String tableName) {
+        try {
+            Thread.sleep(1);
+        }
+        catch (Exception ignored){
+        }
         return tableName + "_" + System.currentTimeMillis();
     }
 
     @Override
     public String getName() {
-        return segmentName;
+        return name;
     }
 
     @Override
     public boolean write(String objectKey, byte[] objectValue) throws IOException {
-
         if (isReadOnly()) {
-            outStream.close();
             return false;
         }
         if (objectValue == null) {
             return delete(objectKey);
         }
-        SetDatabaseRecord newSeg = new SetDatabaseRecord(objectKey.getBytes(StandardCharsets.UTF_8), objectValue);
-        segmentIndex.onIndexedEntityUpdated(objectKey, new SegmentOffsetInfoImpl(segmentSize));
-        segmentSize += outStream.write(newSeg);
-        return true;
+        try {
+            long offsetSize = outputStream.write(new SetDatabaseRecord(objectKey.getBytes(), objectValue));
+            index.onIndexedEntityUpdated(objectKey, new SegmentOffsetInfoImpl(size));
+            size += offsetSize;
+            if (size >= MAX_SIZE) {
+                isReadonly = true;
+                outputStream.close();
+            }
+            return true;
+        } catch (IOException e) {
+            outputStream.close();
+            throw e;
+        }
     }
 
     @Override
     public Optional<byte[]> read(String objectKey) throws IOException {
-
-        Optional<SegmentOffsetInfo> offsetInfo = segmentIndex.searchForKey(objectKey);
+        Optional<SegmentOffsetInfo> offsetInfo = index.searchForKey(objectKey);
         if (offsetInfo.isEmpty()) {
             return Optional.empty();
         }
-
-        long myOf = offsetInfo.get().getOffset();
-        try (DatabaseInputStream input = new DatabaseInputStream(Files.newInputStream(tableRootPath))) {
-            long skipped = input.skip(myOf);
-            if (skipped != myOf) {
-                throw new IOException("Error while skipping bytes in segment called " + segmentName);
+        try (DatabaseInputStream stream = new DatabaseInputStream(new FileInputStream(path.toString()))) {
+            long offset = offsetInfo.get().getOffset();
+            long realOffset = stream.skip(offset);
+            if (realOffset != offset) {
+                throw new IOException("Something went wrong with stream.skip()");
             }
-            Optional<DatabaseRecord> value = input.readDbUnit();
-            if (value.isEmpty()) {
-                return Optional.empty();
-            }
-            return Optional.ofNullable(value.get().getValue());
-        } catch (IOException exception) {
-            throw new IOException("Error while creating a Segment file " + segmentName, exception);
+            Optional<DatabaseRecord> record = stream.readDbUnit();
+            return record.map(DatabaseRecord::getValue);
         }
     }
 
     @Override
     public boolean isReadOnly() {
-        return segmentSize >= sizeMaximum;
+        return isReadonly;
     }
 
     @Override
     public boolean delete(String objectKey) throws IOException {
-
         if (isReadOnly()) {
-            outStream.close();
             return false;
         }
-        RemoveDatabaseRecord newSeg = new RemoveDatabaseRecord(objectKey.getBytes());
-        segmentIndex.onIndexedEntityUpdated(objectKey, new SegmentOffsetInfoImpl(segmentSize));
-        segmentSize += outStream.write(newSeg);
-        return true;
+        try {
+            long offsetSize = outputStream.write(new RemoveDatabaseRecord(objectKey.getBytes()));
+            index.onIndexedEntityUpdated(objectKey, new SegmentOffsetInfoImpl(size));
+            size += offsetSize;
+            if (size >= MAX_SIZE) {
+                isReadonly = true;
+                outputStream.close();
+            }
+            return true;
+        } catch (IOException e) {
+            outputStream.close();
+            throw e;
+        }
     }
 }
