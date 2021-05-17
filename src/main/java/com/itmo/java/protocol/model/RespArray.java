@@ -16,7 +16,7 @@ public class RespArray implements RespObject {
      * Код объекта
      */
     public static final byte CODE = '*';
-    private final List<RespObject> objects;
+    private List<RespObject> objects;
 
     public RespArray(RespObject... obj) {
         objects = Arrays.asList(obj);
