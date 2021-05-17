@@ -42,7 +42,6 @@ public class RespBulkString implements RespObject {
 
     @Override
     public void write(OutputStream output) throws IOException {
-
         output.write(CODE);
         if (data == null) {
             output.write(Integer.toString(NULL_STRING_SIZE).getBytes(StandardCharsets.UTF_8));
