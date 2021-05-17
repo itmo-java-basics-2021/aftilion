@@ -6,13 +6,15 @@ import com.itmo.java.basics.logic.WritableDatabaseRecord;
  * Запись в БД, означающая добавление значения по ключу
  */
 public class SetDatabaseRecord implements WritableDatabaseRecord {
-    private final byte[] key;
-    private final byte[] value;
-    public SetDatabaseRecord(byte[] key, byte[] value)
-    {
+
+    private byte[] key;
+    private byte[] value;
+
+    public SetDatabaseRecord(byte[] key, byte[] value) {
         this.key = key;
         this.value = value;
     }
+
 
     @Override
     public byte[] getKey() {
@@ -24,10 +26,6 @@ public class SetDatabaseRecord implements WritableDatabaseRecord {
         return value;
     }
 
-    /**
-     *
-     * @return размер записи, где 8 - размер записи чисел, равных размерам ключа и значения( 2 размера Integer в байтах)
-     */
     @Override
     public long size() {
         return getKeySize() + getValueSize() + 4 + 4;
