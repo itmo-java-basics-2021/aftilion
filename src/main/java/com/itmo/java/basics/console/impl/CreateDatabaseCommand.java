@@ -16,10 +16,11 @@ import java.util.List;
  */
 public class CreateDatabaseCommand implements DatabaseCommand {
 
-    private final ExecutionEnvironment environment;
-    private final DatabaseFactory dbfactory;
-    private final  List<RespObject> commandargs;
-    private static final int numberOfAgrguments = 3;
+    private static final int ARGUMENTS_QUANTITY = 3;
+    private final ExecutionEnvironment env;
+    private final DatabaseFactory factory;
+    private final List<RespObject> commandArgs;
+
 
     /**
      * Создает команду.
@@ -28,18 +29,17 @@ public class CreateDatabaseCommand implements DatabaseCommand {
      *
      * @param env         env
      * @param factory     функция создания базы данных (пример: DatabaseImpl::create)
-     * @param comArgs аргументы для создания (порядок - {@link DatabaseCommandArgPositions}.
+     * @param commandArgs аргументы для создания (порядок - {@link DatabaseCommandArgPositions}.
      *                    Id команды, имя команды, имя создаваемой бд
      * @throws IllegalArgumentException если передано неправильное количество аргументов
      */
-    public CreateDatabaseCommand(ExecutionEnvironment env, DatabaseFactory factory, List<RespObject> comArgs) {
-
-        environment = env;
-        dbfactory = factory;
-        if (comArgs.size() != numberOfAgrguments){
-            throw new IllegalArgumentException("Why " + comArgs.size()+"!= 3 ,  in CreateDataBaseCommand" );
+    public CreateDatabaseCommand(ExecutionEnvironment env, DatabaseFactory factory, List<RespObject> commandArgs) {
+        this.env = env;
+        this.factory = factory;
+        if (commandArgs.size() != ARGUMENTS_QUANTITY) {
+            throw new IllegalArgumentException(String.format("Wrong number of arguments - you need %d but given %d", ARGUMENTS_QUANTITY, commandArgs.size()));
         }
-        commandargs = comArgs;
+        this.commandArgs = commandArgs;
     }
 
     /**
@@ -49,15 +49,15 @@ public class CreateDatabaseCommand implements DatabaseCommand {
      */
     @Override
     public DatabaseCommandResult execute() {
-       try{
-           String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
-//           if(dbName == null){
-//               throw new DatabaseException("Why dbname is null? ");
-//           }
-           environment.addDatabase(dbfactory.createNonExistent(dbName,environment.getWorkingPath()));
-           return DatabaseCommandResult.success(("Success add " + dbName).getBytes(StandardCharsets.UTF_8));
-       } catch (DatabaseException ex){
-           return new FailedDatabaseCommandResult(ex.getMessage());
-       }
+        try {
+            String databaseName = commandArgs
+                    .get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex())
+                    .asString();
+            env.addDatabase(factory.createNonExistent(databaseName, env.getWorkingPath()));
+            return DatabaseCommandResult.success(String.format("Database with name %s successfully added", databaseName)
+                    .getBytes(StandardCharsets.UTF_8));
+        } catch (DatabaseException e) {
+            return new FailedDatabaseCommandResult(e.getMessage());
+        }
     }
 }
