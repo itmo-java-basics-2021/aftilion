@@ -12,98 +12,92 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-/**
- * Таблица - логическая сущность, представляющая собой набор файлов-сегментов, которые объединены одним
- * именем и используются для хранения однотипных данных (данных, представляющих собой одну и ту же сущность,
- * например, таблица "Пользователи")
- * <p>
- * - имеет единый размер сегмента
- * - представляет из себя директорию в файловой системе, именованную как таблица
- * и хранящую файлы-сегменты данной таблицы
- */
 public class TableImpl implements Table {
-    private final String name;
-    private final Path path;
-    private Segment actualSegment;
-    private final TableIndex index;
 
-    public static Table initializeFromContext(TableInitializationContext context) {
-        return new CachingTable(new TableImpl(context.getTableName(), context.getTablePath(), context.getTableIndex(), context.getCurrentSegment()));
+    private final String tableName;
+    private final Path pathToDatabaseRoot;
+    private final TableIndex tableIndex;
+    private Segment lastSegment;
+
+    private TableImpl(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
+        this.tableName = tableName;
+        this.pathToDatabaseRoot = pathToDatabaseRoot;
+        this.tableIndex = tableIndex;
+        this.lastSegment = SegmentImpl.create(SegmentImpl.createSegmentName(tableName), pathToDatabaseRoot);
+    }
+
+    private TableImpl(TableInitializationContext context) {
+        this.tableName = context.getTableName();
+        this.lastSegment = context.getCurrentSegment();
+        this.pathToDatabaseRoot = context.getTablePath().getParent();
+        this.tableIndex = context.getTableIndex();
     }
 
     public static Table create(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
-        Path path = Paths.get(pathToDatabaseRoot.toString(),  tableName);
-        try {
-            Files.createDirectory(path);
-        } catch (IOException e) {
-            throw new DatabaseException(e);
+        if (tableName == null) {
+            throw new DatabaseException("Why tableBase name is null?");
         }
-        return new CachingTable(new TableImpl(tableName, path, tableIndex, null));
+        Path pathToTableRoot = Paths.get(pathToDatabaseRoot.toString(), tableName);
+        try {
+            Files.createDirectory(pathToTableRoot);
+        } catch (IOException ex) {
+            throw new DatabaseException("Error while creating a Table(" + tableName + ") directory");
+        }
+        TableImpl newTb = new TableImpl(tableName, pathToTableRoot, tableIndex);
+        return new CachingTable(newTb);
     }
 
-    private TableImpl(String tableName, Path path, TableIndex tableIndex, Segment currentSegment)
-    {
-        name = tableName;
-        this.path = path;
-        actualSegment = currentSegment;
-        index = tableIndex;
+
+    public static Table initializeFromContext(TableInitializationContext context) {
+            return new CachingTable(new TableImpl(context));
     }
 
-
-    private TableImpl(String tableName, Path path, TableIndex tableIndex)
-    {
-        name = tableName;
-        this.path = path;
-        actualSegment = null;
-        index = tableIndex;
-    }
 
     @Override
     public String getName() {
-        return name;
+        return tableName;
     }
 
     @Override
     public void write(String objectKey, byte[] objectValue) throws DatabaseException {
         try {
-            if (actualSegment == null || !actualSegment.write(objectKey, objectValue)) {
-                actualSegment = SegmentImpl.create(SegmentImpl.createSegmentName(name), path);
+            boolean canWewrite = lastSegment.write(objectKey, objectValue);
+
+            if (!canWewrite) {
+                lastSegment = SegmentImpl.create(SegmentImpl.createSegmentName(tableName), pathToDatabaseRoot);
+                lastSegment.write(objectKey, objectValue);
             }
-            actualSegment.write(objectKey, objectValue);
-            index.onIndexedEntityUpdated(objectKey, actualSegment);
-        } catch (IOException e) {
-            throw new DatabaseException(e);
+            tableIndex.onIndexedEntityUpdated(objectKey, lastSegment);
+        } catch (IOException ex) {
+            throw new DatabaseException("Writing in database error ", ex);
         }
     }
 
     @Override
     public Optional<byte[]> read(String objectKey) throws DatabaseException {
-        Optional<byte[]> value = Optional.empty();
-        if (index.searchForKey(objectKey).isPresent()) {
-            try{
-                value = index.searchForKey(objectKey).get().read(objectKey);
-            } catch (IOException e) {
-                throw new DatabaseException(e);
-            }
+        try {
+            Optional<Segment> segmentRead = tableIndex.searchForKey(objectKey);
+
+            if (segmentRead.isPresent()) {
+                return segmentRead.get().read(objectKey);
+            } else
+                return Optional.empty();
+        } catch (IOException ex) {
+            throw new DatabaseException("Reading in database error ", ex);
         }
-        return value;
     }
 
     @Override
     public void delete(String objectKey) throws DatabaseException {
-        if (index.searchForKey(objectKey).isPresent()) {
-            try {
-                if (actualSegment == null || !actualSegment.delete(objectKey)) {
-                    actualSegment = SegmentImpl.create(SegmentImpl.createSegmentName(name), path);
-                    actualSegment.delete(objectKey);
-                    index.onIndexedEntityUpdated(objectKey, actualSegment);
-                }
-            } catch (IOException e) {
-                throw new DatabaseException(e);
+        try {
+            boolean canDel = lastSegment.delete(objectKey);
+            if (!canDel) {
+                lastSegment = SegmentImpl.create(SegmentImpl.createSegmentName(tableName), pathToDatabaseRoot);
+                lastSegment.delete(objectKey);
             }
-        } else {
-            throw new DatabaseException(String.format("There is no value for key %s",
-                    objectKey));
+            tableIndex.onIndexedEntityUpdated(objectKey, null);
+        } catch (IOException ex) {
+            throw new DatabaseException("Deleting error in Table");
         }
     }
 }

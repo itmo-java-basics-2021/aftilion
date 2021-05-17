@@ -6,38 +6,43 @@ import com.itmo.java.basics.logic.Table;
 
 import java.util.Optional;
 
-
+/**
+ * Декоратор для таблицы. Кэширует данные
+ */
 public class CachingTable implements Table {
-    private final Table table;
-    private final DatabaseCache cache;
 
-    public CachingTable(TableImpl table) {
-        this.table = table;
-        cache = new DatabaseCacheImpl();
+    private final Table cacheTable;
+    private final DatabaseCache dbCache;
+
+    public CachingTable(Table myTable) {
+        this.cacheTable = myTable;
+        this.dbCache = new DatabaseCacheImpl();
     }
 
     @Override
     public String getName() {
-        return table.getName();
+        return cacheTable.getName();
     }
 
     @Override
     public void write(String objectKey, byte[] objectValue) throws DatabaseException {
-        table.write(objectKey, objectValue);
-        cache.set(objectKey, objectValue);
+        cacheTable.write(objectKey, objectValue);
+        dbCache.set(objectKey, objectValue);
     }
 
     @Override
     public Optional<byte[]> read(String objectKey) throws DatabaseException {
-        Optional<byte[]> value = Optional.ofNullable(cache.get(objectKey));
-        if (value.isPresent())
-            return value;
-        return table.read(objectKey);
+        byte[] reading = dbCache.get(objectKey);
+        if (reading != null) {
+            return Optional.of(reading);
+        } else {
+            return cacheTable.read(objectKey);
+        }
     }
 
     @Override
     public void delete(String objectKey) throws DatabaseException {
-        table.delete(objectKey);
-        cache.delete(objectKey);
+        cacheTable.delete(objectKey);
+        dbCache.delete(objectKey);
     }
 }
