@@ -21,8 +21,8 @@ public class CreateDatabaseKvsCommand implements KvsCommand {
      * @param databaseName имя базы данных
      */
     public CreateDatabaseKvsCommand(String databaseName) {
-       dbID = idGen.get();
-       dbName = databaseName;
+        dbID = idGen.get();
+        dbName = databaseName;
     }
 
     /**

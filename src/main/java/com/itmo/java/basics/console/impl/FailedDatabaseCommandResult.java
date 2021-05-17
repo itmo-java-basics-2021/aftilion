@@ -15,7 +15,7 @@ public class FailedDatabaseCommandResult implements DatabaseCommandResult {
     private final String payLoad;
 
     public FailedDatabaseCommandResult(String pload) {
-       payLoad = pload;
+        payLoad = pload;
     }
 
     /**

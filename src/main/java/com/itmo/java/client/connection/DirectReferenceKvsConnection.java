@@ -21,9 +21,9 @@ public class DirectReferenceKvsConnection implements KvsConnection {
 
     @Override
     public RespObject send(int commandId, RespArray command) throws ConnectionException {
-        try{
+        try {
             return dbServer.executeNextCommand(command).get().serialize();
-        } catch(ExecutionException | InterruptedException ex){
+        } catch (ExecutionException | InterruptedException ex) {
             throw new ConnectionException(ex.getMessage(), ex.getCause());
         }
     }
