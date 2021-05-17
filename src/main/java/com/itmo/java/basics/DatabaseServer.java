@@ -12,7 +12,7 @@ import java.util.concurrent.Executors;
 public class DatabaseServer {
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-    private final ExecutionEnvironment enviroment;
+    private final ExecutionEnvironment env;
 
     /**
      * Con structor
@@ -27,11 +27,14 @@ public class DatabaseServer {
     }
 
     private DatabaseServer(ExecutionEnvironment env) {
-        this.enviroment = env;
+        this.env = env;
     }
 
     public CompletableFuture<DatabaseCommandResult> executeNextCommand(RespArray message) {
-        return CompletableFuture.supplyAsync(() -> DatabaseCommands.valueOf(message.getObjects().get(DatabaseCommandArgPositions.COMMAND_NAME.getPositionIndex()).asString()).getCommand(enviroment, message.getObjects()).execute(), executorService);
+        return CompletableFuture.supplyAsync(() ->
+                        DatabaseCommands.valueOf(message.getObjects().get(DatabaseCommandArgPositions.COMMAND_NAME.getPositionIndex()).asString())
+                                .getCommand(env, message.getObjects()).execute()
+                , executorService);
     }
 
     public CompletableFuture<DatabaseCommandResult> executeNextCommand(DatabaseCommand command) {
