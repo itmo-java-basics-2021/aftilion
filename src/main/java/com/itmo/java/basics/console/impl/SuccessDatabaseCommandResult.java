@@ -17,11 +17,7 @@ public class SuccessDatabaseCommandResult implements DatabaseCommandResult {
 
     @Override
     public String getPayLoad() {
-        if(payLoad != null) {
-            return new String(payLoad);
-        } else {
-            return null;
-        }
+        return payLoad !=null ? new String(payLoad) : null;
     }
 
     @Override
