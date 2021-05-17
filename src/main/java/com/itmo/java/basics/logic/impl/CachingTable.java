@@ -6,9 +6,6 @@ import com.itmo.java.basics.logic.Table;
 
 import java.util.Optional;
 
-/**
- * Декоратор для таблицы. Кэширует данные
- */
 public class CachingTable implements Table {
 
     private final Table cacheTable;
