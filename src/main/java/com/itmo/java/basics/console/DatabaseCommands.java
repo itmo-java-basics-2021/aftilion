@@ -15,31 +15,31 @@ public enum DatabaseCommands {
     CREATE_DATABASE {
         @Override
         public DatabaseCommand getCommand(ExecutionEnvironment env, List<RespObject> commandArgs) {
-            return new CreateDatabaseCommand(env, DatabaseImpl::create ,commandArgs);
+            return new CreateDatabaseCommand(env, DatabaseImpl::create, commandArgs);
         }
     },
     CREATE_TABLE {
         @Override
         public DatabaseCommand getCommand(ExecutionEnvironment env, List<RespObject> commandArgs) {
-            return new CreateTableCommand(env,commandArgs);
+            return new CreateTableCommand(env, commandArgs);
         }
     },
     SET_KEY {
         @Override
         public DatabaseCommand getCommand(ExecutionEnvironment env, List<RespObject> commandArgs) {
-           return new SetKeyCommand(env,commandArgs);
+            return new SetKeyCommand(env, commandArgs);
         }
     },
     GET_KEY {
         @Override
         public DatabaseCommand getCommand(ExecutionEnvironment env, List<RespObject> commandArgs) {
-            return new GetKeyCommand(env,commandArgs);
+            return new GetKeyCommand(env, commandArgs);
         }
     },
     DELETE_KEY {
         @Override
         public DatabaseCommand getCommand(ExecutionEnvironment env, List<RespObject> commandArgs) {
-            return new DeleteKeyCommand(env,commandArgs);
+            return new DeleteKeyCommand(env, commandArgs);
         }
     };
 
