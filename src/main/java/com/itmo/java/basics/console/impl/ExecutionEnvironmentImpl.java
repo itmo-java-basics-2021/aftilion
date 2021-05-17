@@ -12,10 +12,9 @@ import java.util.Optional;
 public class ExecutionEnvironmentImpl implements ExecutionEnvironment {
 
     private final DatabaseConfig dbConfig;
-    private final Map<String, Database> dataBase ;
+    private final Map<String, Database> dataBase;
 
     public ExecutionEnvironmentImpl(DatabaseConfig config) {
-
         dbConfig = config;
         dataBase = new HashMap<>();
     }

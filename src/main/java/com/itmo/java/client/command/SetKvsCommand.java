@@ -12,12 +12,12 @@ public class SetKvsCommand implements KvsCommand {
     private final String dbName;
     private final String tbName;
     private final String Key;
-    private final int setID ;
+    private final int setID;
     private final String Value;
 
-
     public SetKvsCommand(String databaseName, String tableName, String key, String value) {
-        dbName =databaseName;
+
+        dbName = databaseName;
         tbName = tableName;
         Key = key;
         setID = idGen.get();

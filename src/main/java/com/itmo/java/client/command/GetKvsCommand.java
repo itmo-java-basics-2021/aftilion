@@ -12,10 +12,10 @@ public class GetKvsCommand implements KvsCommand {
     private final String dbName;
     private final String tbName;
     private final String Key;
-    private final int getID ;
+    private final int getID;
 
     public GetKvsCommand(String databaseName, String tableName, String key) {
-        dbName =databaseName;
+        dbName = databaseName;
         tbName = tableName;
         Key = key;
         getID = idGen.get();

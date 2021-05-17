@@ -7,15 +7,15 @@ import com.itmo.java.protocol.model.RespCommandId;
 import java.nio.charset.StandardCharsets;
 
 public class DeleteKvsCommand implements KvsCommand {
+
     private static final String COMMAND_NAME = "DELETE_KEY";
     private final String dbName;
     private final String tbName;
     private final String Key;
-    private final int delID ;
-
+    private final int delID;
 
     public DeleteKvsCommand(String databaseName, String tableName, String key) {
-        dbName =databaseName;
+        dbName = databaseName;
         tbName = tableName;
         Key = key;
         delID = idGen.get();

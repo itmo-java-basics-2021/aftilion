@@ -13,6 +13,7 @@ public class SimpleKvsClient implements KvsClient {
 
     private final String dbName;
     private final KvsConnection connectionSupplier;
+
     /**
      * Конструктор
      *
@@ -20,7 +21,7 @@ public class SimpleKvsClient implements KvsClient {
      * @param connectionSupplier метод создания подключения к базе
      */
     public SimpleKvsClient(String databaseName, Supplier<KvsConnection> connectionSupplier) {
-       dbName = databaseName;
+        dbName = databaseName;
         this.connectionSupplier = connectionSupplier.get();
     }
 
@@ -29,11 +30,11 @@ public class SimpleKvsClient implements KvsClient {
         try {
             CreateDatabaseKvsCommand dbKvsCom = new CreateDatabaseKvsCommand(dbName);
             RespObject obj = connectionSupplier.send(dbKvsCom.getCommandId(), dbKvsCom.serialize());
-            if(obj.isError()){
+            if (obj.isError()) {
                 throw new DatabaseExecutionException(obj.asString());
             }
             return obj.asString();
-        } catch(ConnectionException ex){
+        } catch (ConnectionException ex) {
             return DatabaseCommandResult.error(ex).getPayLoad();
         }
     }
@@ -41,13 +42,13 @@ public class SimpleKvsClient implements KvsClient {
     @Override
     public String createTable(String tableName) throws DatabaseExecutionException {
         try {
-            CreateTableKvsCommand tbKvsCom = new CreateTableKvsCommand(dbName,tableName);
+            CreateTableKvsCommand tbKvsCom = new CreateTableKvsCommand(dbName, tableName);
             RespObject obj = connectionSupplier.send(tbKvsCom.getCommandId(), tbKvsCom.serialize());
-            if(obj.isError()){
+            if (obj.isError()) {
                 throw new DatabaseExecutionException(obj.asString());
             }
             return obj.asString();
-        } catch(ConnectionException ex){
+        } catch (ConnectionException ex) {
             return DatabaseCommandResult.error(ex).getPayLoad();
         }
     }
@@ -55,13 +56,13 @@ public class SimpleKvsClient implements KvsClient {
     @Override
     public String get(String tableName, String key) throws DatabaseExecutionException {
         try {
-            GetKvsCommand getKvsCom = new GetKvsCommand(dbName,tableName,key);
-            RespObject obj = connectionSupplier.send(getKvsCom .getCommandId(), getKvsCom .serialize());
-            if(obj.isError()){
+            GetKvsCommand getKvsCom = new GetKvsCommand(dbName, tableName, key);
+            RespObject obj = connectionSupplier.send(getKvsCom.getCommandId(), getKvsCom.serialize());
+            if (obj.isError()) {
                 throw new DatabaseExecutionException(obj.asString());
             }
             return obj.asString();
-        } catch(ConnectionException ex){
+        } catch (ConnectionException ex) {
             return DatabaseCommandResult.error(ex).getPayLoad();
         }
     }
@@ -69,13 +70,13 @@ public class SimpleKvsClient implements KvsClient {
     @Override
     public String set(String tableName, String key, String value) throws DatabaseExecutionException {
         try {
-            SetKvsCommand setKvsCom = new SetKvsCommand(dbName,tableName,key,value);
-            RespObject obj = connectionSupplier.send(setKvsCom .getCommandId(), setKvsCom .serialize());
-            if(obj.isError()){
+            SetKvsCommand setKvsCom = new SetKvsCommand(dbName, tableName, key, value);
+            RespObject obj = connectionSupplier.send(setKvsCom.getCommandId(), setKvsCom.serialize());
+            if (obj.isError()) {
                 throw new DatabaseExecutionException(obj.asString());
             }
             return obj.asString();
-        } catch(ConnectionException ex){
+        } catch (ConnectionException ex) {
             return DatabaseCommandResult.error(ex).getPayLoad();
         }
     }
@@ -83,13 +84,13 @@ public class SimpleKvsClient implements KvsClient {
     @Override
     public String delete(String tableName, String key) throws DatabaseExecutionException {
         try {
-            DeleteKvsCommand delKvsCom = new  DeleteKvsCommand(dbName,tableName,key);
-            RespObject obj = connectionSupplier.send(delKvsCom .getCommandId(), delKvsCom .serialize());
-            if(obj.isError()){
+            DeleteKvsCommand delKvsCom = new DeleteKvsCommand(dbName, tableName, key);
+            RespObject obj = connectionSupplier.send(delKvsCom.getCommandId(), delKvsCom.serialize());
+            if (obj.isError()) {
                 throw new DatabaseExecutionException(obj.asString());
             }
             return obj.asString();
-        } catch(ConnectionException ex){
+        } catch (ConnectionException ex) {
             return DatabaseCommandResult.error(ex).getPayLoad();
         }
     }
