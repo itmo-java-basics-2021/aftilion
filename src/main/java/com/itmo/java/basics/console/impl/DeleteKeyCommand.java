@@ -32,11 +32,11 @@ public class DeleteKeyCommand implements DatabaseCommand {
      * @throws IllegalArgumentException если передано неправильное количество аргументов
      */
     public DeleteKeyCommand(ExecutionEnvironment env, List<RespObject> comArgs) {
-        environment = env;
-        commandargs = comArgs;
         if (comArgs.size() != numberOfAgrguments) {
             throw new IllegalArgumentException("Why " + comArgs.size() + "!= 5 , in CreateTableCommand");
         }
+        environment = env;
+        commandargs = comArgs;
     }
 
     /**
