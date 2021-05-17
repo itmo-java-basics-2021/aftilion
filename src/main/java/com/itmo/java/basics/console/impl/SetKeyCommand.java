@@ -12,14 +12,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
+
 /**
  * Команда для создания записи значения
  */
 public class SetKeyCommand implements DatabaseCommand {
 
-    private final ExecutionEnvironment environment;
-    private final  List<RespObject> commandargs;
+    private final ExecutionEnvironment enviroment;
+    private final List<RespObject> commandargs;
     private static final int numberOfAgrguments = 6;
+
     /**
      * Создает команду.
      * <br/>
@@ -31,11 +33,11 @@ public class SetKeyCommand implements DatabaseCommand {
      * @throws IllegalArgumentException если передано неправильное количество аргументов
      */
     public SetKeyCommand(ExecutionEnvironment env, List<RespObject> comArgs) {
-        if (comArgs.size() != numberOfAgrguments){
-            throw new IllegalArgumentException("Why " + comArgs.size()+"!= 5 , in CreateTableCommand" );
+        this.enviroment = env;
+        this.commandargs = comArgs;
+        if (comArgs.size() != numberOfAgrguments) {
+            throw new IllegalArgumentException(String.format("Wrong number of arguments - you need %d but given %d"));
         }
-        environment = env;
-        commandargs = comArgs;
     }
 
     /**
@@ -45,28 +47,21 @@ public class SetKeyCommand implements DatabaseCommand {
      */
     @Override
     public DatabaseCommandResult execute() {
-        try{
+        try {
             String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
-//            if(dbName == null){
-//                throw new DatabaseException("Why dbname is null?");
-//            }
             String tbName = commandargs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
-//            if(tbName == null){
-//                throw new DatabaseException("Why tbName is null?");
-//            }
             String key = commandargs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
-//            if(key == null){
-//                throw new DatabaseException("Why key is null?");
-//            }
-            Optional<Database> dataBase = environment.getDatabase(dbName);
-            if(dataBase.isEmpty()){
-                throw new DatabaseException("We dont have"+ dbName);
-            }
             byte[] value = commandargs.get(DatabaseCommandArgPositions.VALUE.getPositionIndex()).asString().getBytes(StandardCharsets.UTF_8);
-            dataBase.get().write(tbName,key,value);
-            return DatabaseCommandResult.success(("Success add key " + dbName + tbName + key).getBytes(StandardCharsets.UTF_8));
-        } catch (DatabaseException ex){
-            return new FailedDatabaseCommandResult(ex.getMessage());
+            Optional<Database> database = enviroment.getDatabase(dbName);
+            if (database.isEmpty()) {
+                throw new DatabaseException(String.format("There is no database with name %s", dbName));
+            }
+            database.get().write(tbName, key, value);
+            return DatabaseCommandResult.success(String.format("Key %s was successfully added in table %s in database %s", key, tbName, dbName)
+                    .getBytes(StandardCharsets.UTF_8));
+
+        } catch (DatabaseException e) {
+            return new FailedDatabaseCommandResult(e.getMessage());
         }
     }
 }
