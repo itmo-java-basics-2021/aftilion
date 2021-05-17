@@ -33,12 +33,11 @@ public class CreateDatabaseCommand implements DatabaseCommand {
      * @throws IllegalArgumentException если передано неправильное количество аргументов
      */
     public CreateDatabaseCommand(ExecutionEnvironment env, DatabaseFactory factory, List<RespObject> comArgs) {
-
-        environment = env;
-        dbfactory = factory;
         if (comArgs.size() != numberOfAgrguments){
             throw new IllegalArgumentException("Why " + comArgs.size()+"!= 3 ,  in CreateDataBaseCommand" );
         }
+        environment = env;
+        dbfactory = factory;
         commandargs = comArgs;
     }
 
@@ -51,9 +50,9 @@ public class CreateDatabaseCommand implements DatabaseCommand {
     public DatabaseCommandResult execute() {
        try{
            String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
-//           if(dbName == null){
-//               throw new DatabaseException("Why dbname is null? ");
-//           }
+           if(dbName == null){
+               throw new DatabaseException("Why dbname is null? ");
+           }
            environment.addDatabase(dbfactory.createNonExistent(dbName,environment.getWorkingPath()));
            return DatabaseCommandResult.success(("Success add " + dbName).getBytes(StandardCharsets.UTF_8));
        } catch (DatabaseException ex){

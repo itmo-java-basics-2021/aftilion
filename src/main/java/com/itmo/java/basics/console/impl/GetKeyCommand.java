@@ -47,17 +47,17 @@ public class GetKeyCommand implements DatabaseCommand {
     public DatabaseCommandResult execute() {
         try{
             String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
-//            if(dbName == null){
-//                throw new DatabaseException("Why dbname is null?");
-//            }
+            if(dbName == null){
+                throw new DatabaseException("Why dbname is null?");
+            }
             String tbName = commandargs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
-//            if(tbName == null){
-//                throw new DatabaseException("Why tbName is null?");
-//            }
+            if(tbName == null){
+                throw new DatabaseException("Why tbName is null?");
+            }
             String key = commandargs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
-//            if(key == null){
-//                throw new DatabaseException("Why key is null?");
-//            }
+            if(key == null){
+                throw new DatabaseException("Why key is null?");
+            }
             Optional<Database> dataBase = environment.getDatabase(dbName);
             if(dataBase.isEmpty()){
                 throw new DatabaseException("We dont have"+ dbName);
