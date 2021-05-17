@@ -17,24 +17,25 @@ import java.util.Optional;
  */
 public class DeleteKeyCommand implements DatabaseCommand {
 
-    private final ExecutionEnvironment environment;
-    private final  List<RespObject> commandargs;
-    private static final int numberOfAgrguments = 5;
+    private static final int ARGUMENTS_QUANTITY = 5;
+    private final ExecutionEnvironment env;
+    private final List<RespObject> commandArgs;
+
     /**
      * Создает команду.
      * <br/>
      * Обратите внимание, что в конструкторе нет логики проверки валидности данных. Не проверяется, можно ли исполнить команду. Только формальные признаки (например, количество переданных значений или ненуловость объектов
      *
      * @param env         env
-     * @param comArgs аргументы для создания (порядок - {@link DatabaseCommandArgPositions}.
+     * @param commandArgs аргументы для создания (порядок - {@link DatabaseCommandArgPositions}.
      *                    Id команды, имя команды, имя бд, таблицы, ключ
      * @throws IllegalArgumentException если передано неправильное количество аргументов
      */
-    public DeleteKeyCommand(ExecutionEnvironment env, List<RespObject> comArgs) {
-        environment = env;
-        commandargs = comArgs;
-        if (comArgs.size() != numberOfAgrguments){
-            throw new IllegalArgumentException("Why " + comArgs.size()+"!= 5 , in CreateTableCommand" );
+    public DeleteKeyCommand(ExecutionEnvironment env, List<RespObject> commandArgs) {
+        this.env = env;
+        this.commandArgs = commandArgs;
+        if (commandArgs.size() != ARGUMENTS_QUANTITY) {
+            throw new IllegalArgumentException(String.format("Wrong number of arguments - you need %d but given %d", ARGUMENTS_QUANTITY, commandArgs.size()));
         }
     }
 
@@ -45,27 +46,20 @@ public class DeleteKeyCommand implements DatabaseCommand {
      */
     @Override
     public DatabaseCommandResult execute() {
-        try{
-            String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
-//            if(dbName == null){
-//                throw new DatabaseException("Why dbname is null?");
-//            }
-            String tbName = commandargs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
-//            if(tbName == null){
-//                throw new DatabaseException("Why tbName is null?");
-//            }
-            String key = commandargs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
-//            if(key == null){
-//                throw new DatabaseException("Why key is null?");
-//            }
-            Optional<Database> dataBase = environment.getDatabase(dbName);
-            if(dataBase.isEmpty()){
-                throw new DatabaseException("We dont have"+ dbName);
+        try {
+            String databaseName = commandArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+            String tableName = commandArgs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
+            String key = commandArgs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
+            Optional<Database> database = env.getDatabase(databaseName);
+            if (database.isEmpty()) {
+                throw new DatabaseException(String.format("There is no database with name %s", databaseName));
             }
-            dataBase.get().delete(tbName,key);
-            return DatabaseCommandResult.success(("Success del " + dbName + tbName + key).getBytes(StandardCharsets.UTF_8));
-        } catch (DatabaseException ex){
-            return new FailedDatabaseCommandResult(ex.getMessage());
+            database.get().delete(tableName, key);
+            return DatabaseCommandResult.success(String.format("Key %s was succesfully deleted from table %s in database %s", key, tableName, databaseName)
+                    .getBytes(StandardCharsets.UTF_8));
+
+        } catch (DatabaseException e) {
+            return new FailedDatabaseCommandResult(e.getMessage());
         }
     }
 }
