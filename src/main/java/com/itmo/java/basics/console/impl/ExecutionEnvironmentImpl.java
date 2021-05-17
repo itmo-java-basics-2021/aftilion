@@ -6,15 +6,18 @@ import com.itmo.java.basics.logic.Database;
 
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class ExecutionEnvironmentImpl implements ExecutionEnvironment {
 
-    DatabaseConfig dbConfig;
-    HashMap<String, Database> dataBase = new HashMap<String, Database>();
+    private final DatabaseConfig dbConfig;
+    private final Map<String, Database> dataBase ;
 
     public ExecutionEnvironmentImpl(DatabaseConfig config) {
+
         dbConfig = config;
+        dataBase = new HashMap<>();
     }
 
     @Override
