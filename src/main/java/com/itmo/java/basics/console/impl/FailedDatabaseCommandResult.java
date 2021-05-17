@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
  */
 public class FailedDatabaseCommandResult implements DatabaseCommandResult {
 
-
     private final String payLoad;
 
     public FailedDatabaseCommandResult(String pload) {

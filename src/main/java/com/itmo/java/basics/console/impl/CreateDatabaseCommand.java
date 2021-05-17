@@ -33,11 +33,12 @@ public class CreateDatabaseCommand implements DatabaseCommand {
      * @throws IllegalArgumentException если передано неправильное количество аргументов
      */
     public CreateDatabaseCommand(ExecutionEnvironment env, DatabaseFactory factory, List<RespObject> comArgs) {
+
+        environment = env;
+        dbfactory = factory;
         if (comArgs.size() != numberOfAgrguments){
             throw new IllegalArgumentException("Why " + comArgs.size()+"!= 3 ,  in CreateDataBaseCommand" );
         }
-        environment = env;
-        dbfactory = factory;
         commandargs = comArgs;
     }
 
