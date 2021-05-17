@@ -7,47 +7,43 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class SegmentInitializationContextImpl implements SegmentInitializationContext {
-    private final String name;
-    private final Path path;
-    private final SegmentIndex index;
-    private final long size;
 
-    public SegmentInitializationContextImpl(String segmentName, Path segmentPath, long currentSize, SegmentIndex index) {
-        name = segmentName;
-        path = segmentPath;
-        size = currentSize;
-        this.index = index;
+    private final String segmentName;
+    private final Path segmentPath;
+    private final long currentSize;
+    private final SegmentIndex segmentIndex;
+
+    public SegmentInitializationContextImpl(String segmentName, Path segmentPath, int currentSize, SegmentIndex index) {
+        this.segmentName = segmentName;
+        this.segmentPath = segmentPath;
+        this.currentSize = currentSize;
+        this.segmentIndex = index;
     }
 
-
-    /**
-     * Не используйте этот конструктор. Оставлен для совместимости со старыми тестами.
-     */
-    public SegmentInitializationContextImpl(String segmentName, Path tablePath, long currentSize) {
-        this(segmentName, tablePath.resolve(segmentName), currentSize, new SegmentIndex());
-    }
-
-    public SegmentInitializationContextImpl(String segmentName, Path tablePath) {
-        this(segmentName, tablePath.resolve(segmentName), 0, new SegmentIndex());
+    public SegmentInitializationContextImpl(String segmentName, Path tablePath, int currentSize) {
+        this.segmentName = segmentName;
+        this.segmentPath = Paths.get(tablePath.toString(), segmentName);
+        this.currentSize = currentSize;
+        this.segmentIndex = new SegmentIndex();
     }
 
     @Override
     public String getSegmentName() {
-        return name;
+        return segmentName;
     }
 
     @Override
     public Path getSegmentPath() {
-        return path;
+        return segmentPath;
     }
 
     @Override
     public SegmentIndex getIndex() {
-        return index;
+        return segmentIndex;
     }
 
     @Override
     public long getCurrentSize() {
-        return size;
+        return currentSize;
     }
 }
