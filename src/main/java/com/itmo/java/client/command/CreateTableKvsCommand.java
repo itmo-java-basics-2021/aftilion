@@ -4,14 +4,22 @@ import com.itmo.java.protocol.model.RespArray;
 import com.itmo.java.protocol.model.RespBulkString;
 import com.itmo.java.protocol.model.RespCommandId;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Команда для создания таблицы
  */
 public class CreateTableKvsCommand implements KvsCommand {
     private static final String COMMAND_NAME = "CREATE_TABLE";
+    private final String dbName;
+    private final int tbID;
+    private final String tbName;
+
 
     public CreateTableKvsCommand(String databaseName, String tableName) {
-        //TODO implement
+       dbName = databaseName;
+       tbName = tableName;
+       tbID = idGen.get();
     }
 
     /**
@@ -21,13 +29,14 @@ public class CreateTableKvsCommand implements KvsCommand {
      */
     @Override
     public RespArray serialize() {
-        //TODO implement
-        return null;
+        return new RespArray(new RespCommandId(tbID),
+                new RespBulkString(COMMAND_NAME.getBytes(StandardCharsets.UTF_8)),
+                new RespBulkString(dbName.getBytes(StandardCharsets.UTF_8)),
+                new RespBulkString(tbName.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Override
     public int getCommandId() {
-        //TODO implement
-        return 0;
+        return tbID;
     }
 }
