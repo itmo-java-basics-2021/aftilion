@@ -16,7 +16,6 @@ public class SetKvsCommand implements KvsCommand {
     private final String Value;
 
     public SetKvsCommand(String databaseName, String tableName, String key, String value) {
-
         dbName = databaseName;
         tbName = tableName;
         Key = key;

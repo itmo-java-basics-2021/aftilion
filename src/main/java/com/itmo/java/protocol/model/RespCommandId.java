@@ -16,7 +16,7 @@ public class RespCommandId implements RespObject {
     private final int commandId;
 
     public RespCommandId(int comId) {
-       commandId = comId;
+        commandId = comId;
     }
 
     /**
