@@ -68,7 +68,7 @@ public class GetKeyCommand implements DatabaseCommand {
                 throw new DatabaseException("We dont have" + dbName + tbName + key);
             }
             return DatabaseCommandResult.success(value.get());
-        } catch (DatabaseException | IOException ex) {
+        } catch (DatabaseException ex) {
             return new FailedDatabaseCommandResult(ex.getMessage());
         }
     }

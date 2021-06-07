@@ -62,7 +62,7 @@ public class CreateTableCommand implements DatabaseCommand {
             }
             dataBase.get().createTableIfNotExists(tbName);
             return DatabaseCommandResult.success(("Success add " + dbName + tbName).getBytes(StandardCharsets.UTF_8));
-        } catch (DatabaseException | IOException ex) {
+        } catch (DatabaseException ex) {
             return new FailedDatabaseCommandResult(ex.getMessage());
         }
     }
