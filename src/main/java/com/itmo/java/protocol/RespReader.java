@@ -9,6 +9,10 @@ import com.itmo.java.protocol.model.RespObject;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RespReader implements AutoCloseable {
 
@@ -17,17 +21,18 @@ public class RespReader implements AutoCloseable {
      */
     private static final byte CR = '\r';
     private static final byte LF = '\n';
+    private final InputStream inputStream;
 
     public RespReader(InputStream is) {
-        //TODO implement
+       inputStream = is;
     }
 
     /**
      * Есть ли следующий массив в стриме?
      */
     public boolean hasArray() throws IOException {
-        //TODO implement
-        return false;
+        byte bytes = inputStream.readNBytes(1)[0];
+        return bytes == RespArray.CODE;
     }
 
     /**
@@ -38,8 +43,22 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespObject readObject() throws IOException {
-        //TODO implement
-        return null;
+        if (inputStream == null) {
+            throw new EOFException("Why stream is null?");
+        }
+        byte bytes = inputStream.readNBytes(1)[0];
+        switch(bytes) {
+            case RespError.CODE:
+                return readError();
+            case RespBulkString.CODE:
+                return readBulkString();
+            case RespCommandId.CODE:
+                return readCommandId();
+            case RespArray.CODE:
+                return readArray();
+            default:
+                throw new IOException("Error while reading object code");
+        }
     }
 
     /**
@@ -49,8 +68,30 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespError readError() throws IOException {
-        //TODO implement
-        return null;
+        if (inputStream == null) {
+            throw new EOFException("Why stream is null?");
+        }
+        boolean stop = false;
+        byte bytes = inputStream.readNBytes(1)[0];
+        List<Byte> errorBytes = new ArrayList<>();
+        while (!stop) {
+            while ((bytes == CR)) {
+                bytes = inputStream.readNBytes(1)[0];
+                if (bytes == LF) {
+                    stop = true;
+                } else {
+                    errorBytes.add(CR);
+                    errorBytes.add(bytes);
+                    bytes = inputStream.readNBytes(1)[0];
+                }
+            }
+        }
+        int errorBytesCount = errorBytes.size();
+        byte[] errorByte = new byte[errorBytesCount];
+        for (int i = 0; i < errorBytesCount; i++) {
+            errorByte[i] = errorBytes.get(i);
+        }
+        return new RespError(errorByte);
     }
 
     /**
@@ -60,8 +101,29 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespBulkString readBulkString() throws IOException {
-        //TODO implement
-        return null;
+        if (inputStream == null) {
+            throw new EOFException("Why stream is null?");
+        }
+        byte bytes = inputStream.readNBytes(1)[0];
+        List<Byte> bulkBytes = new ArrayList<>();
+        while ( bytes != CR) {
+            bulkBytes.add(bytes);
+            bytes = inputStream.readNBytes(1)[0];
+        }
+        int bulkBytesSize = bulkBytes.size();
+        byte[] bulkByte = new byte[bulkBytesSize];
+
+        for (int i = 0; i < bulkBytesSize; i++) {
+            bulkByte[i] = bulkBytes.get(i);
+        }
+        final int bulkByteCount = Integer.parseInt(new String( bulkByte, StandardCharsets.UTF_8));
+        inputStream.readNBytes(1);
+        if (bulkByteCount == RespBulkString.NULL_STRING_SIZE) {
+            return new RespBulkString(null);
+        }
+        byte[] data = inputStream.readNBytes(bulkByteCount);
+        inputStream.readNBytes(2);
+        return new RespBulkString(data);
     }
 
     /**
@@ -71,8 +133,28 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespArray readArray() throws IOException {
-        //TODO implement
-        return null;
+        if (inputStream == null) {
+            throw new EOFException("Why stream is null?");
+        }
+        byte bytes = inputStream.readNBytes(1)[0];
+        List<Byte> arrayBytes = new ArrayList<>();
+        while ( bytes != CR) {
+            arrayBytes.add(bytes);
+            bytes = inputStream.readNBytes(1)[0];
+        }
+        int arrayBytesSize = arrayBytes.size();
+        byte[] arrayByte = new byte[arrayBytesSize];
+
+        for (int i = 0; i < arrayBytesSize; i++) {
+            arrayByte[i] = arrayBytes.get(i);
+        }
+        final int arrayByteCount = Integer.parseInt(new String( arrayByte, StandardCharsets.UTF_8));
+        RespObject[] objects = new RespObject[arrayByteCount];
+        inputStream.readNBytes(1);
+        for (int i = 0; i < arrayByteCount; i++) {
+            objects[i] = this.readObject();
+        }
+        return new RespArray(objects);
     }
 
     /**
@@ -82,13 +164,14 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespCommandId readCommandId() throws IOException {
-        //TODO implement
-        return null;
+        int comID = ByteBuffer.wrap(inputStream.readNBytes(4)).getInt();
+        inputStream.readNBytes(2);
+        return new RespCommandId(comID);
     }
 
 
     @Override
     public void close() throws IOException {
-        //TODO implement
+        inputStream.close();
     }
 }

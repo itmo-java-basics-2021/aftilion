@@ -7,19 +7,21 @@ import java.io.OutputStream;
 
 public class RespWriter implements AutoCloseable{
 
+    private final OutputStream outputStream;
+
     public RespWriter(OutputStream os) {
-        //TODO implement
+       outputStream = os;
     }
 
     /**
      * Записывает в output stream объект
      */
     public void write(RespObject object) throws IOException {
-        //TODO implement
+        object.write(outputStream);
     }
 
     @Override
     public void close() throws IOException {
-        //TODO implement
+        outputStream.close();
     }
 }

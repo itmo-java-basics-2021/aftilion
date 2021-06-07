@@ -4,7 +4,6 @@ package com.itmo.java.basics.config;
  * Класс, отвечающий за подгрузку данных из конфигурационного файла формата .properties
  */
 public class ConfigLoader {
-
     /**
      * По умолчанию читает из server.properties
      */

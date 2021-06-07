@@ -40,7 +40,7 @@ public class RespArray implements RespObject {
     @Override
     public String asString() {
         return objects.stream().map(object -> asString()).collect(Collectors.joining(" "));
-    }
+    } // check
 
     @Override
     public void write(OutputStream output) throws IOException {
