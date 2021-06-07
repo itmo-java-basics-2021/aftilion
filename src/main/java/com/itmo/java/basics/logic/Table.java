@@ -40,6 +40,6 @@ public interface Table {
      */
     Optional<byte[]> read(String objectKey) throws DatabaseException, IOException;
 
-    void delete(String objectKey) throws DatabaseException;
+    void delete(String objectKey) throws DatabaseException, IOException;
 }
 
