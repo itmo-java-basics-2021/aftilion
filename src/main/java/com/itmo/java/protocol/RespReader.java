@@ -68,31 +68,31 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespError readError() throws IOException {
-//        if (inputStream == null) {
-//            throw new EOFException("Why stream is null?");
-//        }
-//        boolean stop = false;
-//        byte bytes = inputStream.readNBytes(1)[0];
-//        List<Byte> errorBytes = new ArrayList<>();
-//        while (!stop) {
-//            while ((bytes == CR)) {
-//                bytes = inputStream.readNBytes(1)[0];
-//                if (bytes == LF) {
-//                    stop = true;
-//                } else {
-//                    errorBytes.add(CR);
-//                    errorBytes.add(bytes);
-//                    bytes = inputStream.readNBytes(1)[0];
-//                }
-//            }
-//        }
-//        int errorBytesCount = errorBytes.size();
-//        byte[] errorByte = new byte[errorBytesCount];
-//        for (int i = 0; i < errorBytesCount; i++) {
-//            errorByte[i] = errorBytes.get(i);
-//        }
-//        return new RespError(errorByte);
-        return null;
+        if (inputStream == null) {
+            throw new EOFException("Why stream is null?");
+        }
+        boolean stop = false;
+        byte bytes = inputStream.readNBytes(1)[0];
+        List<Byte> errorBytes = new ArrayList<>();
+        while (!stop) {
+            while ((bytes == CR)) {
+                bytes = inputStream.readNBytes(1)[0];
+                if (bytes == LF) {
+                    stop = true;
+                } else {
+                    errorBytes.add(CR);
+                    errorBytes.add(bytes);
+                    bytes = inputStream.readNBytes(1)[0];
+                }
+            }
+        }
+        int errorBytesCount = errorBytes.size();
+        byte[] errorByte = new byte[errorBytesCount];
+        for (int i = 0; i < errorBytesCount; i++) {
+            errorByte[i] = errorBytes.get(i);
+        }
+        return new RespError(errorByte);
+//        return null;
     }
 
     /**
