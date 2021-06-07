@@ -1,5 +1,7 @@
 package com.itmo.java.basics.config;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Properties;
 
 /**
@@ -9,18 +11,32 @@ public class ConfigLoader {
     /**
      * По умолчанию читает из server.properties
      */
-    private final String configFileName;
+
     private static final String AUTO_NAME = "server.properties";
-    private Properties properties = new Properties();
+    private final Properties properties = new Properties();
     public ConfigLoader() {
-        configFileName = AUTO_NAME;
+        try{
+            properties.load(this.getClass().getClassLoader().getResourceAsStream(AUTO_NAME));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
     }
 
     /**
      * @param name Имя конфикурационного файла, откуда читать
      */
     public ConfigLoader(String name) {
-        configFileName = name;
+        try{
+            if (this.getClass().getClassLoader().getResourceAsStream(name) != null) {
+                properties.load(this.getClass().getClassLoader().getResourceAsStream(name));
+            } else {
+                FileInputStream inputStream = new FileInputStream(name);
+                properties.load(inputStream);
+            }
+        } catch( IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
     /**
