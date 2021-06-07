@@ -41,5 +41,5 @@ public interface Database {
      */
     Optional<byte[]> read(String tableName, String objectKey) throws DatabaseException, IOException;
 
-    void delete(String tableName, String objectKey) throws DatabaseException, IOException;
+    void delete(String tableName, String objectKey) throws DatabaseException;
 }

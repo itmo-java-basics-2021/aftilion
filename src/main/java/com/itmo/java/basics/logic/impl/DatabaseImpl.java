@@ -95,7 +95,7 @@ public class DatabaseImpl implements Database {
     }
 
     @Override
-    public void delete(String tableName, String objectKey) throws DatabaseException, IOException {
+    public void delete(String tableName, String objectKey) throws DatabaseException {
         if (!tableDictionary.containsKey(tableName)) {
             throw new DatabaseException("Table " + tableName + " doesnt exist in database" + dbName);
         }

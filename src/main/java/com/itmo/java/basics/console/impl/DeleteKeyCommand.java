@@ -66,7 +66,7 @@ public class DeleteKeyCommand implements DatabaseCommand {
             }
             dataBase.get().delete(tbName, key);
             return DatabaseCommandResult.success(("Success del " + dbName + tbName + key).getBytes(StandardCharsets.UTF_8));
-        } catch (DatabaseException | IOException ex) {
+        } catch (DatabaseException ex) {
             return new FailedDatabaseCommandResult(ex.getMessage());
         }
     }
