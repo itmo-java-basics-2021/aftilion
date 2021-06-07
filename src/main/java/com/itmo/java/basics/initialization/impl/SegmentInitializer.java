@@ -63,7 +63,7 @@ public class SegmentInitializer implements Initializer {
         Segment newSegment = SegmentImpl.initializeFromContext(new SegmentInitializationContextImpl(segmentinitialContext.getSegmentName(), segmentinitialContext.getSegmentPath(), size, segIndex));
 
         for (String in : keys) {
-            context.currentTableContext().getTableIndex().onIndexedEntityUpdated(in, segment);
+            context.currentTableContext().getTableIndex().onIndexedEntityUpdated(in,segment);
         }
         context.currentTableContext().updateCurrentSegment(newSegment);
     }

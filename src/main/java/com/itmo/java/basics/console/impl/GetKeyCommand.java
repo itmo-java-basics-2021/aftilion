@@ -8,6 +8,7 @@ import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.logic.Database;
 import com.itmo.java.protocol.model.RespObject;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,7 +68,7 @@ public class GetKeyCommand implements DatabaseCommand {
                 throw new DatabaseException("We dont have" + dbName + tbName + key);
             }
             return DatabaseCommandResult.success(value.get());
-        } catch (DatabaseException ex) {
+        } catch (DatabaseException | IOException ex) {
             return new FailedDatabaseCommandResult(ex.getMessage());
         }
     }

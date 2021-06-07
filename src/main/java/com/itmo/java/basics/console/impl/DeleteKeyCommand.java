@@ -8,6 +8,7 @@ import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.logic.Database;
 import com.itmo.java.protocol.model.RespObject;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -65,7 +66,7 @@ public class DeleteKeyCommand implements DatabaseCommand {
             }
             dataBase.get().delete(tbName, key);
             return DatabaseCommandResult.success(("Success del " + dbName + tbName + key).getBytes(StandardCharsets.UTF_8));
-        } catch (DatabaseException ex) {
+        } catch (DatabaseException | IOException ex) {
             return new FailedDatabaseCommandResult(ex.getMessage());
         }
     }
