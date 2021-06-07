@@ -29,7 +29,7 @@ public interface Table {
      * @param objectValue значение, которое нужно записать
      * @throws DatabaseException если произошла ошибка ввода-вывода
      */
-    void write(String objectKey, byte[] objectValue) throws DatabaseException, IOException;
+    void write(String objectKey, byte[] objectValue) throws DatabaseException;
 
     /**
      * Считывает значение из таблицы по заданному ключу.
@@ -38,8 +38,8 @@ public interface Table {
      * @return значение, которое находится по ключу
      * @throws DatabaseException если не была найдена запись по данному ключу или произошла ошибка ввода-вывода
      */
-    Optional<byte[]> read(String objectKey) throws DatabaseException, IOException;
+    Optional<byte[]> read(String objectKey) throws DatabaseException;
 
-    void delete(String objectKey) throws DatabaseException, IOException;
+    void delete(String objectKey) throws DatabaseException;
 }
 

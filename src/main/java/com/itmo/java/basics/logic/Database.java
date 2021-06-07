@@ -19,7 +19,7 @@ public interface Database {
      * @param tableName имя таблицы
      * @throws DatabaseException если таблица с данным именем уже существует или если произошла ошибка ввода-вывода
      */
-    void createTableIfNotExists(String tableName) throws DatabaseException, IOException;
+    void createTableIfNotExists(String tableName) throws DatabaseException;
 
     /**
      * Записывает значение в указанную таблицу по переданному ключу.
@@ -29,7 +29,7 @@ public interface Database {
      * @param objectValue значение, которое нужно записать
      * @throws DatabaseException если указанная таблица не была найдена или если произошла ошибка ввода-вывода
      */
-    void write(String tableName, String objectKey, byte[] objectValue) throws DatabaseException, IOException;
+    void write(String tableName, String objectKey, byte[] objectValue) throws DatabaseException;
 
     /**
      * Считывает значение из указанной таблицы по заданному ключу.
@@ -39,7 +39,7 @@ public interface Database {
      * @return значение, которое находится по ключу
      * @throws DatabaseException если не была найдена указанная таблица, или если не была найдена запись по данному ключу, или произошла ошибка ввода-вывода
      */
-    Optional<byte[]> read(String tableName, String objectKey) throws DatabaseException, IOException;
+    Optional<byte[]> read(String tableName, String objectKey) throws DatabaseException;
 
-    void delete(String tableName, String objectKey) throws DatabaseException , IOException;
+    void delete(String tableName, String objectKey) throws DatabaseException ;
 }

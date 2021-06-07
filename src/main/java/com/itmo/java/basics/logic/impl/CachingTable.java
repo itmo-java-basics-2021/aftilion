@@ -4,7 +4,7 @@ import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.logic.DatabaseCache;
 import com.itmo.java.basics.logic.Table;
 
-import java.io.IOException;
+
 import java.util.Optional;
 
 public class CachingTable implements Table {
@@ -23,13 +23,13 @@ public class CachingTable implements Table {
     }
 
     @Override
-    public void write(String objectKey, byte[] objectValue) throws DatabaseException, IOException {
+    public void write(String objectKey, byte[] objectValue) throws DatabaseException {
         cacheTable.write(objectKey, objectValue);
         dbCache.set(objectKey, objectValue);
     }
 
     @Override
-    public Optional<byte[]> read(String objectKey) throws DatabaseException, IOException {
+    public Optional<byte[]> read(String objectKey) throws DatabaseException {
         byte[] reading = dbCache.get(objectKey);
         if (reading != null) {
             return Optional.of(reading);
@@ -39,7 +39,7 @@ public class CachingTable implements Table {
     }
 
     @Override
-    public void delete(String objectKey) throws DatabaseException, IOException {
+    public void delete(String objectKey) throws DatabaseException {
         cacheTable.delete(objectKey);
         dbCache.delete(objectKey);
     }
