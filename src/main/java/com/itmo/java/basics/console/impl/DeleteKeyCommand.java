@@ -32,7 +32,8 @@ public class DeleteKeyCommand implements DatabaseCommand {
      *                Id команды, имя команды, имя бд, таблицы, ключ
      * @throws IllegalArgumentException если передано неправильное количество аргументов
      */
-    public DeleteKeyCommand(ExecutionEnvironment env, List<RespObject> comArgs) {
+    public DeleteKeyCommand(ExecutionEnvironment env, List<RespObject> comArgs)  {
+
         if (comArgs.size() != numberOfAgrguments) {
             throw new IllegalArgumentException("Why " + comArgs.size() + "!= 5 , in CreateTableCommand");
         }
@@ -64,9 +65,9 @@ public class DeleteKeyCommand implements DatabaseCommand {
             if (dataBase.isEmpty()) {
                 throw new DatabaseException("We dont have" + dbName);
             }
-            dataBase.get().delete(tbName, key);
+                dataBase.get().delete(tbName, key);
             return DatabaseCommandResult.success(("Success del " + dbName + tbName + key).getBytes(StandardCharsets.UTF_8));
-        } catch (DatabaseException ex) {
+        } catch (IOException | DatabaseException ex) {
             return new FailedDatabaseCommandResult(ex.getMessage());
         }
     }
