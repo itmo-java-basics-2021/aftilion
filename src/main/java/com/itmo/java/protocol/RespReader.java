@@ -106,30 +106,30 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespBulkString readBulkString() throws IOException {
-//        if (inputStream == null) {
-//            throw new EOFException("Why stream is null?");
-//        }
-//        byte bytes = inputStream.readNBytes(1)[0];
-//        List<Byte> bulkBytes = new ArrayList<>();
-//        while ( bytes != CR) {
-//            bulkBytes.add(bytes);
-//            bytes = inputStream.readNBytes(1)[0];
-//        }
-//        int bulkBytesSize = bulkBytes.size();
-//        byte[] bulkByte = new byte[bulkBytesSize];
-//
-//        for (int i = 0; i < bulkBytesSize; i++) {
-//            bulkByte[i] = bulkBytes.get(i);
-//        }
-//        final int bulkByteCount = Integer.parseInt(new String( bulkByte, StandardCharsets.UTF_8));
-//        inputStream.readNBytes(1);
-//        if (bulkByteCount == RespBulkString.NULL_STRING_SIZE) {
-//            return new RespBulkString(null);
-//        }
-//        byte[] data = inputStream.readNBytes(bulkByteCount);
-//        inputStream.readNBytes(2);
-//        return new RespBulkString(data);
-        return null;
+        if (inputStream == null) {
+            throw new EOFException("Why stream is null?");
+        }
+        byte bytes = inputStream.readNBytes(1)[0];
+        List<Byte> bulkBytes = new ArrayList<>();
+        while ( bytes != CR) {
+            bulkBytes.add(bytes);
+            bytes = inputStream.readNBytes(1)[0];
+        }
+        int bulkBytesSize = bulkBytes.size();
+        byte[] bulkByte = new byte[bulkBytesSize];
+
+        for (int i = 0; i < bulkBytesSize; i++) {
+            bulkByte[i] = bulkBytes.get(i);
+        }
+        final int bulkByteCount = Integer.parseInt(new String( bulkByte, StandardCharsets.UTF_8));
+        inputStream.readNBytes(1);
+        if (bulkByteCount == RespBulkString.NULL_STRING_SIZE) {
+            return new RespBulkString(null);
+        }
+        byte[] data = inputStream.readNBytes(bulkByteCount);
+        inputStream.readNBytes(2);
+        return new RespBulkString(data);
+     //   return null;
     }
 
     /**
@@ -139,29 +139,29 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespArray readArray() throws IOException {
-//        if (inputStream == null) {
-//            throw new EOFException("Why stream is null?");
-//        }
-//        byte bytes = inputStream.readNBytes(1)[0];
-//        List<Byte> arrayBytes = new ArrayList<>();
-//        while ( bytes != CR) {
-//            arrayBytes.add(bytes);
-//            bytes = inputStream.readNBytes(1)[0];
-//        }
-//        int arrayBytesSize = arrayBytes.size();
-//        byte[] arrayByte = new byte[arrayBytesSize];
-//
-//        for (int i = 0; i < arrayBytesSize; i++) {
-//            arrayByte[i] = arrayBytes.get(i);
-//        }
-//        final int arrayByteCount = Integer.parseInt(new String( arrayByte, StandardCharsets.UTF_8));
-//        RespObject[] objects = new RespObject[arrayByteCount];
-//        inputStream.readNBytes(1);
-//        for (int i = 0; i < arrayByteCount; i++) {
-//            objects[i] = this.readObject();
-//        }
-//        return new RespArray(objects);
-        return null;
+        if (inputStream == null) {
+            throw new EOFException("Why stream is null?");
+        }
+        byte bytes = inputStream.readNBytes(1)[0];
+        List<Byte> arrayBytes = new ArrayList<>();
+        while ( bytes != CR) {
+            arrayBytes.add(bytes);
+            bytes = inputStream.readNBytes(1)[0];
+        }
+        int arrayBytesSize = arrayBytes.size();
+        byte[] arrayByte = new byte[arrayBytesSize];
+
+        for (int i = 0; i < arrayBytesSize; i++) {
+            arrayByte[i] = arrayBytes.get(i);
+        }
+        final int arrayByteCount = Integer.parseInt(new String( arrayByte, StandardCharsets.UTF_8));
+        RespObject[] objects = new RespObject[arrayByteCount];
+        inputStream.readNBytes(1);
+        for (int i = 0; i < arrayByteCount; i++) {
+            objects[i] = this.readObject();
+        }
+        return new RespArray(objects);
+     //   return null;
     }
 
     /**
