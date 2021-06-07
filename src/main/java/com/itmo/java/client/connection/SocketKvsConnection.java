@@ -40,7 +40,7 @@ public class SocketKvsConnection implements KvsConnection {
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
         try {
 
-            respWriter.write(new RespArray(new RespCommandId(commandId),command));
+            respWriter.write(command);
             RespObject respObject = respReader.readObject();
             if (respObject.isError()) {
                 throw new ConnectionException("Connection error respObgect is error");
