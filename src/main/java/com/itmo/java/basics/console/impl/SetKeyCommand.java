@@ -67,7 +67,7 @@ public class SetKeyCommand implements DatabaseCommand {
             byte[] value = commandargs.get(DatabaseCommandArgPositions.VALUE.getPositionIndex()).asString().getBytes(StandardCharsets.UTF_8);
             dataBase.get().write(tbName, key, value);
             return DatabaseCommandResult.success(("Success add key " + dbName + tbName + key).getBytes(StandardCharsets.UTF_8));
-        } catch (DatabaseException | IOException ex) {
+        } catch (DatabaseException ex) {
             return new FailedDatabaseCommandResult(ex.getMessage());
         }
     }
