@@ -39,7 +39,7 @@ public class CachingTable implements Table {
     }
 
     @Override
-    public void delete(String objectKey) throws DatabaseException, IOException {
+    public void delete(String objectKey) throws DatabaseException{
         cacheTable.delete(objectKey);
         dbCache.delete(objectKey);
     }
