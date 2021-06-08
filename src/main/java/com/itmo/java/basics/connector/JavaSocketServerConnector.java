@@ -45,15 +45,11 @@ public class JavaSocketServerConnector implements Closeable {
     public void start() {
         connectionAcceptorExecutor.submit(() -> {
             try {
-                Socket clientSocket = serverSocket.accept();
-                clientIOWorkers.submit(() -> {
-                    ClientTask clientTask = new ClientTask(clientSocket, dbServer);
-                    clientTask.run();
-                });
-            } catch (IOException exception) {
-                exception.printStackTrace();
-            } finally {
-                close();
+                final Socket clientSocket = serverSocket.accept();
+                final ClientTask clientTask = new ClientTask(clientSocket, dbServer);
+                clientIOWorkers.submit(clientTask);
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
         });
     }
@@ -83,14 +79,18 @@ public class JavaSocketServerConnector implements Closeable {
     static class ClientTask implements Runnable, Closeable {
         private final Socket clientSocket;
         private final DatabaseServer databaseServer;
+        private RespWriter respWriter;
+        private RespReader respReader;
 
         /**
          * @param client клиентский сокет
          * @param server сервер, на котором исполняется задача
          */
         public ClientTask(Socket client, DatabaseServer server) {
+
             clientSocket = client;
             databaseServer = server;
+
         }
 
         /**
@@ -103,17 +103,26 @@ public class JavaSocketServerConnector implements Closeable {
         @Override
         public void run() {
             try {
-                final CommandReader commandReader = new CommandReader(new RespReader(clientSocket.getInputStream()), databaseServer.getEnv());
-                final RespWriter respWriter = new RespWriter(clientSocket.getOutputStream());
-                while (commandReader.hasNextCommand()) {
-                    final DatabaseCommand command = commandReader.readCommand();
-                    final DatabaseCommandResult commandResult = databaseServer.executeNextCommand(command).get();
-                    respWriter.write(commandResult.serialize());
+                RespWriter respWriter =  new RespWriter(clientSocket.getOutputStream());
+                RespReader respReader = new RespReader(clientSocket.getInputStream());
+                CommandReader commandReader = new CommandReader(respReader, databaseServer.getEnv());
+                while (!Thread.currentThread().isInterrupted() && !clientSocket.isClosed()) {
+                    if (commandReader.hasNextCommand()) {
+                        DatabaseCommand databaseCommand = commandReader.readCommand();
+                        respWriter.write(databaseCommand.execute().serialize());
+                    } else {
+                        commandReader.close();
+                        break;
+                    }
                 }
-            } catch (ExecutionException | IOException | InterruptedException exception) {
-                exception.printStackTrace();
+                commandReader.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+
+
         }
+
 
         /**
          * Закрывает клиентский сокет
