@@ -71,38 +71,38 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespError readError() throws IOException {
-        byte symbol = is.readNBytes(1)[0];
-
-        final List<Byte> symbols = new ArrayList<>();
-
-        boolean isEndOfError = false;
-
-        while (!isEndOfError) {
-            while (symbol == CR) {
-                symbol = is.readNBytes(1)[0];
-
-                if (symbol == LF) {
-                    isEndOfError = true;
-                } else {
-                    symbols.add(CR);
+        try{
+            StringBuilder errorMessage = new StringBuilder();
+            byte[] currentSymbol = is.readNBytes(1);
+            if (currentSymbol.length == 0){
+                throw new EOFException("end of the stream");
+            }
+            while (currentSymbol[0] != CR){
+                errorMessage.append(new String(currentSymbol));
+                currentSymbol = is.readNBytes(1);
+                if (currentSymbol.length == 0){
+                    throw new EOFException("end of the stream");
                 }
             }
+            readCompareByte(LF);
+            return new RespError(errorMessage.toString().getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new IOException("IO exception in reading Error", e);
+        }
+    }
 
-            if (!isEndOfError) {
-                symbols.add(symbol);
-                symbol = is.readNBytes(1)[0];
+    private void readCompareByte(byte compareWith) throws IOException {
+        byte[] nextByte;
+        try {
+            nextByte = is.readNBytes(1);
+            if (nextByte.length == 0){
+                throw new EOFException("end of the stream");
+            } else if (nextByte[0] != compareWith) {
+                throw new IOException("expected symbol:  " + String.valueOf(compareWith) + " but get: " + String.valueOf(nextByte[0]));
             }
+        } catch (IOException e) {
+            throw new IOException("IO exception in reading byte", e);
         }
-
-        final int symbolsCount = symbols.size();
-
-        final byte[] bytes = new byte[symbolsCount];
-
-        for (int i = 0; i < symbolsCount; i++) {
-            bytes[i] = symbols.get(i);
-        }
-
-        return new RespError(bytes);
     }
 
     /**
