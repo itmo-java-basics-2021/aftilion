@@ -17,13 +17,15 @@ public class SocketKvsConnection implements KvsConnection {
 
     private Socket socket;
     private RespReader respReader;
-    //private RespWriter respWriter;
+    private ConnectionConfig connectionConfig;
+    private RespWriter respWriter;
 
     public SocketKvsConnection(ConnectionConfig config) {
           try {
-              socket = new Socket(config.toString(), config.getPort());
+              connectionConfig = config;
+              socket = new Socket(connectionConfig.toString(), connectionConfig.getPort());
               respReader = new RespReader(socket.getInputStream());
-              //respWriter = new RespWriter(socket.getOutputStream());
+              respWriter = new RespWriter(socket.getOutputStream());
           } catch (IOException ex) {
               ex.toString();
           }
@@ -39,7 +41,7 @@ public class SocketKvsConnection implements KvsConnection {
     @Override
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
         try {
-            RespWriter respWriter = new RespWriter(socket.getOutputStream());
+         //   RespWriter respWriter = new RespWriter(socket.getOutputStream());
             respWriter.write(command);
             RespObject respObject = respReader.readObject();
             if (respObject.isError()) {
