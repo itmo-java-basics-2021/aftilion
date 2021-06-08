@@ -20,8 +20,8 @@ public class SocketKvsConnection implements KvsConnection {
     final ConnectionConfig connectionConfig;
 
     public SocketKvsConnection(ConnectionConfig config) {
-          try {
-              connectionConfig = config;
+        connectionConfig = config;
+        try {
               socket = new Socket(connectionConfig.toString(), connectionConfig.getPort());
           } catch (IOException ex) {
              throw  new RuntimeException("SocketKvsConnection" , ex);
@@ -38,7 +38,6 @@ public class SocketKvsConnection implements KvsConnection {
     @Override
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
         try {
-
             final RespWriter respWriter = new RespWriter(socket.getOutputStream());
             respWriter.write(command);
             final RespReader respReader = new RespReader(socket.getInputStream());
