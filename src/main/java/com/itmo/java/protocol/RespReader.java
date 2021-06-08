@@ -12,36 +12,28 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class RespReader implements AutoCloseable {
-    private final InputStream is;
-    private boolean isHasArray = false;
+
 
     /**
      * Специальные символы окончания элемента
      */
     private static final byte CR = '\r';
     private static final byte LF = '\n';
+    private final InputStream inputStream;
 
     public RespReader(InputStream is) {
-        this.is = is;
+        inputStream = is;
     }
 
     /**
      * Есть ли следующий массив в стриме?
      */
     public boolean hasArray() throws IOException {
-        if (isHasArray) {
-            return true;
-        }
-        byte[] currentRespObjectType = is.readNBytes(1);
-        if (currentRespObjectType[0] == RespArray.CODE){
-            isHasArray = true;
-            return true;
-        }
-        return false;
+        byte bytes = inputStream.readNBytes(1)[0];
+        return bytes == RespArray.CODE;
     }
 
     /**
@@ -52,35 +44,21 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespObject readObject() throws IOException {
-        try {
-            byte[] firstSymbol = is.readNBytes(1);
-            if (firstSymbol[0] == RespError.CODE){
-                return readError();
-            }
-            if(firstSymbol[0] == RespBulkString.CODE){
-                return readBulkString();
-            }
-            if(firstSymbol[0] == RespCommandId.CODE){
-                return readCommandId();
-            }
-            throw new IOException("unknow byte" + new String(firstSymbol));
-        } catch (IOException e){
-            throw new IOException("can't read next first symbol", e);
+        if (inputStream == null) {
+            throw new EOFException("Why stream is null?");
         }
-    }
-
-
-    private int readInt() throws IOException {
-        try{
-            StringBuilder size = new StringBuilder();
-            byte[] sizeB = is.readNBytes(1);
-            while (sizeB[0] != CR){
-                size.append(new String(sizeB));
-                sizeB = is.readNBytes(1);
-            }
-            return Integer.parseInt(size.toString());
-        } catch (IOException e) {
-            throw new IOException("IO exception in reading int", e);
+        byte bytes = inputStream.readNBytes(1)[0];
+        switch(bytes) {
+            case RespError.CODE:
+                return readError();
+            case RespBulkString.CODE:
+                return readBulkString();
+            case RespCommandId.CODE:
+                return readCommandId();
+            case RespArray.CODE:
+                return readArray();
+            default:
+                throw new IOException("Error while reading object code");
         }
     }
 
@@ -91,18 +69,34 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespError readError() throws IOException {
-        try{
-            StringBuilder errorMessage = new StringBuilder();
-            byte[] currentSymbol = is.readNBytes(1);
-            while (currentSymbol[0] != CR){
-                errorMessage.append(new String(currentSymbol));
-                currentSymbol = is.readNBytes(1);
+//        if (inputStream == null) {
+//            throw new EOFException("Why stream is null?");
+//        }
+        boolean stop = false;
+        byte bytes = inputStream.readNBytes(1)[0];
+        List<Byte> errorBytes = new ArrayList<>();
+        while (!stop) {
+            while ((bytes == CR)) {
+                bytes = inputStream.readNBytes(1)[0];
+                if (bytes == LF) {
+                    stop = true;
+                } else {
+                    errorBytes.add(CR);
+//                    errorBytes.add(bytes);
+//                    bytes = inputStream.readNBytes(1)[0];
+                }
             }
-            is.readNBytes(1); //LF
-            return new RespError(errorMessage.toString().getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new IOException("IO exception in reading Error", e);
+            if (!stop) {
+                errorBytes.add(bytes);
+                bytes = inputStream.readNBytes(1)[0];
+            }
         }
+        int errorBytesCount = errorBytes.size();
+        byte[] errorByte = new byte[errorBytesCount];
+        for (int i = 0; i < errorBytesCount; i++) {
+            errorByte[i] = errorBytes.get(i);
+        }
+        return new RespError(errorByte);
     }
 
     /**
@@ -112,19 +106,15 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespBulkString readBulkString() throws IOException {
-        try{
-            int bulkSize = readInt();
-            is.readNBytes(1); //LF
-            if (bulkSize == -1){
-                return RespBulkString.NULL_STRING;
-            }
-            byte[] bulkString = is.readNBytes(bulkSize);
-            is.readNBytes(2); //CRLF
-            return new RespBulkString(bulkString);
-        } catch (IOException e) {
-            throw new IOException("IO exception in reading Bulk String", e);
+        final byte[] bytes = this.getStringNumberInBytes();
+        final int bytesCount = Integer.parseInt(new String(bytes, StandardCharsets.UTF_8));
+        inputStream.readNBytes(1);
+        if (bytesCount == RespBulkString.NULL_STRING_SIZE) {
+            return RespBulkString.NULL_STRING;
         }
-
+        final byte[] data = inputStream.readNBytes(bytesCount);
+        inputStream.readNBytes(2);
+        return new RespBulkString(data);
     }
 
     /**
@@ -134,28 +124,14 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespArray readArray() throws IOException {
-        try {
-            byte[] firstSymbol;
-            if (!isHasArray) {
-                firstSymbol = is.readNBytes(1);
-                if (Arrays.equals(firstSymbol, new byte[0])){
-                    throw new EOFException("end of the stream");
-                } else if (firstSymbol[0] != RespArray.CODE){
-                    throw new IOException("wrong symbol, expected " + String.valueOf(RespArray.CODE) + " but was: " +
-                            String.valueOf(firstSymbol[0]));
-                }
-            }
-            int arraySize = readInt();
-            is.readNBytes(1); //LF
-            RespObject[] listObjects = new RespObject[arraySize];
-            for (int i = 0; i < arraySize; i++){
-                listObjects[i] = readObject();
-            }
-            return new RespArray(listObjects);
-        } catch (IOException e) {
-            throw new IOException("IO exception in reading Array", e);
+        final byte[] bytes = this.getStringNumberInBytes();
+        final int elementsCount = Integer.parseInt(new String(bytes, StandardCharsets.UTF_8));
+        final RespObject[] objects = new RespObject[elementsCount];
+        inputStream.readNBytes(1);
+        for (int i = 0; i < elementsCount; i++) {
+            objects[i] = this.readObject();
         }
-
+        return new RespArray(objects);
     }
 
     /**
@@ -165,18 +141,29 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespCommandId readCommandId() throws IOException {
-        try {
-            int commandId = readInt();
-            is.readNBytes(1); //LF
-            return new RespCommandId(commandId);
-        } catch (IOException e) {
-            throw new IOException("IO exception in reading command id", e);
-        }
+        int comID = ByteBuffer.wrap(inputStream.readNBytes(4)).getInt();
+        inputStream.readNBytes(2);
+        return new RespCommandId(comID);
     }
 
 
     @Override
     public void close() throws IOException {
-        is.close();
+        inputStream.close();
+    }
+
+    private byte[] getStringNumberInBytes() throws IOException {
+        byte symbol = inputStream.readNBytes(1)[0];
+        final List<Byte> symboles = new ArrayList<>();
+        while (symbol != CR) {
+            symboles.add(symbol);
+            symbol = inputStream.readNBytes(1)[0];
+        }
+        final int symbolsCount = symboles.size();
+        final byte[] bytes = new byte[symbolsCount];
+        for (int i = 0; i < symbolsCount; i++) {
+            bytes[i] = symboles.get(i);
+        }
+        return bytes;
     }
 }
