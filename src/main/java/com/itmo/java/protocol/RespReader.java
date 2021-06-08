@@ -16,6 +16,7 @@ import java.util.List;
 
 public class RespReader implements AutoCloseable {
 
+
     /**
      * Специальные символы окончания элемента
      */
@@ -24,7 +25,7 @@ public class RespReader implements AutoCloseable {
     private final InputStream inputStream;
 
     public RespReader(InputStream is) {
-       inputStream = is;
+        inputStream = is;
     }
 
     /**
@@ -68,9 +69,9 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespError readError() throws IOException {
-        if (inputStream == null) {
-            throw new EOFException("Why stream is null?");
-        }
+//        if (inputStream == null) {
+//            throw new EOFException("Why stream is null?");
+//        }
         boolean stop = false;
         byte bytes = inputStream.readNBytes(1)[0];
         List<Byte> errorBytes = new ArrayList<>();
@@ -85,10 +86,10 @@ public class RespReader implements AutoCloseable {
 //                    bytes = inputStream.readNBytes(1)[0];
                 }
             }
-                if (!stop) {
-                    errorBytes.add(bytes);
-                    bytes = inputStream.readNBytes(1)[0];
-                }
+            if (!stop) {
+                errorBytes.add(bytes);
+                bytes = inputStream.readNBytes(1)[0];
+            }
         }
         int errorBytesCount = errorBytes.size();
         byte[] errorByte = new byte[errorBytesCount];
@@ -96,7 +97,6 @@ public class RespReader implements AutoCloseable {
             errorByte[i] = errorBytes.get(i);
         }
         return new RespError(errorByte);
-//        return null;
     }
 
     /**
@@ -106,30 +106,15 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespBulkString readBulkString() throws IOException {
-        if (inputStream == null) {
-            throw new EOFException("Why stream is null?");
-        }
-        byte bytes = inputStream.readNBytes(1)[0];
-        List<Byte> bulkBytes = new ArrayList<>();
-        while ( bytes != CR) {
-            bulkBytes.add(bytes);
-            bytes = inputStream.readNBytes(1)[0];
-        }
-        int bulkBytesSize = bulkBytes.size();
-        byte[] bulkByte = new byte[bulkBytesSize];
-
-        for (int i = 0; i < bulkBytesSize; i++) {
-            bulkByte[i] = bulkBytes.get(i);
-        }
-        final int bulkByteCount = Integer.parseInt(new String( bulkByte, StandardCharsets.UTF_8));
+        final byte[] bytes = this.getStringNumberInBytes();
+        final int bytesCount = Integer.parseInt(new String(bytes, StandardCharsets.UTF_8));
         inputStream.readNBytes(1);
-        if (bulkByteCount == RespBulkString.NULL_STRING_SIZE) {
-            return new RespBulkString(null);
+        if (bytesCount == RespBulkString.NULL_STRING_SIZE) {
+            return RespBulkString.NULL_STRING;
         }
-        byte[] data = inputStream.readNBytes(bulkByteCount);
+        final byte[] data = inputStream.readNBytes(bytesCount);
         inputStream.readNBytes(2);
         return new RespBulkString(data);
-     //   return null;
     }
 
     /**
@@ -139,29 +124,14 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespArray readArray() throws IOException {
-        if (inputStream == null) {
-            throw new EOFException("Why stream is null?");
-        }
-        byte bytes = inputStream.readNBytes(1)[0];
-        List<Byte> arrayBytes = new ArrayList<>();
-        while ( bytes != CR) {
-            arrayBytes.add(bytes);
-            bytes = inputStream.readNBytes(1)[0];
-        }
-        int arrayBytesSize = arrayBytes.size();
-        byte[] arrayByte = new byte[arrayBytesSize];
-
-        for (int i = 0; i < arrayBytesSize; i++) {
-            arrayByte[i] = arrayBytes.get(i);
-        }
-        final int arrayByteCount = Integer.parseInt(new String( arrayByte, StandardCharsets.UTF_8));
-        RespObject[] objects = new RespObject[arrayByteCount];
+        final byte[] bytes = this.getStringNumberInBytes();
+        final int elementsCount = Integer.parseInt(new String(bytes, StandardCharsets.UTF_8));
+        final RespObject[] objects = new RespObject[elementsCount];
         inputStream.readNBytes(1);
-        for (int i = 0; i < arrayByteCount; i++) {
+        for (int i = 0; i < elementsCount; i++) {
             objects[i] = this.readObject();
         }
         return new RespArray(objects);
-     //   return null;
     }
 
     /**
@@ -180,5 +150,20 @@ public class RespReader implements AutoCloseable {
     @Override
     public void close() throws IOException {
         inputStream.close();
+    }
+
+    private byte[] getStringNumberInBytes() throws IOException {
+        byte symbol = inputStream.readNBytes(1)[0];
+        final List<Byte> symboles = new ArrayList<>();
+        while (symbol != CR) {
+            symboles.add(symbol);
+            symbol = inputStream.readNBytes(1)[0];
+        }
+        final int symbolsCount = symboles.size();
+        final byte[] bytes = new byte[symbolsCount];
+        for (int i = 0; i < symbolsCount; i++) {
+            bytes[i] = symboles.get(i);
+        }
+        return bytes;
     }
 }

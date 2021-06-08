@@ -14,6 +14,7 @@ public class RespBulkString implements RespObject {
     public static final byte CODE = '$';
     public static final int NULL_STRING_SIZE = -1;
     private final byte[] data;
+    public static final RespBulkString NULL_STRING = new RespBulkString(null);
 
 
     public RespBulkString(byte[] inform) {
