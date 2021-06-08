@@ -22,7 +22,7 @@ public class SocketKvsConnection implements KvsConnection {
     public SocketKvsConnection(ConnectionConfig config) {
         connectionConfig = config;
         try {
-              socket = new Socket(connectionConfig.toString(), connectionConfig.getPort());
+              socket = new Socket(connectionConfig.getHost(), connectionConfig.getPort());
           } catch (IOException ex) {
              throw  new RuntimeException("SocketKvsConnection" , ex);
           }
