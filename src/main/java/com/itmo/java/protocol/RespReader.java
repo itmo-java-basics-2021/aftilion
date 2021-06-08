@@ -16,6 +16,7 @@ import java.util.List;
 
 public class RespReader implements AutoCloseable {
     private final InputStream is;
+    private boolean isHasArray = false;
 
     /**
      * Специальные символы окончания элемента
@@ -71,38 +72,38 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespError readError() throws IOException {
-        try{
-            StringBuilder errorMessage = new StringBuilder();
-            byte[] currentSymbol = is.readNBytes(1);
-            if (currentSymbol.length == 0){
-                throw new EOFException("end of the stream");
-            }
-            while (currentSymbol[0] != CR){
-                errorMessage.append(new String(currentSymbol));
-                currentSymbol = is.readNBytes(1);
-                if (currentSymbol.length == 0){
-                    throw new EOFException("end of the stream");
+        byte symbol = is.readNBytes(1)[0];
+
+        final List<Byte> symbols = new ArrayList<>();
+
+        boolean isEndOfError = false;
+
+        while (!isEndOfError) {
+            while (symbol == CR) {
+                symbol = is.readNBytes(1)[0];
+
+                if (symbol == LF) {
+                    isEndOfError = true;
+                } else {
+                    symbols.add(CR);
                 }
             }
-            readCompareByte(LF);
-            return new RespError(errorMessage.toString().getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new IOException("IO exception in reading Error", e);
-        }
-    }
 
-    private void readCompareByte(byte compareWith) throws IOException {
-        byte[] nextByte;
-        try {
-            nextByte = is.readNBytes(1);
-            if (nextByte.length == 0){
-                throw new EOFException("end of the stream");
-            } else if (nextByte[0] != compareWith) {
-                throw new IOException("expected symbol:  " + String.valueOf(compareWith) + " but get: " + String.valueOf(nextByte[0]));
+            if (!isEndOfError) {
+                symbols.add(symbol);
+                symbol = is.readNBytes(1)[0];
             }
-        } catch (IOException e) {
-            throw new IOException("IO exception in reading byte", e);
         }
+
+        final int symbolsCount = symbols.size();
+
+        final byte[] bytes = new byte[symbolsCount];
+
+        for (int i = 0; i < symbolsCount; i++) {
+            bytes[i] = symbols.get(i);
+        }
+
+        return new RespError(bytes);
     }
 
     /**
@@ -112,20 +113,20 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespBulkString readBulkString() throws IOException {
-        final byte[] bytes = this.getStringNumberInBytes();
-        final int bytesCount = Integer.parseInt(new String(bytes, StandardCharsets.UTF_8));
-
-        is.readNBytes(1);
-
-        if (bytesCount == RespBulkString.NULL_STRING_SIZE) {
-            return RespBulkString.NULL_STRING;
+        try{
+            int bulkSize = readInt();
+            readCompareByte(LF);
+            if (bulkSize == -1){
+                return RespBulkString.NULL_STRING;
+            }
+            byte[] bulkString = is.readNBytes(bulkSize);
+            readCompareByte(CR);
+            readCompareByte(LF);
+            return new RespBulkString(bulkString);
+        } catch (IOException e) {
+            throw new IOException("IO exception in reading Bulk String", e);
         }
 
-        final byte[] data = is.readNBytes(bytesCount);
-
-        is.readNBytes(2);
-
-        return new RespBulkString(data);
     }
 
     /**
@@ -135,18 +136,21 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespArray readArray() throws IOException {
-        final byte[] bytes = this.getStringNumberInBytes();
-        final int elementsCount = Integer.parseInt(new String(bytes, StandardCharsets.UTF_8));
-
-        final RespObject[] objects = new RespObject[elementsCount];
-
-        is.readNBytes(1);
-
-        for (int i = 0; i < elementsCount; i++) {
-            objects[i] = this.readObject();
+        try {
+            if (!hasArray()) {
+                readCompareByte(RespArray.CODE);
+            }
+            int arraySize = readInt();
+            readCompareByte(LF);
+            RespObject[] listObjects = new RespObject[arraySize];
+            for (int i = 0; i < arraySize; i++){
+                listObjects[i] = readObject();
+            }
+            return new RespArray(listObjects);
+        } catch (IOException e) {
+            throw new IOException("IO exception in reading Array", e);
         }
 
-        return new RespArray(objects);
     }
 
     /**
@@ -156,11 +160,18 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespCommandId readCommandId() throws IOException {
-        final int commandId = ByteBuffer.wrap(is.readNBytes(4)).getInt();
-
-        is.readNBytes(2);
-
-        return new RespCommandId(commandId);
+        try {
+            byte[] commandId1 = is.readNBytes(1);
+            byte[] commandId2 = is.readNBytes(1);
+            byte[] commandId3 = is.readNBytes(1);
+            byte[] commandId4 = is.readNBytes(1);
+            int commandId = ((commandId1[0] << 24) + (commandId2[0]<< 16) + (commandId3[0] << 8) + (commandId4[0] << 0));
+            readCompareByte(CR);
+            readCompareByte(LF);
+            return new RespCommandId(commandId);
+        } catch (IOException e) {
+            throw new IOException("IO exception in reading command id", e);
+        }
     }
 
 
@@ -189,4 +200,43 @@ public class RespReader implements AutoCloseable {
 
         return bytes;
     }
+
+    private int readInt() throws IOException {
+        try{
+            StringBuilder size = new StringBuilder();
+            byte[] sizeByte = is.readNBytes(1);
+            if (sizeByte.length == 0){
+                throw new EOFException("end of the stream");
+            }
+            while (sizeByte[0] != CR){
+                size.append(new String(sizeByte));
+                sizeByte = is.readNBytes(1);
+                if (sizeByte.length == 0){
+                    throw new EOFException("end of the stream");
+                }
+            }
+            try {
+                return Integer.parseInt(size.toString());
+            } catch (NumberFormatException e) {
+                throw new IOException("expected reading int from this string: " + size.toString());
+            }
+        } catch (IOException e) {
+            throw new IOException("IO exception in reading int", e);
+        }
+    }
+
+    private void readCompareByte(byte compareWith) throws IOException {
+        byte[] nextByte;
+        try {
+            nextByte = is.readNBytes(1);
+            if (nextByte.length == 0){
+                throw new EOFException("end of the stream");
+            } else if (nextByte[0] != compareWith) {
+                throw new IOException("expected symbol:  " + String.valueOf(compareWith) + " but get: " + String.valueOf(nextByte[0]));
+            }
+        } catch (IOException e) {
+            throw new IOException("IO exception in reading byte", e);
+        }
+    }
+
 }
