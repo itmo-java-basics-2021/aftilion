@@ -45,11 +45,15 @@ public class JavaSocketServerConnector implements Closeable {
     public void start() {
         connectionAcceptorExecutor.submit(() -> {
             try {
-                final Socket clientSocket = serverSocket.accept();
-                final ClientTask clientTask = new ClientTask(clientSocket, dbServer);
-                clientIOWorkers.submit(clientTask);
-            } catch (IOException ex) {
-                ex.printStackTrace();
+                Socket clientSocket = serverSocket.accept();
+                clientIOWorkers.submit(() -> {
+                    ClientTask clientTask = new ClientTask(clientSocket, dbServer);
+                    clientTask.run();
+                });
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            } finally {
+                close();
             }
         });
     }
@@ -77,8 +81,8 @@ public class JavaSocketServerConnector implements Closeable {
      * Runnable, описывающий исполнение клиентской команды.
      */
     static class ClientTask implements Runnable, Closeable {
-        private final Socket clientSocket;
-        private final DatabaseServer databaseServer;
+        private  Socket clientSocket;
+        private  DatabaseServer databaseServer;
         private RespWriter respWriter;
         private RespReader respReader;
 
@@ -87,9 +91,14 @@ public class JavaSocketServerConnector implements Closeable {
          * @param server сервер, на котором исполняется задача
          */
         public ClientTask(Socket client, DatabaseServer server) {
-
-            clientSocket = client;
-            databaseServer = server;
+            try {
+                clientSocket = client;
+                databaseServer = server;
+                respReader = new RespReader(client.getInputStream());
+                respWriter = new RespWriter(client.getOutputStream());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
 
         }
 
@@ -103,26 +112,17 @@ public class JavaSocketServerConnector implements Closeable {
         @Override
         public void run() {
             try {
-                RespWriter respWriter =  new RespWriter(clientSocket.getOutputStream());
-                RespReader respReader = new RespReader(clientSocket.getInputStream());
-                CommandReader commandReader = new CommandReader(respReader, databaseServer.getEnv());
-                while (!Thread.currentThread().isInterrupted() && !clientSocket.isClosed()) {
-                    if (commandReader.hasNextCommand()) {
-                        DatabaseCommand databaseCommand = commandReader.readCommand();
-                        respWriter.write(databaseCommand.execute().serialize());
-                    } else {
-                        commandReader.close();
-                        break;
-                    }
+                final CommandReader commandReader = new CommandReader(respReader, databaseServer.getEnv());
+                ;
+                while (commandReader.hasNextCommand()) {
+                    final DatabaseCommand command = commandReader.readCommand();
+                    final DatabaseCommandResult commandResult = databaseServer.executeNextCommand(command).get();
+                    respWriter.write(commandResult.serialize());
                 }
-                commandReader.close();
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (ExecutionException | IOException | InterruptedException exception) {
+                exception.printStackTrace();
             }
-
-
         }
-
 
         /**
          * Закрывает клиентский сокет
@@ -131,6 +131,8 @@ public class JavaSocketServerConnector implements Closeable {
         public void close() {
             try {
                 clientSocket.close();
+                respWriter.close();
+                respReader.close();
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
