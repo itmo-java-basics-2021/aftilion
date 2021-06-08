@@ -45,11 +45,15 @@ public class JavaSocketServerConnector implements Closeable {
     public void start() {
         connectionAcceptorExecutor.submit(() -> {
             try {
-                final Socket clientSocket = serverSocket.accept();
-                final ClientTask clientTask = new ClientTask(clientSocket, dbServer);
-                clientIOWorkers.submit(clientTask);
-            } catch (IOException ex) {
-                ex.printStackTrace();
+                Socket clientSocket = serverSocket.accept();
+                clientIOWorkers.submit(() -> {
+                    ClientTask clientTask = new ClientTask(clientSocket, dbServer);
+                    clientTask.run();
+                });
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            } finally {
+                close();
             }
         });
     }
