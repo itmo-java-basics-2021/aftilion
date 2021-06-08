@@ -17,15 +17,15 @@ import java.net.Socket;
 public class SocketKvsConnection implements KvsConnection {
 
     final Socket socket;
-    final ConnectionConfig connectionConfig;
+   // final ConnectionConfig connectionConfig;
     private final RespReader respReader;
     private final RespWriter respWriter;
 
     public SocketKvsConnection(ConnectionConfig config) {
 
         try {
-            connectionConfig = config;
-            socket = new Socket(connectionConfig.getHost(), connectionConfig.getPort());
+           // connectionConfig = config;
+            socket = new Socket(config.getHost(), config.getPort());
             respWriter = new RespWriter(socket.getOutputStream());
             respReader = new RespReader(socket.getInputStream());
           } catch (IOException ex) {
@@ -43,18 +43,14 @@ public class SocketKvsConnection implements KvsConnection {
     @Override
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
         try {
-            try {
-                respWriter.write(new RespArray(new RespCommandId(commandId), command));
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            respWriter.write(new RespArray(new RespCommandId(commandId),command));
             RespObject respObject = respReader.readObject();
             if (respObject.isError()) {
-                throw new ConnectionException("Connection error respObgect is error");
+                throw new ConnectionException("Connection error respObject is error");
             }
             return  respObject;
         } catch (IOException ex) {
-            throw new ConnectionException("Error while sendinh in SocketKvsConnection" , ex);
+            throw new ConnectionException("Error while sending in SocketKvsConnection" , ex);
         }
     }
 
