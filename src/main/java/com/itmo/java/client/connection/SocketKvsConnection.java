@@ -1,11 +1,9 @@
 package com.itmo.java.client.connection;
 
-import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.client.exception.ConnectionException;
 import com.itmo.java.protocol.RespReader;
 import com.itmo.java.protocol.RespWriter;
 import com.itmo.java.protocol.model.RespArray;
-import com.itmo.java.protocol.model.RespCommandId;
 import com.itmo.java.protocol.model.RespObject;
 
 import java.io.IOException;
@@ -20,6 +18,7 @@ public class SocketKvsConnection implements KvsConnection {
 
     public SocketKvsConnection(ConnectionConfig config) {
         this.config = config;
+
         try {
             this.socket = new Socket(this.config.getHost(), this.config.getPort());
         } catch (IOException exception) {
@@ -37,12 +36,16 @@ public class SocketKvsConnection implements KvsConnection {
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
         try {
             final RespWriter respWriter = new RespWriter(socket.getOutputStream());
+
             respWriter.write(command);
+
             final RespReader respReader = new RespReader(socket.getInputStream());
             final RespObject respObject = respReader.readObject();
+
             if (respObject.isError()) {
                 throw new ConnectionException("Response error");
             }
+
             return respObject;
         } catch (IOException exception) {
             throw new ConnectionException("Connection exception", exception);

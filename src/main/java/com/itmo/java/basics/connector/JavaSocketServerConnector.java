@@ -7,7 +7,6 @@ import com.itmo.java.basics.console.DatabaseCommandResult;
 import com.itmo.java.basics.resp.CommandReader;
 import com.itmo.java.protocol.RespReader;
 import com.itmo.java.protocol.RespWriter;
-import lombok.SneakyThrows;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -16,7 +15,6 @@ import java.net.Socket;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 
 /**
  * Класс, который предоставляет доступ к серверу через сокеты
@@ -47,6 +45,7 @@ public class JavaSocketServerConnector implements Closeable {
             try {
                 final Socket client = serverSocket.accept();
                 final ClientTask clientTask = new ClientTask(client, databaseServer);
+
                 clientIOWorkers.submit(clientTask);
             } catch (IOException exception) {
                 exception.printStackTrace();
@@ -60,6 +59,7 @@ public class JavaSocketServerConnector implements Closeable {
     @Override
     public void close() {
         System.out.println("Stopping socket connector");
+
         try {
             serverSocket.close();
             connectionAcceptorExecutor.shutdown();
