@@ -16,16 +16,16 @@ import java.net.Socket;
 public class SocketKvsConnection implements KvsConnection {
 
     private Socket socket;
-    private RespReader respReader;
+   // private RespReader respReader;
     private ConnectionConfig connectionConfig;
-    private RespWriter respWriter;
+   // private RespWriter respWriter;
 
     public SocketKvsConnection(ConnectionConfig config) {
           try {
               connectionConfig = config;
               socket = new Socket(connectionConfig.toString(), connectionConfig.getPort());
-              respReader = new RespReader(socket.getInputStream());
-              respWriter = new RespWriter(socket.getOutputStream());
+            //  respReader = new RespReader(socket.getInputStream());
+            //  respWriter = new RespWriter(socket.getOutputStream());
           } catch (IOException ex) {
               ex.toString();
           }
@@ -41,7 +41,8 @@ public class SocketKvsConnection implements KvsConnection {
     @Override
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
         try {
-         //   RespWriter respWriter = new RespWriter(socket.getOutputStream());
+            final RespReader respReader = new RespReader(socket.getInputStream());
+            final RespWriter respWriter = new RespWriter(socket.getOutputStream());
             respWriter.write(command);
             RespObject respObject = respReader.readObject();
             if (respObject.isError()) {
@@ -60,8 +61,8 @@ public class SocketKvsConnection implements KvsConnection {
     public void close() {
         try {
             socket.close();
-            respReader.close();
-            respWriter.close();
+           // respReader.close();
+          //  respWriter.close();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
