@@ -16,21 +16,18 @@ import java.net.Socket;
  */
 public class SocketKvsConnection implements KvsConnection {
 
-    final Socket socket;
-   // final ConnectionConfig connectionConfig;
-    private final RespReader respReader;
-    private final RespWriter respWriter;
+    private Socket socket;
+    private RespWriter respWriter;
+    private RespReader respReader;
 
     public SocketKvsConnection(ConnectionConfig config) {
-
         try {
-           // connectionConfig = config;
             socket = new Socket(config.getHost(), config.getPort());
-            respWriter = new RespWriter(socket.getOutputStream());
             respReader = new RespReader(socket.getInputStream());
-          } catch (IOException ex) {
-             throw  new RuntimeException("SocketKvsConnection" , ex);
-          }
+            respWriter = new RespWriter(socket.getOutputStream());
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     /**
@@ -43,14 +40,10 @@ public class SocketKvsConnection implements KvsConnection {
     @Override
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
         try {
-            respWriter.write(new RespArray(new RespCommandId(commandId),command));
-            RespObject respObject = respReader.readObject();
-            if (respObject.isError()) {
-                throw new ConnectionException("Connection error respObject is error");
-            }
-            return  respObject;
-        } catch (IOException ex) {
-            throw new ConnectionException("Error while sending in SocketKvsConnection" , ex);
+            respWriter.write(new RespArray(new RespCommandId(commandId) ,command));
+            return respReader.readObject();
+        } catch (IOException e) {
+            throw new ConnectionException("?", e);
         }
     }
 
@@ -61,11 +54,10 @@ public class SocketKvsConnection implements KvsConnection {
     public void close() {
         try {
             socket.close();
-            respReader.close();
             respWriter.close();
-        } catch (IOException ex) {
-          throw new RuntimeException("Socket close" , ex);
+            respReader.close();
+        } catch (IOException exception) {
+            exception.printStackTrace();
         }
-
     }
 }
