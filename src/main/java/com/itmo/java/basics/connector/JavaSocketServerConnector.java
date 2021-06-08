@@ -33,31 +33,31 @@ public class JavaSocketServerConnector implements Closeable {
      */
     public JavaSocketServerConnector(DatabaseServer databaseServer, ServerConfig config) throws IOException {
         //try {
-            dbServer = databaseServer;
-            serverSocket = new ServerSocket(config.getPort());
-      //  } catch (IOException ex) {
-     //       throw new IOException("JavaSocketServerConnector error constructor",ex);
-      //  }
+        dbServer = databaseServer;
+        serverSocket = new ServerSocket(config.getPort());
+        //  } catch (IOException ex) {
+        //       throw new IOException("JavaSocketServerConnector error constructor",ex);
+        //  }
     }
- 
-     /**
+
+    /**
      * Начинает слушать заданный порт, начинает аксептить клиентские сокеты. На каждый из них начинает клиентскую таску
      */
-     public void start() {
-         connectionAcceptorExecutor.submit(() -> {
-             try {
-                 Socket socket = serverSocket.accept();
-                 clientIOWorkers.submit(() -> {
-                     ClientTask clientTask = new ClientTask(socket, dbServer);
-                     clientTask.run();
-                 });
-             } catch (IOException exception) {
-                 exception.printStackTrace();
-             } finally {
-                 close();
-             }
-         });
-     }
+    public void start() {
+        connectionAcceptorExecutor.submit(() -> {
+            try {
+                Socket socket = serverSocket.accept();
+                clientIOWorkers.submit(() -> {
+                    ClientTask clientTask = new ClientTask(socket, dbServer);
+                    clientTask.run();
+                });
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            } finally {
+                close();
+            }
+        });
+    }
 
     /**
      * Закрывает все, что нужно ¯\_(ツ)_/¯
@@ -113,21 +113,14 @@ public class JavaSocketServerConnector implements Closeable {
         @Override
         public void run() {
             CommandReader commandReader = new CommandReader(respReader, databaseServer.getEnv());
-
+            while (commandReader.hasNextCommand()) {
                 try {
-                    while (!Thread.currentThread().isInterrupted() && !clientSocket.isClosed()) {
-                        if (commandReader.hasNextCommand()) {
-                            DatabaseCommand databaseCommand = commandReader.readCommand();
-                            respWriter.write(databaseCommand.execute().serialize());
-                        } else {
-                            commandReader.close();
-                            break;
-                        }
-                    }
-                    commandReader.close();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+                    DatabaseCommand dbCommand = commandReader.readCommand();
+                    respWriter.write(dbCommand.execute().serialize());
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
+            }
         }
 
         /**
@@ -135,12 +128,12 @@ public class JavaSocketServerConnector implements Closeable {
          */
         @Override
         public void close() {
-          try {
+            try {
                 clientSocket.close();
                 respReader.close();
                 respWriter.close();
             } catch (IOException ex) {
-               throw new RuntimeException("Error while cloasing socket client" , ex);
+                throw new RuntimeException("Error while cloasing socket client" , ex);
             }
         }
     }
