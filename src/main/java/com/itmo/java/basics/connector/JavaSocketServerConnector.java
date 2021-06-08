@@ -32,12 +32,12 @@ public class JavaSocketServerConnector implements Closeable {
      * Стартует сервер. По аналогии с сокетом открывает коннекшн в конструкторе.
      */
     public JavaSocketServerConnector(DatabaseServer databaseServer, ServerConfig config) throws IOException {
-        try {
+        //try {
             dbServer = databaseServer;
             serverSocket = new ServerSocket(config.getPort());
-        } catch (IOException ex) {
-            throw new IOException("JavaSocketServerConnector error constructor",ex);
-        }
+      //  } catch (IOException ex) {
+     //       throw new IOException("JavaSocketServerConnector error constructor",ex);
+      //  }
     }
  
      /**
@@ -64,14 +64,14 @@ public class JavaSocketServerConnector implements Closeable {
      */
     @Override
     public void close() {
-//        System.out.println("Stopping socket connector");
-//        try {
-//            serverSocket.close();
-//            connectionAcceptorExecutor.shutdown();
-//            clientIOWorkers.shutdown();
-//        } catch (IOException exception){
-//            exception.printStackTrace();
-//        }
+        System.out.println("Stopping socket connector");
+        try {
+            serverSocket.close();
+            connectionAcceptorExecutor.shutdown();
+            clientIOWorkers.shutdown();
+        } catch (IOException exception){
+            exception.printStackTrace();
+        }
     }
 
 
