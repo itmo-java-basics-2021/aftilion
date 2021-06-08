@@ -117,10 +117,12 @@ public class JavaSocketServerConnector implements Closeable {
                 try {
                     DatabaseCommand dbCommand = commandReader.readCommand();
                     respWriter.write(dbCommand.execute().serialize());
+                    commandReader.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
+            commandReader.close();
         }
 
         /**
