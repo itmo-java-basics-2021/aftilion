@@ -6,14 +6,12 @@ import com.itmo.java.basics.console.DatabaseCommand;
 import com.itmo.java.basics.resp.CommandReader;
 import com.itmo.java.protocol.RespReader;
 import com.itmo.java.protocol.RespWriter;
-import com.itmo.java.protocol.model.RespObject;
+
 
 import java.io.Closeable;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -46,15 +44,12 @@ public class JavaSocketServerConnector implements Closeable {
     public void start() {
         connectionAcceptorExecutor.submit(() -> {
             try {
-                Socket socket = serverSocket.accept();
-                clientIOWorkers.submit(() -> {
-                    ClientTask clientTask = new ClientTask(socket, dbServer);
-                    clientTask.run();
-                });
+                final Socket client = serverSocket.accept();
+                final ClientTask clientTask = new ClientTask(client, dbServer);
+
+                clientIOWorkers.submit(clientTask);
             } catch (IOException exception) {
                 exception.printStackTrace();
-            } finally {
-                close();
             }
         });
     }
@@ -76,28 +71,6 @@ public class JavaSocketServerConnector implements Closeable {
 
 
     public static void main(String[] args) throws Exception {
-/*DatabaseConfig cfg = new DatabaseConfig("C:\\Users\\odmen\\Documents\\testdata");
-ExecutionEnvironment env = new ExecutionEnvironmentImpl(cfg);
-DatabaseInitializationContext dbContext = null;
-TableInitializationContext tableContext = null;
-SegmentInitializationContext sgmContext = null;
-
-InitializationContextImpl context = new InitializationContextImpl(env, null, null, null);
-Initializer init = new DatabaseServerInitializer(
-new DatabaseInitializer(
-new TableInitializer(
-new SegmentInitializer())));
-
-DatabaseServer dbs = DatabaseServer.initialize(env, (DatabaseServerInitializer) init);
-ServerConfig serverConfig = new ServerConfig("localhost", 8080);
-JavaSocketServerConnector javaConnector = new JavaSocketServerConnector(dbs,serverConfig);
-javaConnector.start();
-
-javaConnector.close();*/
-        ByteBuffer bb = ByteBuffer.allocate(11);
-        RespReader respReader = new RespReader(new FileInputStream("C:\\Users\\odmen\\Documents\\testdata\\respreader.txt"));
-        RespObject respObject = respReader.readBulkString();
-        RespObject respObject1 = respObject;
     }
 
     /**
