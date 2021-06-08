@@ -1,5 +1,6 @@
 package com.itmo.java.client.connection;
 
+import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.client.exception.ConnectionException;
 import com.itmo.java.protocol.RespReader;
 import com.itmo.java.protocol.RespWriter;
@@ -27,7 +28,7 @@ public class SocketKvsConnection implements KvsConnection {
             //  respReader = new RespReader(socket.getInputStream());
             //  respWriter = new RespWriter(socket.getOutputStream());
           } catch (IOException ex) {
-              ex.toString();
+             throw  new RuntimeException("SocketKvsConnection" , ex);
           }
     }
 
@@ -64,7 +65,7 @@ public class SocketKvsConnection implements KvsConnection {
            // respReader.close();
           //  respWriter.close();
         } catch (IOException ex) {
-            ex.printStackTrace();
+          throw new RuntimeException("Socket close" , ex);
         }
 
     }
