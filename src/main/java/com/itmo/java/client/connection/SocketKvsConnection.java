@@ -20,9 +20,10 @@ public class SocketKvsConnection implements KvsConnection {
     final ConnectionConfig connectionConfig;
 
     public SocketKvsConnection(ConnectionConfig config) {
-        connectionConfig = config;
+        //connectionConfig = config;
         try {
-              socket = new Socket(connectionConfig.getHost(), connectionConfig.getPort());
+            connectionConfig = config;
+            socket = new Socket(connectionConfig.getHost(), connectionConfig.getPort());
           } catch (IOException ex) {
              throw  new RuntimeException("SocketKvsConnection" , ex);
           }
