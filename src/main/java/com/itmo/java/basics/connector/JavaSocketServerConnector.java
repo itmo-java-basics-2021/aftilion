@@ -67,8 +67,8 @@ public class JavaSocketServerConnector implements Closeable {
         System.out.println("Stopping socket connector");
         try {
             serverSocket.close();
-            connectionAcceptorExecutor.shutdown();
-            clientIOWorkers.shutdown();
+//            connectionAcceptorExecutor.shutdown();
+//            clientIOWorkers.shutdown();
         } catch (IOException exception){
             exception.printStackTrace();
         }
@@ -112,14 +112,20 @@ public class JavaSocketServerConnector implements Closeable {
         @SneakyThrows
         @Override
         public void run() {
-            CommandReader commandReader = new CommandReader(respReader, databaseServer.getEnv());
-            while (commandReader.hasNextCommand()) {
-                try {
-                    DatabaseCommand dbCommand = commandReader.readCommand();
-                    respWriter.write(dbCommand.execute().serialize());
-                } catch (IOException e) {
-                    e.printStackTrace();
+            CommandReader commandReader = new CommandReader(respReader,databaseServer.getEnv());
+            try {
+                while (!Thread.currentThread().isInterrupted() && !clientSocket.isClosed()) {
+                    if (commandReader.hasNextCommand()) {
+                        DatabaseCommand databaseCommand = commandReader.readCommand();
+                        respWriter.write(databaseCommand.execute().serialize());
+                    } else {
+                        commandReader.close();
+                        break;
+                    }
                 }
+                commandReader.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         }
 
