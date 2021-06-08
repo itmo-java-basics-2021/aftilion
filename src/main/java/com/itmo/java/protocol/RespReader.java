@@ -44,19 +44,23 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespObject readObject() throws IOException {
-        final byte code = is.readNBytes(1)[0];
-
-        switch (code) {
-            case RespError.CODE:
-                return this.readError();
-            case RespBulkString.CODE:
-                return this.readBulkString();
-            case RespArray.CODE:
-                return this.readArray();
-            case RespCommandId.CODE:
-                return this.readCommandId();
-            default:
-                throw new IOException("Wrong object code");
+        try {
+            byte[] firstSymbol = is.readNBytes(1);
+            if (firstSymbol.length == 0){
+                throw new EOFException("end of the stream");
+            }
+            if (firstSymbol[0] == RespError.CODE){
+                return readError();
+            }
+            if(firstSymbol[0] == RespBulkString.CODE){
+                return readBulkString();
+            }
+            if(firstSymbol[0] == RespCommandId.CODE){
+                return readCommandId();
+            }
+            throw new IOException("unknown byte" + new String(firstSymbol));
+        } catch (IOException e){
+            throw new IOException("exception in reading object", e);
         }
     }
 
