@@ -115,13 +115,16 @@ public class RespReader implements AutoCloseable {
     public RespBulkString readBulkString() throws IOException {
         try{
             int bulkSize = readInt();
-            readCompareByte(LF);
+           // readCompareByte(LF);
+            is.readNBytes(LF);
             if (bulkSize == -1){
                 return RespBulkString.NULL_STRING;
             }
             byte[] bulkString = is.readNBytes(bulkSize);
-            readCompareByte(CR);
-            readCompareByte(LF);
+            is.readNBytes(CR);
+            is.readNBytes(LF);
+          //  readCompareByte(CR);
+          //  readCompareByte(LF);
             return new RespBulkString(bulkString);
         } catch (IOException e) {
             throw new IOException("IO exception in reading Bulk String", e);
@@ -138,10 +141,12 @@ public class RespReader implements AutoCloseable {
     public RespArray readArray() throws IOException {
         try {
             if (!hasArray()) {
-                readCompareByte(RespArray.CODE);
+                is.readNBytes(RespArray.CODE);
+               // readCompareByte(RespArray.CODE);
             }
             int arraySize = readInt();
-            readCompareByte(LF);
+            is.readNBytes(LF);
+            //readCompareByte(LF);
             RespObject[] listObjects = new RespObject[arraySize];
             for (int i = 0; i < arraySize; i++){
                 listObjects[i] = readObject();
@@ -166,8 +171,10 @@ public class RespReader implements AutoCloseable {
             byte[] commandId3 = is.readNBytes(1);
             byte[] commandId4 = is.readNBytes(1);
             int commandId = ((commandId1[0] << 24) + (commandId2[0]<< 16) + (commandId3[0] << 8) + (commandId4[0] << 0));
-            readCompareByte(CR);
-            readCompareByte(LF);
+            is.readNBytes(CR);
+            is.readNBytes(LF);
+           // readCompareByte(CR);
+           // readCompareByte(LF);
             return new RespCommandId(commandId);
         } catch (IOException e) {
             throw new IOException("IO exception in reading command id", e);
