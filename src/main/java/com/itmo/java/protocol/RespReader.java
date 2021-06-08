@@ -16,7 +16,6 @@ import java.util.List;
 
 public class RespReader implements AutoCloseable {
     private final InputStream is;
-    private boolean ishasArray = false;
 
     /**
      * Специальные символы окончания элемента
@@ -32,15 +31,9 @@ public class RespReader implements AutoCloseable {
      * Есть ли следующий массив в стриме?
      */
     public boolean hasArray() throws IOException {
-        if (ishasArray) {
-            return true;
-        }
-        byte[] bytes = is.readNBytes(1);
-        if (bytes[0] == RespArray.CODE) {
-            ishasArray = true;
-            return true;
-        }
-        return false;
+        final byte code = is.readNBytes(1)[0];
+
+        return code == RespArray.CODE;
     }
 
     /**
