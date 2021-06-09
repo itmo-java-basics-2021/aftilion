@@ -3,16 +3,15 @@ package com.itmo.java.basics.connector;
 import com.itmo.java.basics.DatabaseServer;
 import com.itmo.java.basics.config.ServerConfig;
 import com.itmo.java.basics.console.DatabaseCommand;
-import com.itmo.java.basics.console.DatabaseCommandResult;
 import com.itmo.java.basics.resp.CommandReader;
 import com.itmo.java.protocol.RespReader;
 import com.itmo.java.protocol.RespWriter;
+
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -25,16 +24,18 @@ public class JavaSocketServerConnector implements Closeable {
      * Экзекьютор для выполнения ClientTask
      */
     private final ExecutorService clientIOWorkers = Executors.newSingleThreadExecutor();
-    private final ServerSocket serverSocket;
+    private final ServerSocket serverSocket; // todo uncomment
+
     private final ExecutorService connectionAcceptorExecutor = Executors.newSingleThreadExecutor();
-    private final DatabaseServer databaseServer;
+
+    private DatabaseServer dbServer;
 
     /**
      * Стартует сервер. По аналогии с сокетом открывает коннекшн в конструкторе.
      */
     public JavaSocketServerConnector(DatabaseServer databaseServer, ServerConfig config) throws IOException {
-        this.databaseServer = databaseServer;
-        this.serverSocket = new ServerSocket(config.getPort());
+        serverSocket = new ServerSocket(config.getPort());
+        dbServer = databaseServer;
     }
 
     /**
@@ -43,12 +44,15 @@ public class JavaSocketServerConnector implements Closeable {
     public void start() {
         connectionAcceptorExecutor.submit(() -> {
             try {
-                final Socket client = serverSocket.accept();
-                final ClientTask clientTask = new ClientTask(client, databaseServer);
-
-                clientIOWorkers.submit(clientTask);
+                Socket socket = serverSocket.accept();
+                clientIOWorkers.submit(() -> {
+                    ClientTask clientTask = new ClientTask(socket, dbServer);
+                    clientTask.run();
+                });
             } catch (IOException exception) {
                 exception.printStackTrace();
+            } finally {
+                close();
             }
         });
     }
@@ -59,13 +63,12 @@ public class JavaSocketServerConnector implements Closeable {
     @Override
     public void close() {
         System.out.println("Stopping socket connector");
-
         try {
             serverSocket.close();
-            connectionAcceptorExecutor.shutdown();
-            clientIOWorkers.shutdown();
-        } catch (IOException exception) {
-            throw new RuntimeException("Closing server socket error", exception);
+            connectionAcceptorExecutor.shutdownNow();
+            clientIOWorkers.shutdownNow();
+        } catch (IOException exception){
+            exception.printStackTrace();
         }
     }
 
@@ -77,16 +80,26 @@ public class JavaSocketServerConnector implements Closeable {
      * Runnable, описывающий исполнение клиентской команды.
      */
     static class ClientTask implements Runnable, Closeable {
-        private final Socket client;
-        private final DatabaseServer server;
 
+        private RespWriter respWriter;
+        private
+
+        RespReader respReader;
+        private Socket client;
+        DatabaseServer databaseServer;
         /**
          * @param client клиентский сокет
          * @param server сервер, на котором исполняется задача
          */
         public ClientTask(Socket client, DatabaseServer server) {
-            this.client = client;
-            this.server = server;
+            try {
+                databaseServer = server;
+                this.client = client;
+                respReader = new RespReader(client.getInputStream());
+                respWriter = new RespWriter(client.getOutputStream());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         /**
@@ -98,19 +111,23 @@ public class JavaSocketServerConnector implements Closeable {
          */
         @Override
         public void run() {
+            CommandReader commandReader = new CommandReader(respReader, databaseServer.getEnv());
             try {
-                final CommandReader commandReader = new CommandReader(new RespReader(client.getInputStream()), server.getEnv());
-                final RespWriter respWriter = new RespWriter(client.getOutputStream());
-
-                while (commandReader.hasNextCommand()) {
-                    final DatabaseCommand command = commandReader.readCommand();
-                    final DatabaseCommandResult commandResult = server.executeNextCommand(command).get();
-
-                    respWriter.write(commandResult.serialize());
+                while (!Thread.currentThread().isInterrupted() && !client.isClosed()) {
+                    if (commandReader.hasNextCommand()) {
+                        DatabaseCommand dbCommand = commandReader.readCommand();
+                        respWriter.write(dbCommand.execute().serialize());
+                    } else {
+                        commandReader.close();
+                        break;
+                    }
                 }
-            } catch (ExecutionException | IOException | InterruptedException exception) {
-                exception.printStackTrace();
+                commandReader.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+
+
         }
 
         /**
@@ -120,8 +137,10 @@ public class JavaSocketServerConnector implements Closeable {
         public void close() {
             try {
                 client.close();
+                respReader.close();
+                respWriter.close();
             } catch (IOException exception) {
-                throw new RuntimeException("Closing client socket error", exception);
+                exception.printStackTrace();
             }
         }
     }
