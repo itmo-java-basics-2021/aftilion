@@ -18,7 +18,7 @@ public class DeleteKvsCommand implements KvsCommand {
         dbName = databaseName;
         tbName = tableName;
         Key = key;
-        delID = idGen.incrementAndGet();
+        delID = idGen.getAndIncrement();
     }
 
     /**

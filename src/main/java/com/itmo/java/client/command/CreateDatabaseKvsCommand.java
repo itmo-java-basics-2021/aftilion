@@ -22,7 +22,7 @@ public class CreateDatabaseKvsCommand implements KvsCommand {
      */
     public CreateDatabaseKvsCommand(String databaseName) {
        // dbID = idGen.get();
-        dbID = idGen.incrementAndGet();
+        dbID = idGen.getAndIncrement();
         dbName = databaseName;
     }
 
