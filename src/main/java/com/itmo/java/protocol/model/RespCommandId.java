@@ -36,12 +36,16 @@ public class RespCommandId implements RespObject {
 
     @Override
     public void write(OutputStream output) throws IOException {
-        output.write(CODE);
-        int commandByte = commandId;
-        output.write((commandByte >>> 24) & 0xFF);
-        output.write((commandByte >>> 16) & 0xFF);
-        output.write((commandByte >>> 8) & 0xFF);
-        output.write(commandByte &0xFF);
-        output.write(CRLF);
+        try {
+            output.write(CODE);
+            int commandByte = commandId;
+            output.write((commandByte >>> 24) & 0xFF);
+            output.write((commandByte >>> 16) & 0xFF);
+            output.write((commandByte >>> 8) & 0xFF);
+            output.write(commandByte & 0xFF);
+            output.write(CRLF);
+        } catch (IOException ex) {
+            throw new IOException(ex);
+        }
     }
 }

@@ -44,11 +44,15 @@ public class RespArray implements RespObject {
 
     @Override
     public void write(OutputStream output) throws IOException {
-        output.write(CODE);
-        output.write(Integer.toString(objects.size()).getBytes(StandardCharsets.UTF_8));
-        output.write(CRLF);
-        for (RespObject obj : objects) {
-            obj.write(output);
+        try {
+            output.write(CODE);
+            output.write(Integer.toString(objects.size()).getBytes(StandardCharsets.UTF_8));
+            output.write(CRLF);
+            for (RespObject obj : objects) {
+                obj.write(output);
+            }
+        } catch (IOException ex){
+            throw new IOException(ex);
         }
     }
 

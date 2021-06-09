@@ -32,9 +32,13 @@ public class RespReader implements AutoCloseable {
      * Есть ли следующий массив в стриме?
      */
     public boolean hasArray() throws IOException {
-        final byte code = is.readNBytes(1)[0];
+        try {
+            final byte code = is.readNBytes(1)[0];
 
-        return code == RespArray.CODE;
+            return code == RespArray.CODE;
+        } catch(IOException ex) {
+            throw new IOException(ex);
+        }
     }
 
     /**
@@ -72,38 +76,42 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespError readError() throws IOException {
-        byte symbol = is.readNBytes(1)[0];
+        try {
+            byte symbol = is.readNBytes(1)[0];
 
-        final List<Byte> symbols = new ArrayList<>();
+            final List<Byte> symbols = new ArrayList<>();
 
-        boolean isEndOfError = false;
+            boolean isEndOfError = false;
 
-        while (!isEndOfError) {
-            while (symbol == CR) {
-                symbol = is.readNBytes(1)[0];
+            while (!isEndOfError) {
+                while (symbol == CR) {
+                    symbol = is.readNBytes(1)[0];
 
-                if (symbol == LF) {
-                    isEndOfError = true;
-                } else {
-                    symbols.add(CR);
+                    if (symbol == LF) {
+                        isEndOfError = true;
+                    } else {
+                        symbols.add(CR);
+                    }
+                }
+
+                if (!isEndOfError) {
+                    symbols.add(symbol);
+                    symbol = is.readNBytes(1)[0];
                 }
             }
 
-            if (!isEndOfError) {
-                symbols.add(symbol);
-                symbol = is.readNBytes(1)[0];
+            final int symbolsCount = symbols.size();
+
+            final byte[] bytes = new byte[symbolsCount];
+
+            for (int i = 0; i < symbolsCount; i++) {
+                bytes[i] = symbols.get(i);
             }
+
+            return new RespError(bytes);
+        } catch (IOException ex) {
+            throw new IOException(ex);
         }
-
-        final int symbolsCount = symbols.size();
-
-        final byte[] bytes = new byte[symbolsCount];
-
-        for (int i = 0; i < symbolsCount; i++) {
-            bytes[i] = symbols.get(i);
-        }
-
-        return new RespError(bytes);
     }
 
     /**
@@ -177,7 +185,11 @@ public class RespReader implements AutoCloseable {
 
     @Override
     public void close() throws IOException {
-        is.close();
+        try {
+            is.close();
+        } catch (IOException ex) {
+            throw new IOException(ex);
+        }
     }
 
     private byte[] getStringNumberInBytes() throws IOException {
