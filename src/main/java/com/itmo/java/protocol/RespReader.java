@@ -20,7 +20,6 @@ public class RespReader implements AutoCloseable {
         reader = new InputStreamReader(is);
     }
 
-
     /**
      * Есть ли следующий массив в стриме?
      */
@@ -133,17 +132,15 @@ public class RespReader implements AutoCloseable {
                 throw new EOFException("Stream is empty when try to read all bytes before '\\r\\n'");
             }
             if (currentByte == CR) {
-              //  reader.mark(READ_AHEAD_LIMIT);
                 int nextByte = reader.read();
                 if (nextByte == -1) {
                     throw new EOFException("Stream is empty when try to read all bytes before '\\r\\n'");
                 }
                 if (nextByte == LF){
-                    reader.reset();
-                    reader.read();
                     break;
                 }else {
-                    reader.reset();
+                    message.add((byte) currentByte);
+                    currentByte = nextByte;
                 }
             }
             message.add((byte) currentByte);
