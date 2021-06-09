@@ -20,7 +20,7 @@ public class RespReader implements AutoCloseable {
         reader = new InputStreamReader(is);
     }
 
-    
+
     /**
      * Есть ли следующий массив в стриме?
      */
