@@ -5,7 +5,6 @@ import com.itmo.java.basics.config.ConfigLoader;
 import com.itmo.java.basics.config.DatabaseConfig;
 import com.itmo.java.basics.config.DatabaseServerConfig;
 import com.itmo.java.basics.config.ServerConfig;
-import com.itmo.java.basics.console.DatabaseCommand;
 import com.itmo.java.basics.console.DatabaseCommandResult;
 import com.itmo.java.basics.console.ExecutionEnvironment;
 import com.itmo.java.basics.console.impl.ExecutionEnvironmentImpl;
@@ -126,7 +125,6 @@ public class JavaSocketServerConnector implements Closeable {
         private final Socket client;
         private final DatabaseServer server;
         private final RespWriter respWriter;
-        private final RespReader respReader;
 
         /**
          * @param client клиентский сокет
@@ -137,7 +135,6 @@ public class JavaSocketServerConnector implements Closeable {
             this.server = server;
             try {
                 this.respWriter = new RespWriter(client.getOutputStream());
-                this.respReader = new RespReader(client.getInputStream());
             } catch (IOException e){
                 throw new RuntimeException("IOException when open socket streams", e);
             }
@@ -152,20 +149,15 @@ public class JavaSocketServerConnector implements Closeable {
          */
         @Override
         public void run() {
-            CommandReader commandReader = new CommandReader(respReader, server.getEnv());
-            try {
-                while (!Thread.currentThread().isInterrupted() && !client.isClosed()) {
-                    if (commandReader.hasNextCommand()) {
-                        DatabaseCommand dbCommand = commandReader.readCommand();
-                        respWriter.write(dbCommand.execute().serialize());
-                    } else {
-                        commandReader.close();
-                        break;
-                    }
+            try (CommandReader commandReader = new CommandReader(new RespReader(client.getInputStream()), server.getEnv())) {
+                while (commandReader.hasNextCommand()) {
+                    CompletableFuture<DatabaseCommandResult> commandResult = server.executeNextCommand(commandReader.readCommand());
+                    respWriter.write(commandResult.get().serialize());
                 }
-                commandReader.close();
+                close();
             } catch (Exception e) {
-                e.printStackTrace();
+                close();
+                throw new RuntimeException("When try to read, write or execute command", e);
             }
         }
 
