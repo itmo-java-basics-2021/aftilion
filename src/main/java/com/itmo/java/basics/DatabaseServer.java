@@ -14,8 +14,8 @@ import java.util.concurrent.Executors;
 
 public class DatabaseServer {
 
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-    private final ExecutionEnvironment enviroment;
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final ExecutionEnvironment environment;
 
     /**
      * Конструктор
@@ -31,17 +31,19 @@ public class DatabaseServer {
     }
 
     private DatabaseServer(ExecutionEnvironment env){
-        this.enviroment = env;
+        this.environment = env;
     }
 
     public CompletableFuture<DatabaseCommandResult> executeNextCommand(RespArray message) {
         return CompletableFuture.supplyAsync(() -> DatabaseCommands.valueOf(message.getObjects().get(DatabaseCommandArgPositions.
-                COMMAND_NAME.getPositionIndex()).asString()).getCommand(enviroment, message.getObjects()).execute(), executorService);
+                COMMAND_NAME.getPositionIndex()).asString()).getCommand(environment, message.getObjects()).execute(), executorService);
     }
 
     public CompletableFuture<DatabaseCommandResult> executeNextCommand(DatabaseCommand command) {
         return CompletableFuture.supplyAsync(command::execute, executorService);
     }
 
-    public ExecutionEnvironment getEnv() { return enviroment; }
+    public ExecutionEnvironment getEnv() {
+        return environment;
+    }
 }
