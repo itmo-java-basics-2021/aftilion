@@ -35,25 +35,12 @@ public class CommandReader implements AutoCloseable {
      * @throws IllegalArgumentException если нет имени команды и id
      */
     public DatabaseCommand readCommand() throws IOException {
-        RespArray respArray = respReader.readArray();
-        if (respArray.getObjects().size() < DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex() + 1){
-            throw new IllegalArgumentException("RespArray does not have enough size to have id, name and one object");
+        List<RespObject> comArgs = respReader.readArray().getObjects();
+        if(comArgs.size() < 2) {
+            throw new IllegalArgumentException("Why we dont have id and command name?");
         }
-        RespObject id = respArray.getObjects().get(DatabaseCommandArgPositions.COMMAND_ID.getPositionIndex());
-        if (!(id instanceof RespCommandId)){
-            throw new IllegalArgumentException("Command does not have command id");
-        }
-        if (id.asString() == null || id.asString().isEmpty()){
-            throw new IllegalArgumentException("Command id does not exist");
-        }
-        RespObject commandName = respArray.getObjects().get(DatabaseCommandArgPositions.COMMAND_NAME.getPositionIndex());
-        if (!(commandName instanceof RespBulkString)){
-            throw new IllegalArgumentException("Command does not have command name");
-        }
-        if (commandName.asString() == null || commandName.asString().isEmpty()){
-            throw new IllegalArgumentException("Command name does not exist");
-        }
-        return DatabaseCommands.valueOf(commandName.asString()).getCommand(executionEnvironment, respArray.getObjects());
+        return DatabaseCommands.valueOf(comArgs.get(DatabaseCommandArgPositions.COMMAND_NAME.getPositionIndex()).asString())
+                .getCommand(executionEnvironment,comArgs);
     }
 
     @Override
