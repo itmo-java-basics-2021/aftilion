@@ -11,7 +11,7 @@ public class RespWriter implements AutoCloseable{
 
     public RespWriter(OutputStream os) {
 
-       outputStream = os;
+        outputStream = os;
     }
 
     /**

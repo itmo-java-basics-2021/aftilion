@@ -9,7 +9,10 @@ import com.itmo.java.protocol.model.RespObject;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RespReader implements AutoCloseable {
     private final InputStream is;
@@ -29,15 +32,13 @@ public class RespReader implements AutoCloseable {
      * Есть ли следующий массив в стриме?
      */
     public boolean hasArray() throws IOException {
-        if (isHasArray) {
-            return true;
+        try {
+            final byte code = is.readNBytes(1)[0];
+
+            return code == RespArray.CODE;
+        } catch(IOException ex) {
+            throw new IOException(ex);
         }
-        byte[] currentRespObjectType = is.readNBytes(1);
-        if (currentRespObjectType[0] == RespArray.CODE){
-            isHasArray = true;
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -68,31 +69,6 @@ public class RespReader implements AutoCloseable {
         }
     }
 
-
-    private int readInt() throws IOException {
-        try{
-            StringBuilder size = new StringBuilder();
-            byte[] sizeByte = is.readNBytes(1);
-            if (sizeByte.length == 0){
-                throw new EOFException("end of the stream");
-            }
-            while (sizeByte[0] != CR){
-                size.append(new String(sizeByte));
-                sizeByte = is.readNBytes(1);
-                if (sizeByte.length == 0){
-                    throw new EOFException("end of the stream");
-                }
-            }
-            try {
-                return Integer.parseInt(size.toString());
-            } catch (NumberFormatException e) {
-                throw new IOException("expected reading int from this string: " + size.toString());
-            }
-        } catch (IOException e) {
-            throw new IOException("IO exception in reading int", e);
-        }
-    }
-
     /**
      * Считывает объект ошибки
      *
@@ -100,23 +76,41 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespError readError() throws IOException {
-        try{
-            StringBuilder errorMessage = new StringBuilder();
-            byte[] currentSymbol = is.readNBytes(1);
-            if (currentSymbol.length == 0){
-                throw new EOFException("end of the stream");
-            }
-            while (currentSymbol[0] != CR){
-                errorMessage.append(new String(currentSymbol));
-                currentSymbol = is.readNBytes(1);
-                if (currentSymbol.length == 0){
-                    throw new EOFException("end of the stream");
+        try {
+            byte symbol = is.readNBytes(1)[0];
+
+            final List<Byte> symbols = new ArrayList<>();
+
+            boolean isEndOfError = false;
+
+            while (!isEndOfError) {
+                while (symbol == CR) {
+                    symbol = is.readNBytes(1)[0];
+
+                    if (symbol == LF) {
+                        isEndOfError = true;
+                    } else {
+                        symbols.add(CR);
+                    }
+                }
+
+                if (!isEndOfError) {
+                    symbols.add(symbol);
+                    symbol = is.readNBytes(1)[0];
                 }
             }
-            readCompareByte(LF);
-            return new RespError(errorMessage.toString().getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new IOException("IO exception in reading Error", e);
+
+            final int symbolsCount = symbols.size();
+
+            final byte[] bytes = new byte[symbolsCount];
+
+            for (int i = 0; i < symbolsCount; i++) {
+                bytes[i] = symbols.get(i);
+            }
+
+            return new RespError(bytes);
+        } catch (IOException ex) {
+            throw new IOException(ex);
         }
     }
 
@@ -151,7 +145,7 @@ public class RespReader implements AutoCloseable {
      */
     public RespArray readArray() throws IOException {
         try {
-            if (!isHasArray) {
+            if (!hasArray()) {
                 readCompareByte(RespArray.CODE);
             }
             int arraySize = readInt();
@@ -188,6 +182,61 @@ public class RespReader implements AutoCloseable {
         }
     }
 
+
+    @Override
+    public void close() throws IOException {
+        try {
+            is.close();
+        } catch (IOException ex) {
+            throw new IOException(ex);
+        }
+    }
+
+    private byte[] getStringNumberInBytes() throws IOException {
+        byte symbol = is.readNBytes(1)[0];
+
+        final List<Byte> symbols = new ArrayList<>();
+
+        while (symbol != CR) {
+            symbols.add(symbol);
+            symbol = is.readNBytes(1)[0];
+        }
+
+        final int symbolsCount = symbols.size();
+
+        final byte[] bytes = new byte[symbolsCount];
+
+        for (int i = 0; i < symbolsCount; i++) {
+            bytes[i] = symbols.get(i);
+        }
+
+        return bytes;
+    }
+
+    private int readInt() throws IOException {
+        try{
+            StringBuilder size = new StringBuilder();
+            byte[] sizeByte = is.readNBytes(1);
+            if (sizeByte.length == 0){
+                throw new EOFException("end of the stream");
+            }
+            while (sizeByte[0] != CR){
+                size.append(new String(sizeByte));
+                sizeByte = is.readNBytes(1);
+                if (sizeByte.length == 0){
+                    throw new EOFException("end of the stream");
+                }
+            }
+            try {
+                return Integer.parseInt(size.toString());
+            } catch (NumberFormatException e) {
+                throw new IOException("expected reading int from this string: " + size.toString());
+            }
+        } catch (IOException e) {
+            throw new IOException("IO exception in reading int", e);
+        }
+    }
+
     private void readCompareByte(byte compareWith) throws IOException {
         byte[] nextByte;
         try {
@@ -202,10 +251,4 @@ public class RespReader implements AutoCloseable {
         }
     }
 
-
-    @Override
-    public void close() throws IOException {
-        is.close();
-    }
 }
- 
