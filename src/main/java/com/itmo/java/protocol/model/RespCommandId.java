@@ -44,6 +44,7 @@ public class RespCommandId implements RespObject {
             output.write((commandByte >>> 8) & 0xFF);
             output.write(commandByte & 0xFF);
             output.write(CRLF);
+            output.flush();
         } catch (IOException ex) {
             throw new IOException(ex);
         }

@@ -38,7 +38,7 @@ public class RespBulkString implements RespObject {
      */
     @Override
     public String asString() {
-        return new String(data);
+        return new String(data ,StandardCharsets.UTF_8);
     }
 
     @Override
@@ -53,6 +53,7 @@ public class RespBulkString implements RespObject {
                 output.write(data);
             }
             output.write(CRLF);
+            output.flush();
         } catch (IOException ex) {
             throw new IOException(ex);
         }

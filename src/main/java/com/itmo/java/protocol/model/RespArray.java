@@ -16,7 +16,7 @@ public class RespArray implements RespObject {
      * Код объекта
      */
     public static final byte CODE = '*';
-    private List<RespObject> objects;
+    private final List<RespObject> objects;
 
     public RespArray(RespObject... obj) {
         objects = Arrays.asList(obj);
@@ -48,6 +48,7 @@ public class RespArray implements RespObject {
             output.write(CODE);
             output.write(Integer.toString(objects.size()).getBytes(StandardCharsets.UTF_8));
             output.write(CRLF);
+            output.flush();
             for (RespObject obj : objects) {
                 obj.write(output);
             }

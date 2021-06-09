@@ -2,6 +2,7 @@ package com.itmo.java.protocol.model;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Сообщение об ошибке в RESP протоколе
@@ -30,7 +31,10 @@ public class RespError implements RespObject {
 
     @Override
     public String asString() {
-        return new String(message);
+        if (message == null) {
+            return null;
+        }
+        return new String(message , StandardCharsets.UTF_8);
     }
 
     @Override
@@ -39,6 +43,7 @@ public class RespError implements RespObject {
             output.write(CODE);
             output.write(message);
             output.write(CRLF);
+            output.flush();
         } catch(IOException ex) {
             throw new IOException(ex);
         }
