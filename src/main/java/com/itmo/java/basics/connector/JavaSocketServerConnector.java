@@ -1,12 +1,28 @@
 package com.itmo.java.basics.connector;
 
 import com.itmo.java.basics.DatabaseServer;
+import com.itmo.java.basics.config.ConfigLoader;
+import com.itmo.java.basics.config.DatabaseConfig;
 import com.itmo.java.basics.config.ServerConfig;
 import com.itmo.java.basics.console.DatabaseCommand;
 import com.itmo.java.basics.console.DatabaseCommandResult;
+import com.itmo.java.basics.console.ExecutionEnvironment;
+import com.itmo.java.basics.console.impl.ExecutionEnvironmentImpl;
+import com.itmo.java.basics.initialization.impl.DatabaseInitializer;
+import com.itmo.java.basics.initialization.impl.DatabaseServerInitializer;
+import com.itmo.java.basics.initialization.impl.SegmentInitializer;
+import com.itmo.java.basics.initialization.impl.TableInitializer;
 import com.itmo.java.basics.resp.CommandReader;
+import com.itmo.java.client.command.CreateDatabaseKvsCommand;
+import com.itmo.java.client.command.CreateTableKvsCommand;
+import com.itmo.java.client.command.GetKvsCommand;
+import com.itmo.java.client.command.SetKvsCommand;
+import com.itmo.java.client.connection.ConnectionConfig;
+import com.itmo.java.client.connection.SocketKvsConnection;
 import com.itmo.java.protocol.RespReader;
 import com.itmo.java.protocol.RespWriter;
+import com.itmo.java.protocol.model.RespArray;
+import com.itmo.java.protocol.model.RespObject;
 
 
 import java.io.Closeable;
@@ -73,6 +89,29 @@ public class JavaSocketServerConnector implements Closeable {
 
 
     public static void main(String[] args) throws Exception {
+        ServerConfig serverConfig = new ConfigLoader().readConfig().getServerConfig();
+        DatabaseConfig databaseConfig = new ConfigLoader().readConfig().getDbConfig();
+        ExecutionEnvironment env = new ExecutionEnvironmentImpl(databaseConfig);
+        DatabaseServerInitializer initializer =
+                new DatabaseServerInitializer(
+                        new DatabaseInitializer(
+                                new TableInitializer(
+                                        new SegmentInitializer())));
+        DatabaseServer databaseServer = DatabaseServer.initialize(env, initializer);
+
+        JavaSocketServerConnector j = new JavaSocketServerConnector(databaseServer, serverConfig);
+
+        j.start();
+        RespObject q;
+        try(SocketKvsConnection socketKvsConnection =
+                    new SocketKvsConnection(new ConnectionConfig(serverConfig.getHost(), serverConfig.getPort()))) {
+            socketKvsConnection.send(1, new CreateDatabaseKvsCommand("t1").serialize());
+            socketKvsConnection.send(1, new CreateTableKvsCommand("t1", "da").serialize());
+            socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "value1").serialize());
+            q = socketKvsConnection.send(1, new GetKvsCommand("t1", "da", "key1").serialize());
+        }
+        System.out.println(q.asString());
+        j.close();
     }
 
     /**
