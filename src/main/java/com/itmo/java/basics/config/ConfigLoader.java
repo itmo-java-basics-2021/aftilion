@@ -45,7 +45,7 @@ public class ConfigLoader {
         } catch (IOException exception){
             return new DatabaseServerConfig(
                     new ServerConfig(ServerConfig.DEFAULT_HOST, ServerConfig.DEFAULT_PORT),
-                    new DatabaseConfig(DatabaseConfig.DEFAULT_WORKING_PATH)
+                    new DatabaseConfig()
             );
         }
     }

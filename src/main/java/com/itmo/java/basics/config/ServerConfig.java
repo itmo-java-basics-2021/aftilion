@@ -7,7 +7,6 @@ import lombok.Getter;
  * Какой хост и какой порт будет слушать наш сервер
  */
 @Getter
-@AllArgsConstructor
 public class ServerConfig {
 
     public static final String DEFAULT_HOST = "localhost";
@@ -15,4 +14,9 @@ public class ServerConfig {
 
     private final String host;
     private final int port;
+
+    public ServerConfig(String host , int port) {
+        this.host =  host;
+        this.port = port;
+    }
 }
