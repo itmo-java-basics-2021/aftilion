@@ -8,8 +8,6 @@ import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.logic.Database;
 import com.itmo.java.protocol.model.RespObject;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,12 +15,9 @@ import java.util.Optional;
  * Команда для создания удаления значения по ключу
  */
 public class DeleteKeyCommand implements DatabaseCommand {
-
     private final ExecutionEnvironment environment;
-    private final List<RespObject> commandargs;
-    private static final int numberOfAgrguments = 5;
-    private final String tbName;
     private final String dbName;
+    private final String tbName;
     private final String key;
 
     /**
@@ -30,21 +25,16 @@ public class DeleteKeyCommand implements DatabaseCommand {
      * <br/>
      * Обратите внимание, что в конструкторе нет логики проверки валидности данных. Не проверяется, можно ли исполнить команду. Только формальные признаки (например, количество переданных значений или ненуловость объектов
      *
-     * @param env     env
-     * @param comArgs аргументы для создания (порядок - {@link DatabaseCommandArgPositions}.
-     *                Id команды, имя команды, имя бд, таблицы, ключ
+     * @param env         env
+     * @param commandArgs аргументы для создания (порядок - {@link DatabaseCommandArgPositions}.
+     *                    Id команды, имя команды, имя бд, таблицы, ключ
      * @throws IllegalArgumentException если передано неправильное количество аргументов
      */
-    public DeleteKeyCommand(ExecutionEnvironment env, List<RespObject> comArgs) {
-
-        if (comArgs.size() != numberOfAgrguments) {
-            throw new IllegalArgumentException("Why " + comArgs.size() + "!= 5 , in CreateTableCommand");
-        }
-        environment = env;
-        commandargs = comArgs;
-        dbName = comArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
-        tbName = comArgs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
-        key = comArgs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
+    public DeleteKeyCommand(ExecutionEnvironment env, List<RespObject> commandArgs) {
+        this.environment = env;
+        this.dbName = commandArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+        this.tbName = commandArgs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
+        this.key = commandArgs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
     }
 
     /**
@@ -55,27 +45,18 @@ public class DeleteKeyCommand implements DatabaseCommand {
     @Override
     public DatabaseCommandResult execute() {
         try {
-            if (dbName == null) {
-                throw new DatabaseException("Why dbname is null?");
+            Optional<Database> database = environment.getDatabase(dbName);
+            if (database.isEmpty()){
+                return DatabaseCommandResult.error("");
             }
-            if (tbName == null) {
-                throw new DatabaseException("Why tbName is null?");
+            Optional<byte[]> value = database.get().read(tbName, key);
+            if (value.isEmpty()){
+                return DatabaseCommandResult.error("");
             }
-            if (key == null) {
-                throw new DatabaseException("Why key is null?");
-            }
-            Optional<Database> dataBase = environment.getDatabase(dbName);
-            if (dataBase.isEmpty()) {
-                throw new DatabaseException("We dont have" + dbName);
-            }
-            Optional<byte[]> previous = dataBase.get().read(tbName, key);
-            if (previous.isEmpty()) {
-                return DatabaseCommandResult.error("Value is not found");
-            }
-            dataBase.get().delete(tbName, key);
-            return DatabaseCommandResult.success(("Success del " + dbName + tbName + key).getBytes(StandardCharsets.UTF_8));
-        } catch (DatabaseException ex) {
-            return DatabaseCommandResult.error("Error while dbComRes Delete");
+            database.get().delete(tbName, key);
+            return DatabaseCommandResult.success(value.get());
+        } catch (DatabaseException e){
+            return DatabaseCommandResult.error("");
         }
     }
 }

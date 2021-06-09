@@ -12,8 +12,8 @@ import java.util.Optional;
 
 public class ExecutionEnvironmentImpl implements ExecutionEnvironment {
 
-    public Path workingPath;
-    public Map<String, Database> dataBase = new HashMap<>();
+   public Path workingPath;
+   public Map<String, Database> dataBase = new HashMap<>();
 
     public ExecutionEnvironmentImpl(DatabaseConfig config) {
         workingPath = Paths.get(config.getWorkingPath());
