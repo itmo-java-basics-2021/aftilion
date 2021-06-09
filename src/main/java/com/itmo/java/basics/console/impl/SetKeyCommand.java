@@ -21,6 +21,10 @@ public class SetKeyCommand implements DatabaseCommand {
     private final ExecutionEnvironment environment;
     private final List<RespObject> commandargs;
     private static final int numberOfAgrguments = 6;
+    private  final String dbName;
+    private  final String tbName;
+    private  final String key;
+    private final String value;
 
     /**
      * Создает команду.
@@ -38,6 +42,10 @@ public class SetKeyCommand implements DatabaseCommand {
         }
         environment = env;
         commandargs = comArgs;
+        dbName = comArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+        tbName = comArgs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
+        key = comArgs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
+        value = comArgs.get(DatabaseCommandArgPositions.VALUE.getPositionIndex()).asString();
     }
 
     /**
@@ -48,27 +56,27 @@ public class SetKeyCommand implements DatabaseCommand {
     @Override
     public DatabaseCommandResult execute() {
         try {
-            String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+
             if (dbName == null) {
                 throw new DatabaseException("Why dbname is null?");
             }
-            String tbName = commandargs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
+
             if (tbName == null) {
                 throw new DatabaseException("Why tbName is null?");
             }
-            String key = commandargs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
+
             if (key == null) {
                 throw new DatabaseException("Why key is null?");
             }
             Optional<Database> dataBase = environment.getDatabase(dbName);
             if (dataBase.isEmpty()) {
-                throw new DatabaseException("We dont have" + dbName);
+                return DatabaseCommandResult.error("DB is not found");
             }
-            byte[] value = commandargs.get(DatabaseCommandArgPositions.VALUE.getPositionIndex()).asString().getBytes(StandardCharsets.UTF_8);
-            dataBase.get().write(tbName, key, value);
-            return DatabaseCommandResult.success(("Success add key " + dbName + tbName + key).getBytes(StandardCharsets.UTF_8));
+            Optional<byte[]> previous = dataBase.get().read(tbName,key);
+            dataBase.get().write(tbName, key, value.getBytes(StandardCharsets.UTF_8));
+            return DatabaseCommandResult.success(previous.orElse(null));
         } catch (DatabaseException ex) {
-            return new FailedDatabaseCommandResult(ex.getMessage());
+            return DatabaseCommandResult.error("Error while setkey");
         }
     }
 }

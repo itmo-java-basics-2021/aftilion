@@ -21,6 +21,8 @@ public class CreateTableCommand implements DatabaseCommand {
     private final ExecutionEnvironment environment;
     private final List<RespObject> commandargs;
     private static final int numberOfAgrguments = 4;
+    private final String dbName;
+    private final String tbName;
 
     /**
      * Создает команду
@@ -38,6 +40,8 @@ public class CreateTableCommand implements DatabaseCommand {
         }
         environment = env;
         commandargs = comArgs;
+        dbName = comArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+        tbName = comArgs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
     }
 
     /**
@@ -47,12 +51,13 @@ public class CreateTableCommand implements DatabaseCommand {
      */
     @Override
     public DatabaseCommandResult execute() {
+
         try {
-            String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+
             if (dbName == null) {
                 throw new DatabaseException("Why dbname is null?");
             }
-            String tbName = commandargs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
+
             if (tbName == null) {
                 throw new DatabaseException("Why tbName is  null?");
             }
@@ -61,9 +66,10 @@ public class CreateTableCommand implements DatabaseCommand {
                 throw new DatabaseException("We dont have" + dbName);
             }
             dataBase.get().createTableIfNotExists(tbName);
-            return DatabaseCommandResult.success(("Success add " + dbName + tbName).getBytes(StandardCharsets.UTF_8));
+
         } catch (DatabaseException ex) {
             return new FailedDatabaseCommandResult(ex.getMessage());
         }
+        return DatabaseCommandResult.success(("Success add " + dbName + tbName).getBytes(StandardCharsets.UTF_8));
     }
 }

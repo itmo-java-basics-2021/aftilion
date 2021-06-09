@@ -82,6 +82,9 @@ public class DatabaseImpl implements Database {
         }
 
         Table table = tableDictionary.get(tableName);
+        if (table == null) {
+            throw new DatabaseException("Table not found");
+        }
         table.write(objectKey, objectValue);
     }
 
@@ -103,6 +106,9 @@ public class DatabaseImpl implements Database {
             throw new DatabaseException("Writing in database error");
         }
         Table tableImpl = tableDictionary.get(tableName);
+        if (tableName == null) {
+            throw new DatabaseException("Error while reading in database , null name");
+        }
         tableImpl.delete(objectKey);
     }
 }

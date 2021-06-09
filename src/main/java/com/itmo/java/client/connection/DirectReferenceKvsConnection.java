@@ -16,7 +16,7 @@ public class DirectReferenceKvsConnection implements KvsConnection {
     private final DatabaseServer dbServer;
 
     public DirectReferenceKvsConnection(DatabaseServer databaseServer) {
-        dbServer = databaseServer;
+        this.dbServer = databaseServer;
     }
 
     @Override

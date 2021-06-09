@@ -20,6 +20,7 @@ public class CreateDatabaseCommand implements DatabaseCommand {
     private final DatabaseFactory dbfactory;
     private final List<RespObject> commandargs;
     private static final int numberOfAgrguments = 3;
+    private final String dbName;
 
     /**
      * Создает команду.
@@ -39,6 +40,7 @@ public class CreateDatabaseCommand implements DatabaseCommand {
         environment = env;
         dbfactory = factory;
         commandargs = comArgs;
+        dbName = comArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
     }
 
     /**
@@ -48,15 +50,17 @@ public class CreateDatabaseCommand implements DatabaseCommand {
      */
     @Override
     public DatabaseCommandResult execute() {
+        String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
         try {
-            String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+          //  String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
             if (dbName == null) {
                 throw new DatabaseException("Why dbname is null? ");
             }
             environment.addDatabase(dbfactory.createNonExistent(dbName, environment.getWorkingPath()));
-            return DatabaseCommandResult.success(("Success add " + dbName).getBytes(StandardCharsets.UTF_8));
+          //  return DatabaseCommandResult.success(("Success add " + dbName).getBytes(StandardCharsets.UTF_8));
         } catch (DatabaseException ex) {
-            return new FailedDatabaseCommandResult(ex.getMessage());
+            return DatabaseCommandResult.error("Error while create db ");
         }
+        return DatabaseCommandResult.success(("Success add " + dbName).getBytes(StandardCharsets.UTF_8));
     }
 }

@@ -20,6 +20,9 @@ public class GetKeyCommand implements DatabaseCommand {
     private final ExecutionEnvironment environment;
     private final List<RespObject> commandargs;
     private static final int numberOfAgrguments = 5;
+    private  final String dbName;
+    private  final String tbName;
+    private  final String key;
 
     /**
      * Создает команду.
@@ -37,6 +40,9 @@ public class GetKeyCommand implements DatabaseCommand {
         }
         environment = env;
         commandargs = comArgs;
+        dbName = comArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+        tbName = comArgs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
+        key = comArgs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
     }
 
     /**
@@ -47,15 +53,15 @@ public class GetKeyCommand implements DatabaseCommand {
     @Override
     public DatabaseCommandResult execute() {
         try {
-            String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+
             if (dbName == null) {
                 throw new DatabaseException("Why dbname is null?");
             }
-            String tbName = commandargs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
+
             if (tbName == null) {
                 throw new DatabaseException("Why tbName is null?");
             }
-            String key = commandargs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
+
             if (key == null) {
                 throw new DatabaseException("Why key is null?");
             }
@@ -65,11 +71,11 @@ public class GetKeyCommand implements DatabaseCommand {
             }
             Optional<byte[]> value = dataBase.get().read(tbName, key);
             if (value.isEmpty()) {
-                throw new DatabaseException("We dont have" + dbName + tbName + key);
+                return  DatabaseCommandResult.error("DataBase is not found");
             }
-            return DatabaseCommandResult.success(value.get());
+            return DatabaseCommandResult.success(value.orElse(null));
         } catch (DatabaseException ex) {
-            return new FailedDatabaseCommandResult(ex.getMessage());
+            return  DatabaseCommandResult.error("DataBase exception while try get key");
         }
     }
 }
