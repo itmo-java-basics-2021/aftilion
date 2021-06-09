@@ -21,7 +21,7 @@ public class RespWriter implements AutoCloseable{
         try {
             object.write(outputStream);
         } catch (IOException ex) {
-            throw new IOException(ex);
+           ex.printStackTrace();
         }
     }
 
@@ -30,7 +30,7 @@ public class RespWriter implements AutoCloseable{
         try {
             outputStream.close();
         } catch (IOException ex) {
-            throw new IOException(ex);
+           ex.printStackTrace();
         }
     }
 }
