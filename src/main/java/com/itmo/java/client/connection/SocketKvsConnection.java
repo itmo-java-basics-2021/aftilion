@@ -27,7 +27,7 @@ public class SocketKvsConnection implements KvsConnection {
 
 
         try {
-            this.clientSocket = new Socket(host, port);
+            this.clientSocket = new Socket((String) null, config.getPort());
             this.respReader = new RespReader(clientSocket.getInputStream());
             respWriter = new RespWriter(clientSocket.getOutputStream());
         } catch (IOException e) {
