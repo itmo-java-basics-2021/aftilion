@@ -28,7 +28,7 @@ public class SocketKvsConnection implements KvsConnection {
             this.respReader = new RespReader(clientSocket.getInputStream());
             respWriter = new RespWriter(clientSocket.getOutputStream());
         } catch (IOException e) {
-            throw new RuntimeException("IOException when try to connect by " + host + " " + port, e);
+            throw new RuntimeException("SocketKvsConnection IOException when try to connect by  " + host + " " + port, e);
         }
     }
 
