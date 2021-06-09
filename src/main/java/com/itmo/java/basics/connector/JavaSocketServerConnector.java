@@ -5,7 +5,6 @@ import com.itmo.java.basics.config.ConfigLoader;
 import com.itmo.java.basics.config.DatabaseConfig;
 import com.itmo.java.basics.config.DatabaseServerConfig;
 import com.itmo.java.basics.config.ServerConfig;
-import com.itmo.java.basics.console.DatabaseCommand;
 import com.itmo.java.basics.console.DatabaseCommandResult;
 import com.itmo.java.basics.console.impl.ExecutionEnvironmentImpl;
 import com.itmo.java.basics.initialization.impl.DatabaseInitializer;
@@ -116,9 +115,8 @@ public class JavaSocketServerConnector implements Closeable {
         public void run() {
             try (CommandReader commandReader = new CommandReader(new RespReader(client.getInputStream()), server.getEnv())) {
                 while (commandReader.hasNextCommand()) {
-                    DatabaseCommand databaseCommand = commandReader.readCommand();
-                   // CompletableFuture<DatabaseCommandResult> commandResult = server.executeNextCommand(commandReader.readCommand());
-                    respWriter.write(databaseCommand.execute().serialize());
+                    CompletableFuture<DatabaseCommandResult> commandResult = server.executeNextCommand(commandReader.readCommand());
+                    respWriter.write(commandResult.get().serialize());
                 }
                 close();
             } catch (Exception e) {
