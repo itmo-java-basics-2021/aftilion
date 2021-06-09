@@ -21,6 +21,9 @@ public class DeleteKeyCommand implements DatabaseCommand {
     private final ExecutionEnvironment environment;
     private final List<RespObject> commandargs;
     private static final int numberOfAgrguments = 5;
+    private final String tbName;
+    private final String dbName;
+    private final String key;
 
     /**
      * Создает команду.
@@ -32,13 +35,16 @@ public class DeleteKeyCommand implements DatabaseCommand {
      *                Id команды, имя команды, имя бд, таблицы, ключ
      * @throws IllegalArgumentException если передано неправильное количество аргументов
      */
-    public DeleteKeyCommand(ExecutionEnvironment env, List<RespObject> comArgs)  {
+    public DeleteKeyCommand(ExecutionEnvironment env, List<RespObject> comArgs) {
 
         if (comArgs.size() != numberOfAgrguments) {
             throw new IllegalArgumentException("Why " + comArgs.size() + "!= 5 , in CreateTableCommand");
         }
         environment = env;
         commandargs = comArgs;
+        dbName = comArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+        tbName = comArgs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
+        key = comArgs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
     }
 
     /**
@@ -49,15 +55,12 @@ public class DeleteKeyCommand implements DatabaseCommand {
     @Override
     public DatabaseCommandResult execute() {
         try {
-            String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
             if (dbName == null) {
                 throw new DatabaseException("Why dbname is null?");
             }
-            String tbName = commandargs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
             if (tbName == null) {
                 throw new DatabaseException("Why tbName is null?");
             }
-            String key = commandargs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
             if (key == null) {
                 throw new DatabaseException("Why key is null?");
             }
@@ -65,10 +68,14 @@ public class DeleteKeyCommand implements DatabaseCommand {
             if (dataBase.isEmpty()) {
                 throw new DatabaseException("We dont have" + dbName);
             }
-                dataBase.get().delete(tbName, key);
+            Optional<byte[]> previous = dataBase.get().read(tbName, key);
+            if (previous.isEmpty()) {
+                return DatabaseCommandResult.error("Value is not found");
+            }
+            dataBase.get().delete(tbName, key);
             return DatabaseCommandResult.success(("Success del " + dbName + tbName + key).getBytes(StandardCharsets.UTF_8));
         } catch (DatabaseException ex) {
-            return new FailedDatabaseCommandResult(ex.getMessage());
+            return DatabaseCommandResult.error("Error while dbComRes Delete");
         }
     }
 }
