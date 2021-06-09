@@ -44,20 +44,14 @@ public class JavaSocketServerConnector implements Closeable {
      * Начинает слушать заданный порт, начинает аксептить клиентские сокеты. На каждый из них начинает клиентскую таску
      */
     public void start() {
-        try {
             connectionAcceptorExecutor.submit(() -> {
-                try {
+
                     while (true) {
                         Socket clientSocket = serverSocket.accept();
                         clientIOWorkers.submit(new ClientTask(clientSocket, dbServer));
                     }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+
             });
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
     }
 
     /**
