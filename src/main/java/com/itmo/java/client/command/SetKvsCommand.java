@@ -19,7 +19,7 @@ public class SetKvsCommand implements KvsCommand {
         dbName = databaseName;
         tbName = tableName;
         Key = key;
-        setID = idGen.get();
+        setID = idGen.incrementAndGet();
         Value = value;
     }
 
