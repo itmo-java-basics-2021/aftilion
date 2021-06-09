@@ -65,10 +65,8 @@ public class DeleteKeyCommand implements DatabaseCommand {
             if (dataBase.isEmpty()) {
                 throw new DatabaseException("We dont have" + dbName);
             }
-            Optional<byte[]> prev;
-            prev = environment.getDatabase(dbName).get().read(tbName,key);
-            dataBase.get().delete(tbName, key);
-            return DatabaseCommandResult.success((new String(prev.get())).getBytes(StandardCharsets.UTF_8));
+                dataBase.get().delete(tbName, key);
+            return DatabaseCommandResult.success(("Success del " + dbName + tbName + key).getBytes(StandardCharsets.UTF_8));
         } catch (DatabaseException ex) {
             return new FailedDatabaseCommandResult(ex.getMessage());
         }
