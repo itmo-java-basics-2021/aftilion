@@ -18,6 +18,7 @@ public class SocketKvsConnection implements KvsConnection {
 
     public SocketKvsConnection(ConnectionConfig config) {
         this.config = config;
+
         try {
             this.socket = new Socket(this.config.getHost(), this.config.getPort());
         } catch (IOException exception) {
