@@ -20,16 +20,10 @@ public class SocketKvsConnection implements KvsConnection {
     private final Socket clientSocket;
     private final RespWriter respWriter;
     private final RespReader respReader;
-   // public static final String DEFAULT_HOST = "localhost";
-    public SocketKvsConnection(ConnectionConfig config)  {
+
+    public SocketKvsConnection(ConnectionConfig config) {
         this.port = config.getPort();
         this.host = config.getHost();
-        if (host == null){
-            throw new RuntimeException("null host");
-        }
-        if (port == 0){
-            throw new RuntimeException("null port");
-        }
 
         try {
             this.clientSocket = new Socket(host, port);

@@ -1,43 +1,26 @@
 package com.itmo.java.basics.config;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
+import java.net.URL;
 import java.util.Properties;
 
 /**
  * Класс, отвечающий за подгрузку данных из конфигурационного файла формата .properties
  */
 public class ConfigLoader {
+    private final String fileName;
+
     /**
      * По умолчанию читает из server.properties
      */
-
-    private static final String AUTO_NAME = "server.properties";
-    private final Properties properties = new Properties();
     public ConfigLoader() {
-        try{
-            properties.load(this.getClass().getClassLoader().getResourceAsStream(AUTO_NAME));
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-
+        fileName = "server.properties";
     }
 
     /**
      * @param name Имя конфикурационного файла, откуда читать
      */
-    public ConfigLoader(String name) {
-        try{
-            if (this.getClass().getClassLoader().getResourceAsStream(name) != null) {
-                properties.load(this.getClass().getClassLoader().getResourceAsStream(name));
-            } else {
-                FileInputStream inputStream = new FileInputStream(name);
-                properties.load(inputStream);
-            }
-        } catch( IOException ex) {
-            ex.printStackTrace();
-        }
-    }
+    public ConfigLoader(String name) { fileName = name; }
 
     /**
      * Считывает конфиг из указанного в конструкторе файла.
@@ -47,20 +30,23 @@ public class ConfigLoader {
      * Читаются: "kvs.workingPath", "kvs.host", "kvs.port" (но в конфигурационном файле допустимы и другие проперти)
      */
     public DatabaseServerConfig readConfig() {
-        String workingPath = properties.getProperty("kvs.workingPath");
-        if (workingPath == null){
-            workingPath = DatabaseConfig.DEFAULT_WORKING_PATH;
+        final Properties properties = new Properties();
+        final URL resource = this.getClass().getClassLoader().getResource(fileName);
+        final String filepath = resource == null ? fileName : resource.getPath();
+
+        try (final InputStream stream = new FileInputStream(filepath)) {
+            properties.load(stream);
+
+            final String workingPath = properties.getProperty("kvs.workingPath", DatabaseConfig.DEFAULT_WORKING_PATH);
+            final String host = properties.getProperty("kvs.host", ServerConfig.DEFAULT_HOST);
+            final int port = Integer.parseInt(properties.getProperty("kvs.port", String.valueOf(ServerConfig.DEFAULT_PORT)));
+
+            return new DatabaseServerConfig(new ServerConfig(host, port), new DatabaseConfig(workingPath));
+        } catch (IOException exception){
+            return new DatabaseServerConfig(
+                    new ServerConfig(ServerConfig.DEFAULT_HOST, ServerConfig.DEFAULT_PORT),
+                    new DatabaseConfig(DatabaseConfig.DEFAULT_WORKING_PATH)
+            );
         }
-        String host = properties.getProperty("kvs.host");
-        if (host == null) {
-            host = ServerConfig.DEFAULT_HOST;
-        }
-        int port;
-        if (properties.getProperty("kvs.port") == null){
-            port = ServerConfig.DEFAULT_PORT;
-        }else {
-            port = Integer.parseInt(properties.getProperty("kvs.port"));
-        }
-        return new DatabaseServerConfig(new ServerConfig(host, port), new DatabaseConfig(workingPath));
     }
 }
