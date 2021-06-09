@@ -5,9 +5,6 @@ import com.itmo.java.basics.console.DatabaseCommandArgPositions;
 import com.itmo.java.basics.console.DatabaseCommands;
 import com.itmo.java.basics.console.ExecutionEnvironment;
 import com.itmo.java.protocol.RespReader;
-import com.itmo.java.protocol.model.RespArray;
-import com.itmo.java.protocol.model.RespBulkString;
-import com.itmo.java.protocol.model.RespCommandId;
 import com.itmo.java.protocol.model.RespObject;
 
 import java.io.IOException;
@@ -26,7 +23,7 @@ public class CommandReader implements AutoCloseable {
      * Есть ли следующая команда в ридере?
      */
     public boolean hasNextCommand() throws IOException {
-       return respReader.hasArray();
+        return respReader.hasArray();
     }
 
     /**
@@ -45,6 +42,6 @@ public class CommandReader implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-       respReader.close();
+        respReader.close();
     }
 }
