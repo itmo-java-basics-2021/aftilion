@@ -56,7 +56,7 @@ public class CreateDatabaseCommand implements DatabaseCommand {
             environment.addDatabase(dbfactory.createNonExistent(dbName, environment.getWorkingPath()));
             return DatabaseCommandResult.success(("Success add " + dbName).getBytes(StandardCharsets.UTF_8));
         } catch (DatabaseException ex) {
-            return new FailedDatabaseCommandResult(ex.getMessage());
+            return DatabaseCommandResult.error("Create db com");
         }
     }
 }

@@ -61,9 +61,10 @@ public class CreateTableCommand implements DatabaseCommand {
                 throw new DatabaseException("We dont have" + dbName);
             }
             dataBase.get().createTableIfNotExists(tbName);
-            return DatabaseCommandResult.success(("Success add " + dbName + tbName).getBytes(StandardCharsets.UTF_8));
+//            return DatabaseCommandResult.success(("Success add " + dbName + tbName).getBytes(StandardCharsets.UTF_8));
         } catch (DatabaseException ex) {
-            return new FailedDatabaseCommandResult(ex.getMessage());
+            return DatabaseCommandResult.error("Error cr table com");
         }
+        return DatabaseCommandResult.success(("Succes").getBytes(StandardCharsets.UTF_8));
     }
 }
