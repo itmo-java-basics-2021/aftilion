@@ -36,12 +36,11 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespObject readObject() throws IOException {
-        try {
 
             int codeInt = reader.read();
-            if (codeInt == -1) {
-                throw new EOFException("InputStream is empty when try to read RespObject");
-            }
+//            if (codeInt == -1) {
+//                throw new EOFException("InputStream is empty when try to read RespObject");
+//            }
             byte code = (byte) codeInt;
             switch (code) {
                 case RespArray.CODE:
@@ -56,9 +55,6 @@ public class RespReader implements AutoCloseable {
                     throw new IOException("Code character is not correct");
 
             }
-        } catch(IOException ex) {
-            throw new RuntimeException("rer");
-        }
     }
 
     /**
