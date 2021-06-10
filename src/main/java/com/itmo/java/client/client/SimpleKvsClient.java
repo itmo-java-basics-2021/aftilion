@@ -35,7 +35,7 @@ public class SimpleKvsClient implements KvsClient {
             }
             return obj.asString();
         } catch (ConnectionException ex) {
-            return DatabaseCommandResult.error(ex).getPayLoad();
+            throw new DatabaseExecutionException("Creating DataBAse SinpleKvsClient, ConnectionException", ex);
         }
     }
 
@@ -49,7 +49,7 @@ public class SimpleKvsClient implements KvsClient {
             }
             return obj.asString();
         } catch (ConnectionException ex) {
-            return DatabaseCommandResult.error(ex).getPayLoad();
+            throw new DatabaseExecutionException("Creating table SinpleKvsClient, ConnectionException", ex);
         }
     }
 
@@ -63,7 +63,7 @@ public class SimpleKvsClient implements KvsClient {
             }
             return obj.asString();
         } catch (ConnectionException ex) {
-            return DatabaseCommandResult.error(ex).getPayLoad();
+            throw new DatabaseExecutionException("getting SinpleKvsClient, ConnectionException", ex);
         }
     }
 
@@ -77,7 +77,7 @@ public class SimpleKvsClient implements KvsClient {
             }
             return obj.asString();
         } catch (ConnectionException ex) {
-            return DatabaseCommandResult.error(ex).getPayLoad();
+            throw new DatabaseExecutionException("setting SinpleKvsClient, ConnectionException", ex);
         }
     }
 
@@ -91,7 +91,7 @@ public class SimpleKvsClient implements KvsClient {
             }
             return obj.asString();
         } catch (ConnectionException ex) {
-            return DatabaseCommandResult.error(ex).getPayLoad();
+            throw new DatabaseExecutionException("Deleting SinpleKvsClient, ConnectionException", ex);
         }
     }
 }
