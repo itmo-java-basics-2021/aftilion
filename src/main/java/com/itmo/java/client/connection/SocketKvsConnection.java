@@ -50,7 +50,8 @@ public class SocketKvsConnection implements KvsConnection {
             return respObject;
         } catch (IOException e) {
             close();
-            throw new ConnectionException("IOException when send SocketKvs");
+            return null;
+            //throw new ConnectionException("IOException when send SocketKvs");
         }
     }
 
