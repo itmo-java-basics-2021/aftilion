@@ -9,16 +9,16 @@ import java.nio.charset.StandardCharsets;
 public class GetKvsCommand implements KvsCommand {
 
     private static final String COMMAND_NAME = "GET_KEY";
-    private final String dbName;
-    private final String tbName;
-    private final String Key;
-    private final int getID;
+    private final String databaseName;
+    private final String tableName;
+    private final String key;
+    private final int commandId;
 
     public GetKvsCommand(String databaseName, String tableName, String key) {
-        dbName = databaseName;
-        tbName = tableName;
-        Key = key;
-        getID = idGen.incrementAndGet();
+        this.databaseName = databaseName;
+        this.tableName = tableName;
+        this.key = key;
+        this.commandId = idGen.getAndIncrement();
     }
 
     /**
@@ -28,15 +28,15 @@ public class GetKvsCommand implements KvsCommand {
      */
     @Override
     public RespArray serialize() {
-        return new RespArray(new RespCommandId(getID),
+        return new RespArray(new RespCommandId(commandId),
                 new RespBulkString(COMMAND_NAME.getBytes(StandardCharsets.UTF_8)),
-                new RespBulkString(dbName.getBytes(StandardCharsets.UTF_8)),
-                new RespBulkString(tbName.getBytes(StandardCharsets.UTF_8)),
-                new RespBulkString(Key.getBytes(StandardCharsets.UTF_8)));
+                new RespBulkString(databaseName.getBytes(StandardCharsets.UTF_8)),
+                new RespBulkString(tableName.getBytes(StandardCharsets.UTF_8)),
+                new RespBulkString(key.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Override
     public int getCommandId() {
-        return getID;
+        return commandId;
     }
 }
