@@ -54,6 +54,10 @@ public class DeleteKeyCommand implements DatabaseCommand {
                 return DatabaseCommandResult.error("Value with key DeleteKeyCommand " + key + " in database " + databaseName + " not found");
             }
             database.get().delete(tableName, key);
+            Optional<byte[]> valuePrev  = database.get().read(tableName,key);
+            if (valuePrev.isEmpty()) {
+                return DatabaseCommandResult.error("lol DelereKeyCom");
+            }
             return DatabaseCommandResult.success(value.get());
         } catch (DatabaseException e){
             return DatabaseCommandResult.error("DatabaseException when try to delete value by key  DeleteKeyCommand" + key + " in table " + tableName);
