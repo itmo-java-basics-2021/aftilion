@@ -64,9 +64,9 @@ public class GetKeyCommand implements DatabaseCommand {
                 throw new DatabaseException("We dont have GetKeyCommand" + dbName);
             }
             Optional<byte[]> value = dataBase.get().read(tbName, key);
-            if (value.isEmpty()) {
-                throw new DatabaseException("We dont have GetKeyCommand" + dbName + tbName + key);
-            }
+         //   if (value.isEmpty()) {
+           //     throw new DatabaseException("We dont have GetKeyCommand" + dbName + tbName + key);
+            //}
             return DatabaseCommandResult.success(value.get());
         } catch (DatabaseException ex) {
             return new FailedDatabaseCommandResult(ex.getMessage());
