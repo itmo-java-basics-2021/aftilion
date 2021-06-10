@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
  * Команда для создания бд
  */
 public class CreateDatabaseKvsCommand implements KvsCommand {
+
     private static final String COMMAND_NAME = "CREATE_DATABASE";
     private final String dbName;
     private final int dbID;
@@ -21,7 +22,7 @@ public class CreateDatabaseKvsCommand implements KvsCommand {
      */
     public CreateDatabaseKvsCommand(String databaseName) {
         // dbID = idGen.get();
-        dbID = idGen.getAndIncrement();
+        dbID = idGen.incrementAndGet();
         dbName = databaseName;
     }
 

@@ -8,19 +8,17 @@ import java.nio.charset.StandardCharsets;
  * Строка
  */
 public class RespBulkString implements RespObject {
-    private final byte[] data;
-
     /**
      * Код объекта
      */
     public static final byte CODE = '$';
-
     public static final int NULL_STRING_SIZE = -1;
-
+    private final byte[] data;
     public static final RespBulkString NULL_STRING = new RespBulkString(null);
 
-    public RespBulkString(byte[] data) {
-        this.data = data;
+
+    public RespBulkString(byte[] inform) {
+        data = inform;
     }
 
     /**
@@ -40,24 +38,24 @@ public class RespBulkString implements RespObject {
      */
     @Override
     public String asString() {
-        if (data == null) {
-            return null;
-        }
-        return new String(data, StandardCharsets.UTF_8);
+        return new String(data);
     }
 
     @Override
-    public void write(OutputStream os) throws IOException {
-        os.write(CODE);
-        if (data == null) {
-            os.write(String.valueOf(NULL_STRING_SIZE).getBytes(StandardCharsets.UTF_8));
+    public void write(OutputStream output) throws IOException {
+        try {
+            output.write(CODE);
+            if (data == null) {
+                output.write(Integer.toString(NULL_STRING_SIZE).getBytes(StandardCharsets.UTF_8));
+            } else {
+                output.write(Integer.toString(data.length).getBytes(StandardCharsets.UTF_8));
+                output.write(CRLF);
+                output.write(data);
+            }
+            output.write(CRLF);
+        } catch (IOException ex) {
+            throw new IOException(ex);
         }
-        else {
-            os.write(String.valueOf(data.length).getBytes(StandardCharsets.UTF_8));
-            os.write(CRLF);
-            os.write(data);
-        }
-        os.write(CRLF);
-        os.flush();
     }
+
 }

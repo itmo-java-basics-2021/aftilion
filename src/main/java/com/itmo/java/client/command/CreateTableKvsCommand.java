@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
  * Команда для создания таблицы
  */
 public class CreateTableKvsCommand implements KvsCommand {
+
     private static final String COMMAND_NAME = "CREATE_TABLE";
     private final String dbName;
     private final int tbID;
@@ -18,7 +19,7 @@ public class CreateTableKvsCommand implements KvsCommand {
     public CreateTableKvsCommand(String databaseName, String tableName) {
         dbName = databaseName;
         tbName = tableName;
-        tbID = idGen.getAndIncrement();
+        tbID = idGen.incrementAndGet();
     }
 
     /**

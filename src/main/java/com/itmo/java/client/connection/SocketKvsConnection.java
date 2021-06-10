@@ -1,5 +1,6 @@
 package com.itmo.java.client.connection;
 
+
 import com.itmo.java.client.exception.ConnectionException;
 import com.itmo.java.protocol.RespReader;
 import com.itmo.java.protocol.RespWriter;
@@ -23,6 +24,7 @@ public class SocketKvsConnection implements KvsConnection {
     public SocketKvsConnection(ConnectionConfig config) {
         this.port = config.getPort();
         this.host = config.getHost();
+
         try {
             this.clientSocket = new Socket(host, port);
             this.respReader = new RespReader(clientSocket.getInputStream());
