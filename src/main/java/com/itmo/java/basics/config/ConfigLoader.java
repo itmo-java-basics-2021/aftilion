@@ -29,7 +29,7 @@ public class ConfigLoader {
      */
     public ConfigLoader(String name) {
         try {
-            if (this.getClass().getClassLoader().getResourceAsStream(name) != null){
+            if (this.getClass().getClassLoader().getResourceAsStream(name) != null) {
                 configFileProp.load(this.getClass().getClassLoader().getResourceAsStream(name));
             } else {
                 FileInputStream fileInputStream = new FileInputStream(name);
@@ -51,7 +51,7 @@ public class ConfigLoader {
         workingPath = configFileProp.getProperty("kvs.workingPath");
         host = configFileProp.getProperty("kvs.host");
         String stringPort = configFileProp.getProperty("kvs.port");
-        if (host == null){
+        if (host == null) {
             host = ServerConfig.DEFAULT_HOST;
         }
         if (stringPort == null) {
@@ -59,7 +59,7 @@ public class ConfigLoader {
         } else {
             port = Integer.parseInt(stringPort);
         }
-        if (workingPath == null){
+        if (workingPath == null) {
             workingPath = DatabaseConfig.DEFAULT_WORKING_PATH;
         }
         ServerConfig serverConfig = new ServerConfig(host, port);

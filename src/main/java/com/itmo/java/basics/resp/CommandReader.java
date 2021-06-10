@@ -4,7 +4,6 @@ import com.itmo.java.basics.console.DatabaseCommand;
 import com.itmo.java.basics.console.DatabaseCommandArgPositions;
 import com.itmo.java.basics.console.DatabaseCommands;
 import com.itmo.java.basics.console.ExecutionEnvironment;
-import com.itmo.java.basics.console.impl.CreateDatabaseCommand;
 import com.itmo.java.protocol.RespReader;
 import com.itmo.java.protocol.model.RespArray;
 import com.itmo.java.protocol.model.RespBulkString;
@@ -36,21 +35,21 @@ public class CommandReader implements AutoCloseable {
      */
     public DatabaseCommand readCommand() throws IOException {
         RespArray respArray = reader.readArray();
-        if (respArray.getObjects().size() < DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex() + 1){
-            throw new IllegalArgumentException("RespArray does not have enough size to have id, name and one object");
+        if (respArray.getObjects().size() < DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex() + 1) {
+            throw new IllegalArgumentException("RespArray does not have enough size");
         }
         RespObject id = respArray.getObjects().get(DatabaseCommandArgPositions.COMMAND_ID.getPositionIndex());
-        if (!(id instanceof RespCommandId)){
+        if (!(id instanceof RespCommandId)) {
             throw new IllegalArgumentException("Command does not have command id");
         }
-        if (id.asString() == null || id.asString().isEmpty()){
+        if (id.asString() == null || id.asString().isEmpty()) {
             throw new IllegalArgumentException("Command id does not exist");
         }
         RespObject commandName = respArray.getObjects().get(DatabaseCommandArgPositions.COMMAND_NAME.getPositionIndex());
-        if (!(commandName instanceof RespBulkString)){
+        if (!(commandName instanceof RespBulkString)) {
             throw new IllegalArgumentException("Command does not have command name");
         }
-        if (commandName.asString() == null || commandName.asString().isEmpty()){
+        if (commandName.asString() == null || commandName.asString().isEmpty()) {
             throw new IllegalArgumentException("Command name does not exist");
         }
 

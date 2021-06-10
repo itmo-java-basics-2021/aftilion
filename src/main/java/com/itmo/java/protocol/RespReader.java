@@ -52,10 +52,10 @@ public class RespReader implements AutoCloseable {
                 case RespError.CODE:
                     return readError();
                 default:
-                    throw new IOException("Code character is not correct");
+                    throw new IOException("Code is not correct");
             }
         } catch (IOException ex) {
-            throw new RuntimeException("Read object fail");
+            throw new IOException("Error while readObject RespReader");
         }
     }
 
