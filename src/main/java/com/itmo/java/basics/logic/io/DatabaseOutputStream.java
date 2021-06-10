@@ -42,8 +42,9 @@ public class DatabaseOutputStream extends DataOutputStream {
         if (databaseRecord.isValuePresented()) {
             write(databaseRecord.getValue());
         }
+        flush();
 
-        return size();
+        return (int) databaseRecord.size();
 
     }
 }

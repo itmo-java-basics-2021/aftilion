@@ -42,8 +42,12 @@ public class JavaSocketServerConnector implements Closeable {
      * Стартует сервер. По аналогии с сокетом открывает коннекшн в конструкторе.
      */
     public JavaSocketServerConnector(DatabaseServer databaseServer, ServerConfig config) throws IOException {
-        this.serverSocket = new ServerSocket(config.getPort());
-        this.server = databaseServer;
+        try {
+            this.serverSocket = new ServerSocket(config.getPort());
+            this.server = databaseServer;
+        } catch (IOException ex) {
+            throw new IOException(ex);
+        }
     }
 
     /**
@@ -51,13 +55,12 @@ public class JavaSocketServerConnector implements Closeable {
      */
     public void start() {
         connectionAcceptorExecutor.submit(() -> {
-            while (true) {
+            while(true) {
                 Socket clientSocket = serverSocket.accept();
-                clientIOWorkers.submit(new ClientTask(clientSocket, server));
+                clientIOWorkers.submit(new ClientTask(clientSocket,server));
             }
         });
     }
-
     /**
      * Закрывает все, что нужно ¯\_(ツ)_/¯
      */
@@ -77,11 +80,6 @@ public class JavaSocketServerConnector implements Closeable {
 
 
     public static void main(String[] args) throws Exception {
-        DatabaseServerConfig config = new ConfigLoader().readConfig();
-        DatabaseServer server = DatabaseServer.initialize(new ExecutionEnvironmentImpl(config.getDbConfig()),
-                new DatabaseServerInitializer(new DatabaseInitializer(new TableInitializer(new SegmentInitializer()))));
-        JavaSocketServerConnector connector = new JavaSocketServerConnector(server, config.getServerConfig());
-        connector.start();
     }
 
     /**
