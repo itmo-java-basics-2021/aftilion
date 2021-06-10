@@ -33,12 +33,8 @@ public class JavaSocketServerConnector implements Closeable {
      * Стартует сервер. По аналогии с сокетом открывает коннекшн в конструкторе.
      */
     public JavaSocketServerConnector(DatabaseServer databaseServer, ServerConfig config) throws IOException {
-        try {
-            this.serverSocket = new ServerSocket(config.getPort());
-            this.server = databaseServer;
-        } catch (IOException ex) {
-            throw new IOException(ex);
-        }
+        this.serverSocket = new ServerSocket(config.getPort());
+        this.server = databaseServer;
     }
 
     /**
