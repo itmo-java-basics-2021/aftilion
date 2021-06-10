@@ -16,8 +16,8 @@ import java.util.Optional;
  */
 public class DeleteKeyCommand implements DatabaseCommand {
     private final ExecutionEnvironment environment;
-    private final String databaseName;
-    private final String tableName;
+    private final String dbName;
+    private final String tbName;
     private final String key;
 
     /**
@@ -32,8 +32,8 @@ public class DeleteKeyCommand implements DatabaseCommand {
      */
     public DeleteKeyCommand(ExecutionEnvironment env, List<RespObject> commandArgs) {
         this.environment = env;
-        this.databaseName = commandArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
-        this.tableName = commandArgs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
+        this.dbName = commandArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+        this.tbName = commandArgs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
         this.key = commandArgs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
     }
 
@@ -45,22 +45,22 @@ public class DeleteKeyCommand implements DatabaseCommand {
     @Override
     public DatabaseCommandResult execute() {
         try {
-            Optional<Database> database = environment.getDatabase(databaseName);
+            Optional<Database> database = environment.getDatabase(dbName);
             if (database.isEmpty()){
-                return DatabaseCommandResult.error("Not found database DeleteKeyCommand " + databaseName);
+                return DatabaseCommandResult.error("Not found database DeleteKeyCommand " + dbName);
             }
-            Optional<byte[]> previous = database.get().read(tableName, key);
+            Optional<byte[]> previous = database.get().read(tbName, key);
             if (previous.isEmpty()){
-                return DatabaseCommandResult.error("Value with key DeleteKeyCommand " + key + " in database " + databaseName + " not found");
+                return DatabaseCommandResult.error("Value with key DeleteKeyCommand " + key + " in database " + dbName + " not found");
             }
-            database.get().delete(tableName, key);
+            database.get().delete(tbName, key);
 //            Optional<byte[]> valuePrev  = database.get().read(tableName,key);
 //            if (valuePrev.isEmpty()) {
 //                return DatabaseCommandResult.error("lol DelereKeyCom");
 //            }
             return DatabaseCommandResult.success(previous.get());
         } catch (DatabaseException e){
-            return DatabaseCommandResult.error("DatabaseException when try to delete value by key  DeleteKeyCommand" + key + " in table " + tableName);
+            return DatabaseCommandResult.error("DatabaseException when try to delete value by key  DeleteKeyCommand" + key + " in table " + tbName);
         }
     }
 }
