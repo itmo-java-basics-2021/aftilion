@@ -40,15 +40,31 @@ public class SocketKvsConnection implements KvsConnection {
      */
     @Override
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
+//        try {
         try {
             RespWriter respWriter = new RespWriter(clientSocket.getOutputStream());
-            respWriter.write(command);
-            RespReader respReader = new RespReader(clientSocket.getInputStream());
-            return respReader.readObject();
-        } catch (IOException e) {
-            close();
-            throw new ConnectionException("IOException when send " + command.asString() + " with " + host + " and port " + port + " ___IOMessage___: " + e.getMessage(), e);
+        } catch (IOException ex) {
+            throw new ConnectionException("1");
         }
+        try {
+            respWriter.write(command);
+        } catch (IOException ex) {
+            throw new ConnectionException("2");
+        }
+        try {
+            RespReader respReader = new RespReader(clientSocket.getInputStream());
+        } catch (IOException ex) {
+            throw new ConnectionException("3");
+        }
+        try {
+            return respReader.readObject();
+        } catch (IOException ex) {
+            throw new ConnectionException("4");
+        }
+//        } catch (IOException e) {
+//            close();
+//            throw new ConnectionException("IOException when send " + command.asString() + " with " + host + " and port " + port + " ___IOMessage___: " + e.getMessage(), e);
+//        }
     }
 
     /**
