@@ -129,19 +129,19 @@ public class RespReader implements AutoCloseable {
         while (true) {
             int currentByte = reader.read();
             if (currentByte == -1) {
-                throw new EOFException("Stream is empty when try to read all bytes before '\\r\\n'");
+                throw new EOFException("Stream is empty when try to read ");
             }
             if (currentByte == CR) {
                 reader.mark(READ_AHEAD_LIMIT);
                 int nextByte = reader.read();
                 if (nextByte == -1) {
-                    throw new EOFException("Stream is empty when try to read all bytes before '\\r\\n'");
+                    throw new EOFException("Stream is empty when try to read ");
                 }
-                if (nextByte == LF){
+                if (nextByte == LF) {
                     reader.reset();
                     reader.read();
                     break;
-                }else {
+                } else {
                     reader.reset();
                 }
             }

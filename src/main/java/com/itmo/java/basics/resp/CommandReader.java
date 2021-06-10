@@ -5,12 +5,10 @@ import com.itmo.java.basics.console.DatabaseCommandArgPositions;
 import com.itmo.java.basics.console.DatabaseCommands;
 import com.itmo.java.basics.console.ExecutionEnvironment;
 import com.itmo.java.protocol.RespReader;
-import com.itmo.java.protocol.model.RespArray;
-import com.itmo.java.protocol.model.RespBulkString;
-import com.itmo.java.protocol.model.RespCommandId;
 import com.itmo.java.protocol.model.RespObject;
 
 import java.io.IOException;
+import java.util.List;
 
 public class CommandReader implements AutoCloseable {
     private final RespReader reader;
@@ -25,7 +23,7 @@ public class CommandReader implements AutoCloseable {
      * Есть ли следующая команда в ридере?
      */
     public boolean hasNextCommand() throws IOException {
-        return reader.hasArray();
+        return this.reader.hasArray();
     }
 
     /**
@@ -34,30 +32,17 @@ public class CommandReader implements AutoCloseable {
      * @throws IllegalArgumentException если нет имени команды и id
      */
     public DatabaseCommand readCommand() throws IOException {
-        RespArray respArray = reader.readArray();
-        if (respArray.getObjects().size() < DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex() + 1) {
-            throw new IllegalArgumentException("RespArray does not have enough size");
+        final List<RespObject> commandArgs = this.reader.readArray().getObjects();
+        if (commandArgs.size() < 2) {
+            throw new IllegalArgumentException("There is no id and command name");
         }
-        RespObject id = respArray.getObjects().get(DatabaseCommandArgPositions.COMMAND_ID.getPositionIndex());
-        if (!(id instanceof RespCommandId)) {
-            throw new IllegalArgumentException("Command does not have command id");
-        }
-        if (id.asString() == null || id.asString().isEmpty()) {
-            throw new IllegalArgumentException("Command id does not exist");
-        }
-        RespObject commandName = respArray.getObjects().get(DatabaseCommandArgPositions.COMMAND_NAME.getPositionIndex());
-        if (!(commandName instanceof RespBulkString)) {
-            throw new IllegalArgumentException("Command does not have command name");
-        }
-        if (commandName.asString() == null || commandName.asString().isEmpty()) {
-            throw new IllegalArgumentException("Command name does not exist");
-        }
-
-        return DatabaseCommands.valueOf(commandName.asString()).getCommand(env, respArray.getObjects());
+        return DatabaseCommands.valueOf(commandArgs
+                .get(DatabaseCommandArgPositions.COMMAND_NAME.getPositionIndex()).asString())
+                .getCommand(env, commandArgs);
     }
 
     @Override
     public void close() throws Exception {
-        reader.close();
+        this.reader.close();
     }
 }
