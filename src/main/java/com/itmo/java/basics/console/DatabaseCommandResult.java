@@ -35,13 +35,8 @@ public interface DatabaseCommandResult extends DatabaseApiSerializable {
      * @param exception исключение, из которого нужно сформировать результат выполнения команды
      * @return результат команды, при выполнении которой произошла ошибка
      */
-    static DatabaseCommandResult error(Exception exception) {
-        if (exception.getMessage().isEmpty()) {
-            return new FailedDatabaseCommandResult(Arrays.toString(exception.getStackTrace()));
-        } else {
-            return new FailedDatabaseCommandResult(exception.getMessage());
-        }
-    }
+    static DatabaseCommandResult error(Exception exception) { return new FailedDatabaseCommandResult(exception.getMessage()); }
+
 
     /**
      * @return значение результата выполнения команды в виде {@code Optional<String>}
