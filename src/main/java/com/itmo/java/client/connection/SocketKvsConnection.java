@@ -9,23 +9,19 @@ import com.itmo.java.protocol.model.RespObject;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 /**
  * С помощью {@link RespWriter} и {@link RespReader} читает/пишет в сокет
  */
 public class SocketKvsConnection implements KvsConnection {
-    //    private final int port;
-//    private final String host;
-//    private final Socket clientSocket;
-//    private final RespWriter respWriter;
-//    private final RespReader respReader;
+
     final ConnectionConfig connectionConfig;
-    final  Socket socket;
+    final Socket socket;
+
     public SocketKvsConnection(ConnectionConfig config) {
         connectionConfig = config;
         try {
-            socket = new Socket(connectionConfig.getHost(),connectionConfig.getPort());
+            socket = new Socket(connectionConfig.getHost(), connectionConfig.getPort());
         } catch (IOException e) {
             throw new RuntimeException("Error in const");
         }
@@ -33,6 +29,7 @@ public class SocketKvsConnection implements KvsConnection {
 
     /**
      * Отправляет с помощью сокета команду и получает результат.
+     *
      * @param commandId id команды (номер)
      * @param command   команда
      * @throws ConnectionException если сокет закрыт или если произошла другая ошибка соединения
@@ -44,13 +41,9 @@ public class SocketKvsConnection implements KvsConnection {
             respWriter.write(command);
             RespReader respReader = new RespReader(socket.getInputStream());
             RespObject respObject = respReader.readObject();
-//            if (respObject.isError()) {
-//                throw new ConnectionException("Response error");
-//            }
             return respObject;
         } catch (IOException e) {
             close();
-          //  return null;
             throw new ConnectionException("IOException when send SocketKvs");
         }
     }
