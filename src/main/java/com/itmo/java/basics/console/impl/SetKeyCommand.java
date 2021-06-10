@@ -21,7 +21,6 @@ public class SetKeyCommand implements DatabaseCommand {
     private final ExecutionEnvironment environment;
     private final List<RespObject> commandargs;
     private static final int numberOfAgrguments = 6;
-    private final String value;
 
     /**
      * Создает команду.
@@ -39,7 +38,6 @@ public class SetKeyCommand implements DatabaseCommand {
         }
         environment = env;
         commandargs = comArgs;
-        value = comArgs.get(DatabaseCommandArgPositions.VALUE.getPositionIndex()).asString();
     }
 
     /**
@@ -66,11 +64,11 @@ public class SetKeyCommand implements DatabaseCommand {
             if (dataBase.isEmpty()) {
                 throw new DatabaseException("We dont have" + dbName);
             }
-           Optional <byte[]> previous = dataBase.get().read(tbName,key);
-            dataBase.get().write(tbName, key, value.getBytes(StandardCharsets.UTF_8));
-            return DatabaseCommandResult.success(previous.orElse(null));
+            byte[] value = commandargs.get(DatabaseCommandArgPositions.VALUE.getPositionIndex()).asString().getBytes(StandardCharsets.UTF_8);
+            dataBase.get().write(tbName, key, value);
+            return DatabaseCommandResult.success(("Success add key " + dbName + tbName + key).getBytes(StandardCharsets.UTF_8));
         } catch (DatabaseException ex) {
-            return DatabaseCommandResult.error("Error while setting");
+            return new FailedDatabaseCommandResult(ex.getMessage());
         }
     }
 }
