@@ -48,7 +48,7 @@ public class CreateDatabaseCommand implements DatabaseCommand {
      */
     @Override
     public DatabaseCommandResult execute() {
-        try {
+        try { 
             String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
             if (dbName == null) {
                 throw new DatabaseException("Why dbname is null? CreateDatabaseCommand ");
