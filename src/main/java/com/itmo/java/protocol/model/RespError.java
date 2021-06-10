@@ -39,7 +39,7 @@ public class RespError implements RespObject {
             output.write(CODE);
             output.write(message);
             output.write(CRLF);
-        } catch(IOException ex) {
+        } catch (IOException ex) {
             throw new IOException(ex);
         }
     }
