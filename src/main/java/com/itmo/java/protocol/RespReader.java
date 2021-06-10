@@ -38,7 +38,7 @@ public class RespReader implements AutoCloseable {
     public RespObject readObject() throws IOException {
         int codeInt = reader.read();
         if (codeInt == -1) {
-            return readError();
+           throw new IOException("me too");
         }
         byte code = (byte) codeInt;
         switch (code) {
