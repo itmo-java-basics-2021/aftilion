@@ -48,7 +48,7 @@ public class SimpleKvsClient implements KvsClient {
                 throw new DatabaseExecutionException(obj.asString());
             }
             return obj.asString();
-        } catch (ConnectionException ex) {
+        } catch (ConnectionException ex){
             return DatabaseCommandResult.error(ex).getPayLoad();
         }
     }
