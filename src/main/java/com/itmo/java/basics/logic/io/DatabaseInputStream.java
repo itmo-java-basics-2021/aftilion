@@ -6,6 +6,7 @@ import com.itmo.java.basics.logic.impl.RemoveDatabaseRecord;
 import com.itmo.java.basics.logic.impl.SetDatabaseRecord;
 
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
@@ -30,15 +31,12 @@ public class DatabaseInputStream extends DataInputStream {
             int keySize = readInt();
             byte[] key = readNBytes(keySize);
             int valueSize = readInt();
-
-            if (valueSize != REMOVED_OBJECT_SIZE) {
-                byte[] value = readNBytes(valueSize);
-                Optional<DatabaseRecord> result = Optional.of(new SetDatabaseRecord(key, value));
-                return result;
-            } else {
-                return Optional.of(new RemoveDatabaseRecord(key));
+            if (valueSize == REMOVED_OBJECT_SIZE) {
+                return Optional.of(new RemoveDatabaseRecord(keySize, key));
             }
-        } catch (IOException ex) {
+            byte[] value = readNBytes(valueSize);
+            return Optional.of(new SetDatabaseRecord(keySize, key, valueSize, value));
+        }catch (EOFException e){
             return Optional.empty();
         }
     }

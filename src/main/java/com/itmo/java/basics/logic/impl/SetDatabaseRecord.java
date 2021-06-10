@@ -2,19 +2,18 @@ package com.itmo.java.basics.logic.impl;
 
 import com.itmo.java.basics.logic.WritableDatabaseRecord;
 
-/**
- * Запись в БД, означающая добавление значения по ключу
- */
 public class SetDatabaseRecord implements WritableDatabaseRecord {
+    private static final int SIZE_OF_KEY_SIZE = 4;
+    private static final int SIZE_OF_VALUE_SIZE = 4;
+    private int keySize, valueSize;
+    private byte[] key, value;
 
-    private byte[] key;
-    private byte[] value;
-
-    public SetDatabaseRecord(byte[] key, byte[] value) {
+    public SetDatabaseRecord(int keySize, byte[] key, int valueSize, byte[] value) {
+        this.keySize = keySize;
         this.key = key;
+        this.valueSize = valueSize;
         this.value = value;
     }
-
 
     @Override
     public byte[] getKey() {
@@ -28,21 +27,21 @@ public class SetDatabaseRecord implements WritableDatabaseRecord {
 
     @Override
     public long size() {
-        return getKeySize() + getValueSize() + 4 + 4;
+        return SIZE_OF_KEY_SIZE + keySize + SIZE_OF_VALUE_SIZE + valueSize;
     }
 
     @Override
     public boolean isValuePresented() {
-        return true;
+        return value != null;
     }
 
     @Override
     public int getKeySize() {
-        return key.length;
+        return keySize;
     }
 
     @Override
     public int getValueSize() {
-        return value.length;
+        return valueSize;
     }
 }

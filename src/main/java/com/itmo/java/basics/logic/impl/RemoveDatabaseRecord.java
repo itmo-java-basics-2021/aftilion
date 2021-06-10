@@ -2,14 +2,16 @@ package com.itmo.java.basics.logic.impl;
 
 import com.itmo.java.basics.logic.WritableDatabaseRecord;
 
-/**
- * Запись в БД, означающая удаление значения по ключу
- */
 public class RemoveDatabaseRecord implements WritableDatabaseRecord {
+    private static final int SIZE_OF_KEY_SIZE = 4;
+    private static final int SIZE_OF_VALUE_SIZE = 4;
+    private static final int VALUE_SIZE = -1;
+    private static final byte[] VALUE = null;
+    private int keySize;
     private byte[] key;
-    private byte[] value;
 
-    public RemoveDatabaseRecord(byte[] key) {
+    public RemoveDatabaseRecord(int keySize, byte[] key) {
+        this.keySize = keySize;
         this.key = key;
     }
 
@@ -20,12 +22,12 @@ public class RemoveDatabaseRecord implements WritableDatabaseRecord {
 
     @Override
     public byte[] getValue() {
-        return null;
+        return VALUE;
     }
 
     @Override
     public long size() {
-        return getKeySize() + 4 + 4;
+        return SIZE_OF_KEY_SIZE + keySize + SIZE_OF_VALUE_SIZE;
     }
 
     @Override
@@ -33,14 +35,13 @@ public class RemoveDatabaseRecord implements WritableDatabaseRecord {
         return false;
     }
 
-
     @Override
     public int getKeySize() {
-        return key.length;
+        return keySize;
     }
 
     @Override
     public int getValueSize() {
-        return -1;
+        return VALUE_SIZE;
     }
 }
