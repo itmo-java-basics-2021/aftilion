@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
  * Результат успешной команды
  */
 public class SuccessDatabaseCommandResult implements DatabaseCommandResult {
-
     private final byte[] payLoad;
 
     public SuccessDatabaseCommandResult(byte[] pload) {
@@ -19,10 +18,10 @@ public class SuccessDatabaseCommandResult implements DatabaseCommandResult {
 
     @Override
     public String getPayLoad() {
-        if(payLoad == null) {
+        if (payLoad == null) {
             return null;
         } else {
-            return new String(payLoad , StandardCharsets.UTF_8);
+            return new String(payLoad, StandardCharsets.UTF_8);
         }
     }
 

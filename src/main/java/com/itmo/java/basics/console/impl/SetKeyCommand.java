@@ -8,7 +8,6 @@ import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.logic.Database;
 import com.itmo.java.protocol.model.RespObject;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -29,17 +28,18 @@ public class SetKeyCommand implements DatabaseCommand {
      * <br/>
      * Обратите внимание, что в конструкторе нет логики проверки валидности данных. Не проверяется, можно ли исполнить команду. Только формальные признаки (например, количество переданных значений или ненуловость объектов
      *
-     * @param env     env
-     * @param comArgs аргументы для создания (порядок - {@link DatabaseCommandArgPositions}.
-     *                Id команды, имя команды, имя бд, таблицы, ключ, значение
+     * @param env         env
+     * @param commandArgs аргументы для создания (порядок - {@link DatabaseCommandArgPositions}.
+     *                    Id команды, имя команды, имя бд, таблицы, ключ, значение
      * @throws IllegalArgumentException если передано неправильное количество аргументов
      */
-    public SetKeyCommand(ExecutionEnvironment env, List<RespObject> comArgs) {
+    public SetKeyCommand(ExecutionEnvironment env, List<RespObject> commandArgs) {
         environment = env;
-        this.value = comArgs.get(DatabaseCommandArgPositions.VALUE.getPositionIndex()).asString();
-        this.dbName = comArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
-        this.tbName = comArgs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
-        this.key = comArgs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
+        value = commandArgs.get(DatabaseCommandArgPositions.VALUE.getPositionIndex()).asString();
+        dbName = commandArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+        tbName = commandArgs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
+        key = commandArgs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
+
     }
 
     /**
@@ -50,14 +50,14 @@ public class SetKeyCommand implements DatabaseCommand {
     @Override
     public DatabaseCommandResult execute() {
         try {
-            Optional<Database> dataBase = environment.getDatabase(dbName);
-            if (dataBase.isEmpty()) {
-               return DatabaseCommandResult.error("We dont have SetKeyCommand" + dbName);
+            Optional<Database> database = environment.getDatabase(dbName);
+            if (database.isEmpty()) {
+                return DatabaseCommandResult.error("We dont have SetKeyCommand" + dbName);
             }
-           Optional <byte[]> previous = dataBase.get().read(tbName,key);
-            dataBase.get().write(tbName, key, value.getBytes(StandardCharsets.UTF_8));
+            Optional<byte[]> previous = database.get().read(tbName, key);
+            database.get().write(tbName, key, value.getBytes(StandardCharsets.UTF_8));
             return DatabaseCommandResult.success(previous.orElse(null));
-        } catch (DatabaseException ex) {
+        } catch (DatabaseException e){
             return DatabaseCommandResult.error("Error when try to set value by key");
         }
     }

@@ -15,26 +15,25 @@ import java.util.List;
  * Команда для создания базы данных
  */
 public class CreateDatabaseCommand implements DatabaseCommand {
-
     private final ExecutionEnvironment environment;
-    private final DatabaseFactory dbfactory;
-    private final String dbName;
+    private final DatabaseFactory factoryDataBase;
+    private final String databaseName;
 
     /**
      * Создает команду.
      * <br/>
      * Обратите внимание, что в конструкторе нет логики проверки валидности данных. Не проверяется, можно ли исполнить команду. Только формальные признаки (например, количество переданных значений или ненуловость объектов
      *
-     * @param env     env
-     * @param factory функция создания базы данных (пример: DatabaseImpl::create)
-     * @param comArgs аргументы для создания (порядок - {@link DatabaseCommandArgPositions}.
-     *                Id команды, имя команды, имя создаваемой бд
+     * @param env         env
+     * @param factory     функция создания базы данных (пример: DatabaseImpl::create)
+     * @param commandArgs аргументы для создания (порядок - {@link DatabaseCommandArgPositions}.
+     *                    Id команды, имя команды, имя создаваемой бд
      * @throws IllegalArgumentException если передано неправильное количество аргументов
      */
-    public CreateDatabaseCommand(ExecutionEnvironment env, DatabaseFactory factory, List<RespObject> comArgs) {
+    public CreateDatabaseCommand(ExecutionEnvironment env, DatabaseFactory factory, List<RespObject> commandArgs) {
         environment = env;
-        dbfactory = factory;
-        dbName = comArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+        factoryDataBase = factory;
+        databaseName = commandArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
     }
 
     /**
@@ -45,10 +44,10 @@ public class CreateDatabaseCommand implements DatabaseCommand {
     @Override
     public DatabaseCommandResult execute() {
         try {
-            environment.addDatabase(dbfactory.createNonExistent(dbName, environment.getWorkingPath()));
-        } catch (DatabaseException ex) {
-            return new FailedDatabaseCommandResult(ex.getMessage());
+            environment.addDatabase(factoryDataBase.createNonExistent(databaseName, environment.getWorkingPath()));
+        } catch (DatabaseException ex){
+            return DatabaseCommandResult.error("DatabaseException when try to create database " + databaseName);
         }
-        return DatabaseCommandResult.success(("Success add CreateDatabaseCommand" + dbName).getBytes(StandardCharsets.UTF_8));
+        return DatabaseCommandResult.success(("Success add CreateDataBaseCommand " + databaseName).getBytes(StandardCharsets.UTF_8));
     }
 }
