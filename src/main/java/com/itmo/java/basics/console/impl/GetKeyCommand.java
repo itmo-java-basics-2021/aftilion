@@ -33,7 +33,7 @@ public class GetKeyCommand implements DatabaseCommand {
      */
     public GetKeyCommand(ExecutionEnvironment env, List<RespObject> comArgs) {
         if (comArgs.size() != numberOfAgrguments) {
-            throw new IllegalArgumentException("Why " + comArgs.size() + "!= 5 , in CreateTableCommand");
+            throw new IllegalArgumentException("Why " + comArgs.size() + "!= 5 , in GetKeyCommand");
         }
         environment = env;
         commandargs = comArgs;
@@ -49,23 +49,23 @@ public class GetKeyCommand implements DatabaseCommand {
         try {
             String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
             if (dbName == null) {
-                throw new DatabaseException("Why dbname is null?");
+                throw new DatabaseException("Why dbname is null? GetKeyCommand");
             }
             String tbName = commandargs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
             if (tbName == null) {
-                throw new DatabaseException("Why tbName is null?");
+                throw new DatabaseException("Why tbName is null? GetKeyCommand");
             }
             String key = commandargs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
             if (key == null) {
-                throw new DatabaseException("Why key is null?");
+                throw new DatabaseException("Why key is null? GetKeyCommand");
             }
             Optional<Database> dataBase = environment.getDatabase(dbName);
             if (dataBase.isEmpty()) {
-                throw new DatabaseException("We dont have" + dbName);
+                throw new DatabaseException("We dont have GetKeyCommand" + dbName);
             }
             Optional<byte[]> value = dataBase.get().read(tbName, key);
             if (value.isEmpty()) {
-                throw new DatabaseException("We dont have" + dbName + tbName + key);
+                throw new DatabaseException("We dont have GetKeyCommand" + dbName + tbName + key);
             }
             return DatabaseCommandResult.success(value.get());
         } catch (DatabaseException ex) {

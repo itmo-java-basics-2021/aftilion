@@ -34,7 +34,7 @@ public class SetKeyCommand implements DatabaseCommand {
      */
     public SetKeyCommand(ExecutionEnvironment env, List<RespObject> comArgs) {
         if (comArgs.size() != numberOfAgrguments) {
-            throw new IllegalArgumentException("Why " + comArgs.size() + "!= 5 , in CreateTableCommand");
+            throw new IllegalArgumentException("Why " + comArgs.size() + "!= 5 , in CreateTableCommand SetKeyCommand");
         }
         environment = env;
         commandargs = comArgs;
@@ -50,23 +50,23 @@ public class SetKeyCommand implements DatabaseCommand {
         try {
             String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
             if (dbName == null) {
-                throw new DatabaseException("Why dbname is null?");
+                throw new DatabaseException("Why dbname is null SetKeyCommand? ");
             }
             String tbName = commandargs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
             if (tbName == null) {
-                throw new DatabaseException("Why tbName is null?");
+                throw new DatabaseException("Why tbName is null SetKeyCommand?");
             }
             String key = commandargs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
             if (key == null) {
-                throw new DatabaseException("Why key is null?");
+                throw new DatabaseException("Why key is null? SetKeyCommand");
             }
             Optional<Database> dataBase = environment.getDatabase(dbName);
             if (dataBase.isEmpty()) {
-                throw new DatabaseException("We dont have" + dbName);
+                throw new DatabaseException("We dont have SetKeyCommand" + dbName);
             }
             byte[] value = commandargs.get(DatabaseCommandArgPositions.VALUE.getPositionIndex()).asString().getBytes(StandardCharsets.UTF_8);
             dataBase.get().write(tbName, key, value);
-            return DatabaseCommandResult.success(("Success add key " + dbName + tbName + key).getBytes(StandardCharsets.UTF_8));
+            return DatabaseCommandResult.success(("Success add key SetKeyCommand " + dbName + tbName + key).getBytes(StandardCharsets.UTF_8));
         } catch (DatabaseException ex) {
             return new FailedDatabaseCommandResult(ex.getMessage());
         }

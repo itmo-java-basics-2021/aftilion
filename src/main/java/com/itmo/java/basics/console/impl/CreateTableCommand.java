@@ -50,18 +50,18 @@ public class CreateTableCommand implements DatabaseCommand {
         try {
             String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
             if (dbName == null) {
-                throw new DatabaseException("Why dbname is null?");
+                throw new DatabaseException("Why dbname is null? CreateTableCommand");
             }
             String tbName = commandargs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
             if (tbName == null) {
-                throw new DatabaseException("Why tbName is  null?");
+                throw new DatabaseException("Why tbName is  null? CreateTableCommand");
             }
             Optional<Database> dataBase = environment.getDatabase(dbName);
             if (dataBase.isEmpty()) {
-                throw new DatabaseException("We dont have" + dbName);
+                throw new DatabaseException("We dont have CreateTableCommand"  + dbName);
             }
             dataBase.get().createTableIfNotExists(tbName);
-            return DatabaseCommandResult.success(("Success add " + dbName + tbName).getBytes(StandardCharsets.UTF_8));
+            return DatabaseCommandResult.success(("Success add CreateTableCommand " + dbName + tbName).getBytes(StandardCharsets.UTF_8));
         } catch (DatabaseException ex) {
             return new FailedDatabaseCommandResult(ex.getMessage());
         }
