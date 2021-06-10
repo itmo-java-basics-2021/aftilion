@@ -20,7 +20,11 @@ public class SetKeyCommand implements DatabaseCommand {
 
     private final ExecutionEnvironment environment;
     private final List<RespObject> commandargs;
-    private static final int numberOfAgrguments = 6;
+   // private static final int numberOfAgrguments = 6;
+    private final String dbName;
+    private final String tbName;
+    private final String key;
+    private final String value;
 
     /**
      * Создает команду.
@@ -33,11 +37,15 @@ public class SetKeyCommand implements DatabaseCommand {
      * @throws IllegalArgumentException если передано неправильное количество аргументов
      */
     public SetKeyCommand(ExecutionEnvironment env, List<RespObject> comArgs) {
-        if (comArgs.size() != numberOfAgrguments) {
-            throw new IllegalArgumentException("Why " + comArgs.size() + "!= 5 , in CreateTableCommand SetKeyCommand");
-        }
+//        if (comArgs.size() != numberOfAgrguments) {
+//            throw new IllegalArgumentException("Why " + comArgs.size() + "!= 5 , in CreateTableCommand SetKeyCommand");
+//        }
         environment = env;
         commandargs = comArgs;
+        this.value = comArgs.get(DatabaseCommandArgPositions.VALUE.getPositionIndex()).asString();
+        this.dbName = comArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+        this.tbName = comArgs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
+        this.key = comArgs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
     }
 
     /**
@@ -48,27 +56,27 @@ public class SetKeyCommand implements DatabaseCommand {
     @Override
     public DatabaseCommandResult execute() {
         try {
-            String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
-            if (dbName == null) {
-                throw new DatabaseException("Why dbname is null SetKeyCommand? ");
-            }
-            String tbName = commandargs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
-            if (tbName == null) {
-                throw new DatabaseException("Why tbName is null SetKeyCommand?");
-            }
-            String key = commandargs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
-            if (key == null) {
-                throw new DatabaseException("Why key is null? SetKeyCommand");
-            }
+//            String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+//            if (dbName == null) {
+//                throw new DatabaseException("Why dbname is null SetKeyCommand? ");
+//            }
+//            String tbName = commandargs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
+//            if (tbName == null) {
+//                throw new DatabaseException("Why tbName is null SetKeyCommand?");
+//            }
+//            String key = commandargs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
+//            if (key == null) {
+//                throw new DatabaseException("Why key is null? SetKeyCommand");
+//            }
             Optional<Database> dataBase = environment.getDatabase(dbName);
             if (dataBase.isEmpty()) {
-                throw new DatabaseException("We dont have SetKeyCommand" + dbName);
+               return DatabaseCommandResult.error("We dont have SetKeyCommand" + dbName);
             }
-            byte[] value = commandargs.get(DatabaseCommandArgPositions.VALUE.getPositionIndex()).asString().getBytes(StandardCharsets.UTF_8);
-            dataBase.get().write(tbName, key, value);
-            return DatabaseCommandResult.success(("Success add key SetKeyCommand " + dbName + tbName + key).getBytes(StandardCharsets.UTF_8));
+           Optional <byte[]> previous = dataBase.get().read(tbName,key);
+            dataBase.get().write(tbName, key, value.getBytes(StandardCharsets.UTF_8));
+            return DatabaseCommandResult.success(previous.orElse(null));
         } catch (DatabaseException ex) {
-            return new FailedDatabaseCommandResult(ex.getMessage());
+            return DatabaseCommandResult.error("Error when try to set value by key");
         }
     }
 }

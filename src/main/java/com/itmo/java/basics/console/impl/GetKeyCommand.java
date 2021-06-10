@@ -19,7 +19,10 @@ public class GetKeyCommand implements DatabaseCommand {
 
     private final ExecutionEnvironment environment;
     private final List<RespObject> commandargs;
-    private static final int numberOfAgrguments = 5;
+  //  private static final int numberOfAgrguments = 5;
+    private final String dbName;
+    private final String tbName;
+    private final String key;
 
     /**
      * Создает команду.
@@ -32,11 +35,14 @@ public class GetKeyCommand implements DatabaseCommand {
      * @throws IllegalArgumentException если передано неправильное количество аргументов
      */
     public GetKeyCommand(ExecutionEnvironment env, List<RespObject> comArgs) {
-        if (comArgs.size() != numberOfAgrguments) {
-            throw new IllegalArgumentException("Why " + comArgs.size() + "!= 5 , in GetKeyCommand");
-        }
+//        if (comArgs.size() != numberOfAgrguments) {
+//            throw new IllegalArgumentException("Why " + comArgs.size() + "!= 5 , in GetKeyCommand");
+//        }
         environment = env;
         commandargs = comArgs;
+        this.dbName = comArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+        this.tbName = comArgs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
+        this.key = comArgs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
     }
 
     /**
@@ -47,29 +53,29 @@ public class GetKeyCommand implements DatabaseCommand {
     @Override
     public DatabaseCommandResult execute() {
         try {
-            String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
-            if (dbName == null) {
-                throw new DatabaseException("Why dbname is null? GetKeyCommand");
-            }
-            String tbName = commandargs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
-            if (tbName == null) {
-                throw new DatabaseException("Why tbName is null? GetKeyCommand");
-            }
-            String key = commandargs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
-            if (key == null) {
-                throw new DatabaseException("Why key is null? GetKeyCommand");
-            }
+//            String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+//            if (dbName == null) {
+//                throw new DatabaseException("Why dbname is null? GetKeyCommand");
+//            }
+//            String tbName = commandargs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
+//            if (tbName == null) {
+//                throw new DatabaseException("Why tbName is null? GetKeyCommand");
+//            }
+//            String key = commandargs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
+//            if (key == null) {
+//                throw new DatabaseException("Why key is null? GetKeyCommand");
+//            }
             Optional<Database> dataBase = environment.getDatabase(dbName);
             if (dataBase.isEmpty()) {
-                throw new DatabaseException("We dont have GetKeyCommand" + dbName);
+                return DatabaseCommandResult.error("We dont have GetKeyCommand");
             }
             Optional<byte[]> value = dataBase.get().read(tbName, key);
          //   if (value.isEmpty()) {
            //     throw new DatabaseException("We dont have GetKeyCommand" + dbName + tbName + key);
             //}
-            return DatabaseCommandResult.success(value.get());
+            return DatabaseCommandResult.success(value.orElse(null));
         } catch (DatabaseException ex) {
-            return new FailedDatabaseCommandResult(ex.getMessage());
+            return DatabaseCommandResult.error("Error when try ti get value bu key");
         }
     }
 }
