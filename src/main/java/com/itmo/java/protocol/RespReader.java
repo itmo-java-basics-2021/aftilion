@@ -1,21 +1,14 @@
 package com.itmo.java.protocol;
 
-import com.itmo.java.protocol.model.RespArray;
-import com.itmo.java.protocol.model.RespBulkString;
-import com.itmo.java.protocol.model.RespCommandId;
-import com.itmo.java.protocol.model.RespError;
-import com.itmo.java.protocol.model.RespObject;
+import com.itmo.java.protocol.model.*;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.List;
 
 public class RespReader implements AutoCloseable {
-    private final InputStream is;
+    private static final int READ_AHEAD_LIMIT = 3;
+    private final BufferedReader reader;
 
     /**
      * Специальные символы окончания элемента
@@ -24,15 +17,14 @@ public class RespReader implements AutoCloseable {
     private static final byte LF = '\n';
 
     public RespReader(InputStream is) {
-        this.is = is;
+        reader = new BufferedReader(new InputStreamReader(is));
     }
 
     /**
      * Есть ли следующий массив в стриме?
      */
     public boolean hasArray() throws IOException {
-        final byte code = is.readNBytes(1)[0];
-
+        byte code = (byte) reader.read();
         return code == RespArray.CODE;
     }
 
@@ -44,20 +36,29 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespObject readObject() throws IOException {
-        final byte code = is.readNBytes(1)[0];
+//        try {
 
-        switch (code) {
-            case RespError.CODE:
-                return this.readError();
-            case RespBulkString.CODE:
-                return this.readBulkString();
-            case RespArray.CODE:
-                return this.readArray();
-            case RespCommandId.CODE:
-                return this.readCommandId();
-            default:
-                throw new IOException("Wrong object code");
-        }
+            int codeInt = reader.read();
+            if (codeInt == -1) {
+                throw new EOFException("InputStream is empty when try to read RespObject");
+            }
+            byte code = (byte) codeInt;
+            switch (code) {
+                case RespArray.CODE:
+                    return readArray();
+                case RespBulkString.CODE:
+                    return readBulkString();
+                case RespCommandId.CODE:
+                    return readCommandId();
+                case RespError.CODE:
+                    return readError();
+                default:
+                    throw new IOException("Code character is not correct");
+
+            }
+//        } catch(IOException ex) {
+//            throw new RuntimeException("rer");
+//        }
     }
 
     /**
@@ -67,38 +68,7 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespError readError() throws IOException {
-        byte symbol = is.readNBytes(1)[0];
-
-        final List<Byte> symbols = new ArrayList<>();
-
-        boolean isEndOfError = false;
-
-        while (!isEndOfError) {
-            while (symbol == CR) {
-                symbol = is.readNBytes(1)[0];
-
-                if (symbol == LF) {
-                    isEndOfError = true;
-                } else {
-                    symbols.add(CR);
-                }
-            }
-
-            if (!isEndOfError) {
-                symbols.add(symbol);
-                symbol = is.readNBytes(1)[0];
-            }
-        }
-
-        final int symbolsCount = symbols.size();
-
-        final byte[] bytes = new byte[symbolsCount];
-
-        for (int i = 0; i < symbolsCount; i++) {
-            bytes[i] = symbols.get(i);
-        }
-
-        return new RespError(bytes);
+        return new RespError(readBytesToEndOfLine());
     }
 
     /**
@@ -108,20 +78,16 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespBulkString readBulkString() throws IOException {
-        final byte[] bytes = this.getStringNumberInBytes();
-        final int bytesCount = Integer.parseInt(new String(bytes, StandardCharsets.UTF_8));
-
-        is.readNBytes(1);
-
-        if (bytesCount == RespBulkString.NULL_STRING_SIZE) {
+        byte[] stringSizeBytes = readBytesToEndOfLine();
+        int stringSize = Integer.parseInt(new String(stringSizeBytes, StandardCharsets.UTF_8));
+        if (stringSize == RespBulkString.NULL_STRING_SIZE) {
             return RespBulkString.NULL_STRING;
         }
-
-        final byte[] data = is.readNBytes(bytesCount);
-
-        is.readNBytes(2);
-
-        return new RespBulkString(data);
+        byte[] stringData = readBytesToEndOfLine();
+        if (stringData.length != stringSize) {
+            throw new IOException("String length is not equal with StringBulk size");
+        }
+        return new RespBulkString(stringData);
     }
 
     /**
@@ -131,18 +97,13 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespArray readArray() throws IOException {
-        final byte[] bytes = this.getStringNumberInBytes();
-        final int elementsCount = Integer.parseInt(new String(bytes, StandardCharsets.UTF_8));
-
-        final RespObject[] objects = new RespObject[elementsCount];
-
-        is.readNBytes(1);
-
-        for (int i = 0; i < elementsCount; i++) {
-            objects[i] = this.readObject();
+        byte[] arraySizeBytes = readBytesToEndOfLine();
+        int arraySize = Integer.parseInt(new String(arraySizeBytes, StandardCharsets.UTF_8));
+        RespObject[] respObjectArray = new RespObject[arraySize];
+        for (int i = 0; i < arraySize; i++) {
+            respObjectArray[i] = readObject();
         }
-
-        return new RespArray(objects);
+        return new RespArray(respObjectArray);
     }
 
     /**
@@ -152,37 +113,50 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespCommandId readCommandId() throws IOException {
-        final int commandId = ByteBuffer.wrap(is.readNBytes(4)).getInt();
-
-        is.readNBytes(2);
-
-        return new RespCommandId(commandId);
+        byte[] idBytes = readBytesToEndOfLine();
+        if (idBytes.length != 4) {
+            throw new IOException("Command Id is not integer");
+        }
+        return new RespCommandId(bytesToInt(idBytes));
     }
 
 
     @Override
     public void close() throws IOException {
-        is.close();
+        reader.close();
     }
 
-    private byte[] getStringNumberInBytes() throws IOException {
-        byte symbol = is.readNBytes(1)[0];
+    private static int bytesToInt(byte[] bytes) {
+        return (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | (bytes[3]);
+    }
 
-        final List<Byte> symbols = new ArrayList<>();
-
-        while (symbol != CR) {
-            symbols.add(symbol);
-            symbol = is.readNBytes(1)[0];
+    private byte[] readBytesToEndOfLine() throws IOException {
+        ArrayList<Byte> message = new ArrayList<>();
+        while (true) {
+            int currentByte = reader.read();
+            if (currentByte == -1) {
+                throw new EOFException("Stream is empty when try to read all bytes before '\\r\\n'");
+            }
+            if (currentByte == CR) {
+                reader.mark(READ_AHEAD_LIMIT);
+                int nextByte = reader.read();
+                if (nextByte == -1) {
+                    throw new EOFException("Stream is empty when try to read all bytes before '\\r\\n'");
+                }
+                if (nextByte == LF){
+                    reader.reset();
+                    reader.read();
+                    break;
+                }else {
+                    reader.reset();
+                }
+            }
+            message.add((byte) currentByte);
         }
-
-        final int symbolsCount = symbols.size();
-
-        final byte[] bytes = new byte[symbolsCount];
-
-        for (int i = 0; i < symbolsCount; i++) {
-            bytes[i] = symbols.get(i);
+        byte[] bytes = new byte[message.size()];
+        for (int i = 0; i < message.size(); i++) {
+            bytes[i] = message.get(i);
         }
-
         return bytes;
     }
 }
