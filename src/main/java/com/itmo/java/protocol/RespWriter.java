@@ -4,24 +4,24 @@ import com.itmo.java.protocol.model.RespObject;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
-public class RespWriter implements AutoCloseable {
-
-    private final OutputStream outputStream;
+public class RespWriter implements AutoCloseable{
+    private final OutputStream os;
 
     public RespWriter(OutputStream os) {
-        outputStream = os;
+        this.os = os;
     }
 
     /**
      * Записывает в output stream объект
      */
     public void write(RespObject object) throws IOException {
-            object.write(outputStream);
+        object.write(os);
     }
 
     @Override
     public void close() throws IOException {
-            outputStream.close();
+        os.close();
     }
 }

@@ -36,23 +36,23 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespObject readObject() throws IOException {
-            int codeInt = reader.read();
-            if (codeInt == -1) {
-                throw new EOFException("InputStream is empty RespObject");
-            }
-            byte code = (byte) codeInt;
-            switch (code) {
-                case RespArray.CODE:
-                    return readArray();
-                case RespBulkString.CODE:
-                    return readBulkString();
-                case RespCommandId.CODE:
-                    return readCommandId();
-                case RespError.CODE:
-                    return readError();
-                default:
-                    throw new IOException("Code is not correct");
-            }
+        int codeInt = reader.read();
+        if (codeInt == -1) {
+            throw new EOFException("InputStream is empty when try to read RespObject");
+        }
+        byte code = (byte) codeInt;
+        switch (code) {
+            case RespArray.CODE:
+                return readArray();
+            case RespBulkString.CODE:
+                return readBulkString();
+            case RespCommandId.CODE:
+                return readCommandId();
+            case RespError.CODE:
+                return readError();
+            default:
+                throw new IOException("Code character is not correct");
+        }
     }
 
     /**
@@ -137,11 +137,11 @@ public class RespReader implements AutoCloseable {
                 if (nextByte == -1) {
                     throw new EOFException("Stream is empty when try to read all bytes before '\\r\\n'");
                 }
-                if (nextByte == LF) {
+                if (nextByte == LF){
                     reader.reset();
                     reader.read();
                     break;
-                } else {
+                }else {
                     reader.reset();
                 }
             }
