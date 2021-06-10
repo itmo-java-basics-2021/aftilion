@@ -1,6 +1,5 @@
 package com.itmo.java.client.connection;
 
-
 import com.itmo.java.client.exception.ConnectionException;
 import com.itmo.java.protocol.RespReader;
 import com.itmo.java.protocol.RespWriter;
@@ -9,27 +8,32 @@ import com.itmo.java.protocol.model.RespObject;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 /**
  * С помощью {@link RespWriter} и {@link RespReader} читает/пишет в сокет
  */
 public class SocketKvsConnection implements KvsConnection {
-
-    final ConnectionConfig connectionConfig;
-    final Socket socket;
+    private final int port;
+    private final String host;
+    private final Socket clientSocket;
+    private final RespWriter respWriter;
+    private final RespReader respReader;
 
     public SocketKvsConnection(ConnectionConfig config) {
-        connectionConfig = config;
+        this.port = config.getPort();
+        this.host = config.getHost();
         try {
-            socket = new Socket(connectionConfig.getHost(), connectionConfig.getPort());
+            this.clientSocket = new Socket(host, port);
+            this.respReader = new RespReader(clientSocket.getInputStream());
+            respWriter = new RespWriter(clientSocket.getOutputStream());
         } catch (IOException e) {
-            throw new RuntimeException("Error in const");
+            throw new RuntimeException("IOException when try to connect by " + host + " " + port, e);
         }
     }
 
     /**
      * Отправляет с помощью сокета команду и получает результат.
-     *
      * @param commandId id команды (номер)
      * @param command   команда
      * @throws ConnectionException если сокет закрыт или если произошла другая ошибка соединения
@@ -37,14 +41,13 @@ public class SocketKvsConnection implements KvsConnection {
     @Override
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
         try {
-            RespWriter respWriter = new RespWriter(socket.getOutputStream());
+            RespWriter respWriter = new RespWriter(clientSocket.getOutputStream());
             respWriter.write(command);
-            RespReader respReader = new RespReader(socket.getInputStream());
-            RespObject respObject = respReader.readObject();
-            return respObject;
+            RespReader respReader = new RespReader(clientSocket.getInputStream());
+            return respReader.readObject();
         } catch (IOException e) {
             close();
-            throw new ConnectionException("IOException when send SocketKvs");
+            throw new ConnectionException("IOException when send " + command.asString() + " with " + host + " and port " + port + " ___IOMessage___: " + e.getMessage(), e);
         }
     }
 
@@ -54,7 +57,9 @@ public class SocketKvsConnection implements KvsConnection {
     @Override
     public void close() {
         try {
-            socket.close();
+            respWriter.close();
+            respReader.close();
+            clientSocket.close();
         } catch (IOException e) {
             throw new RuntimeException("IOException when try to close client socket");
         }
