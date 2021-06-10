@@ -52,7 +52,7 @@ public class RespBulkString implements RespObject {
                 output.write(CRLF);
                 output.write(data);
             }
-            output.write(CRLF);
+          //  output.write(CRLF);
         } catch (IOException ex) {
             throw new IOException(ex);
         }
