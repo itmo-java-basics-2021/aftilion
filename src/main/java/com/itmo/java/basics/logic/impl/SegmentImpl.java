@@ -10,7 +10,6 @@ import com.itmo.java.basics.logic.Segment;
 import com.itmo.java.basics.logic.io.DatabaseInputStream;
 import com.itmo.java.basics.logic.io.DatabaseOutputStream;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -86,21 +85,20 @@ public class SegmentImpl implements Segment {
 
     @Override
     public boolean write(String objectKey, byte[] objectValue) throws IOException {
+
         if (isReadOnly()) {
+            outStream.close();
             return false;
         }
-        try (DatabaseOutputStream outputStream = new DatabaseOutputStream(new FileOutputStream(tableRootPath.toString(), true))) {
-            int writtenBytes;
-            if (objectValue == null) {
-                writtenBytes = outputStream.write(new SetDatabaseRecord(objectKey.length(), objectKey.getBytes(StandardCharsets.UTF_8), -1, new byte[]{}));
-            } else {
-                writtenBytes = outputStream.write(new SetDatabaseRecord(objectKey.length(), objectKey.getBytes(StandardCharsets.UTF_8), objectValue.length, objectValue));
-            }
-            segmentIndex.onIndexedEntityUpdated(objectKey, new SegmentOffsetInfoImpl(segmentSize));
-            segmentSize += writtenBytes;
-            return true;
+        if (objectValue == null) {
+            return delete(objectKey);
         }
+        SetDatabaseRecord newSeg = new SetDatabaseRecord(objectKey.getBytes(StandardCharsets.UTF_8), objectValue);
+        segmentIndex.onIndexedEntityUpdated(objectKey, new SegmentOffsetInfoImpl(segmentSize));
+        segmentSize += outStream.write(newSeg);
+        return true;
     }
+
     @Override
     public Optional<byte[]> read(String objectKey) throws IOException {
 
@@ -132,14 +130,14 @@ public class SegmentImpl implements Segment {
 
     @Override
     public boolean delete(String objectKey) throws IOException {
-        if (segmentIndex.searchForKey(objectKey).isEmpty()) {
+
+        if (isReadOnly()) {
+            outStream.close();
             return false;
         }
-        try (DatabaseOutputStream outputStream = new DatabaseOutputStream(new FileOutputStream(tableRootPath.toString(), true))) {
-            int writtenBytes = outputStream.write(new RemoveDatabaseRecord(objectKey.length(), objectKey.getBytes(StandardCharsets.UTF_8)));
-            segmentIndex.onIndexedEntityUpdated(objectKey, null);
-            segmentSize += writtenBytes;
-            return true;
-        }
+        RemoveDatabaseRecord newSeg = new RemoveDatabaseRecord(objectKey.getBytes());
+        segmentIndex.onIndexedEntityUpdated(objectKey, new SegmentOffsetInfoImpl(segmentSize));
+        segmentSize += outStream.write(newSeg);
+        return true;
     }
 }
