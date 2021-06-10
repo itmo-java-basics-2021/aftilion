@@ -15,30 +15,25 @@ import java.util.List;
  * Команда для создания базы данных
  */
 public class CreateDatabaseCommand implements DatabaseCommand {
-
     private final ExecutionEnvironment environment;
-    private final DatabaseFactory dbfactory;
-    private final List<RespObject> commandargs;
-    private static final int numberOfAgrguments = 3;
+    private final DatabaseFactory factoryDataBase;
+    private final String databaseName;
 
     /**
      * Создает команду.
      * <br/>
      * Обратите внимание, что в конструкторе нет логики проверки валидности данных. Не проверяется, можно ли исполнить команду. Только формальные признаки (например, количество переданных значений или ненуловость объектов
      *
-     * @param env     env
-     * @param factory функция создания базы данных (пример: DatabaseImpl::create)
-     * @param comArgs аргументы для создания (порядок - {@link DatabaseCommandArgPositions}.
-     *                Id команды, имя команды, имя создаваемой бд
+     * @param env         env
+     * @param factory     функция создания базы данных (пример: DatabaseImpl::create)
+     * @param commandArgs аргументы для создания (порядок - {@link DatabaseCommandArgPositions}.
+     *                    Id команды, имя команды, имя создаваемой бд
      * @throws IllegalArgumentException если передано неправильное количество аргументов
      */
-    public CreateDatabaseCommand(ExecutionEnvironment env, DatabaseFactory factory, List<RespObject> comArgs) {
-        if (comArgs.size() != numberOfAgrguments) {
-            throw new IllegalArgumentException("Why " + comArgs.size() + "!= 3 ,  in CreateDataBaseCommand");
-        }
+    public CreateDatabaseCommand(ExecutionEnvironment env, DatabaseFactory factory, List<RespObject> commandArgs) {
         environment = env;
-        dbfactory = factory;
-        commandargs = comArgs;
+        factoryDataBase = factory;
+        databaseName = commandArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
     }
 
     /**
@@ -49,14 +44,10 @@ public class CreateDatabaseCommand implements DatabaseCommand {
     @Override
     public DatabaseCommandResult execute() {
         try {
-            String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
-            if (dbName == null) {
-                throw new DatabaseException("Why dbname is null? ");
-            }
-            environment.addDatabase(dbfactory.createNonExistent(dbName, environment.getWorkingPath()));
-            return DatabaseCommandResult.success(("Success add " + dbName).getBytes(StandardCharsets.UTF_8));
-        } catch (DatabaseException ex) {
-            return new FailedDatabaseCommandResult(ex.getMessage());
+            environment.addDatabase(factoryDataBase.createNonExistent(databaseName, environment.getWorkingPath()));
+        } catch (DatabaseException ex){
+            return DatabaseCommandResult.error("DatabaseException when try to create database " + databaseName);
         }
+        return DatabaseCommandResult.success(("Success add CreateDataBaseCommand " + databaseName).getBytes(StandardCharsets.UTF_8));
     }
 }

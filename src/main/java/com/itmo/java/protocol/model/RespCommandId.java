@@ -2,7 +2,6 @@ package com.itmo.java.protocol.model;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Id
@@ -41,7 +40,7 @@ public class RespCommandId implements RespObject {
         output.write((commandByte >>> 24) & 0xFF);
         output.write((commandByte >>> 16) & 0xFF);
         output.write((commandByte >>> 8) & 0xFF);
-        output.write(commandByte &0xFF);
+        output.write(commandByte & 0xFF);
         output.write(CRLF);
     }
 }

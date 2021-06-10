@@ -10,16 +10,15 @@ import java.nio.charset.StandardCharsets;
  * Команда для создания таблицы
  */
 public class CreateTableKvsCommand implements KvsCommand {
-
     private static final String COMMAND_NAME = "CREATE_TABLE";
-    private final String dbName;
-    private final int tbID;
-    private final String tbName;
+    private final String databaseName;
+    private final String tableName;
+    private final int commandId;
 
     public CreateTableKvsCommand(String databaseName, String tableName) {
-        dbName = databaseName;
-        tbName = tableName;
-        tbID = idGen.get();
+        this.databaseName = databaseName;
+        this.tableName = tableName;
+        this.commandId = idGen.getAndIncrement();
     }
 
     /**
@@ -29,14 +28,14 @@ public class CreateTableKvsCommand implements KvsCommand {
      */
     @Override
     public RespArray serialize() {
-        return new RespArray(new RespCommandId(tbID),
+        return new RespArray(new RespCommandId(commandId),
                 new RespBulkString(COMMAND_NAME.getBytes(StandardCharsets.UTF_8)),
-                new RespBulkString(dbName.getBytes(StandardCharsets.UTF_8)),
-                new RespBulkString(tbName.getBytes(StandardCharsets.UTF_8)));
+                new RespBulkString(databaseName.getBytes(StandardCharsets.UTF_8)),
+                new RespBulkString(tableName.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Override
     public int getCommandId() {
-        return tbID;
+        return commandId;
     }
 }

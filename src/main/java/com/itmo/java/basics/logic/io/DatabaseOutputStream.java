@@ -1,5 +1,4 @@
 package com.itmo.java.basics.logic.io;
-
 import com.itmo.java.basics.logic.WritableDatabaseRecord;
 
 import java.io.DataOutputStream;

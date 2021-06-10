@@ -21,7 +21,7 @@ public class SimpleKvsClient implements KvsClient {
      * @param connectionSupplier метод создания подключения к базе
      */
     public SimpleKvsClient(String databaseName, Supplier<KvsConnection> connectionSupplier) {
-        dbName = databaseName;
+        this.dbName = databaseName;
         this.connectionSupplier = connectionSupplier.get();
     }
 
@@ -48,7 +48,7 @@ public class SimpleKvsClient implements KvsClient {
                 throw new DatabaseExecutionException(obj.asString());
             }
             return obj.asString();
-        } catch (ConnectionException ex) {
+        } catch (ConnectionException ex){
             return DatabaseCommandResult.error(ex).getPayLoad();
         }
     }

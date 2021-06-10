@@ -6,5 +6,5 @@ public interface DatabaseCommand {
      *
      * @return Сообщение о выполнении результата команды.
      */
-    DatabaseCommandResult execute();
+    DatabaseCommandResult execute() ;
 }

@@ -27,29 +27,26 @@ public class DatabaseServerInitializer implements Initializer {
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
 
-        if (context.executionEnvironment() == null) {
-            throw new DatabaseException("Context executionEnvironment is null");
-        }
+//        if (context.executionEnvironment() == null) {
+//            throw new DatabaseException("Context executionEnvironment is null");
+//        }
 
         ExecutionEnvironment ExecutionEnvironment = context.executionEnvironment();
         Path path = ExecutionEnvironment.getWorkingPath();
+        File workingDir = new File(String.valueOf(path));
 
-        if (!Files.exists(path)) {
-            try {
-                Files.createDirectory(path);
-            } catch (IOException ex) {
-                throw new DatabaseException("Error while creating " + path.toString(), ex);
+        if (!workingDir.exists()) {
+            if (!workingDir.mkdir()) {
+                throw new DatabaseException("While creating dir DVSIit");
             }
         }
-        File curFile = new File(path.toString());
-        File[] directory = curFile.listFiles();
-        if (directory == null) {
-            throw new DatabaseException("Error while working with" + curFile.toString());
-        }
-
-        for (File in : directory) {
-            DatabaseInitializationContextImpl dbContext = new DatabaseInitializationContextImpl(in.getName(), path);
-            databaseInitializer.perform(new InitializationContextImpl(context.executionEnvironment(), dbContext, null, null));
+        File[] curFiles = workingDir.listFiles(File::isDirectory);
+        for (File dir : curFiles) {
+            DatabaseInitializationContextImpl dbContext = new DatabaseInitializationContextImpl(dir.getName(),path);
+            InitializationContextImpl newContext = InitializationContextImpl.builder()
+                    .currentDatabaseContext(dbContext)
+                    .executionEnvironment(context.executionEnvironment()).build();
+            databaseInitializer.perform(newContext);
         }
     }
 }
