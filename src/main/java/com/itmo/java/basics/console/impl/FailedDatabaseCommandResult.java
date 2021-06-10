@@ -10,10 +10,12 @@ import java.nio.charset.StandardCharsets;
  * Зафейленная команда
  */
 public class FailedDatabaseCommandResult implements DatabaseCommandResult {
-    private final String payload;
 
-    public FailedDatabaseCommandResult(String payload) {
-        this.payload = payload;
+
+    private final String payLoad;
+
+    public FailedDatabaseCommandResult(String pload) {
+        payLoad = pload;
     }
 
     /**
@@ -21,7 +23,7 @@ public class FailedDatabaseCommandResult implements DatabaseCommandResult {
      */
     @Override
     public String getPayLoad() {
-        return payload;
+        return payLoad;
     }
 
     @Override
@@ -34,6 +36,6 @@ public class FailedDatabaseCommandResult implements DatabaseCommandResult {
      */
     @Override
     public RespObject serialize() {
-        return new RespError(payload.getBytes(StandardCharsets.UTF_8));
+        return new RespError(payLoad.getBytes(StandardCharsets.UTF_8));
     }
 }

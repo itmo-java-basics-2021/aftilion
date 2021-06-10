@@ -5,18 +5,18 @@ import com.itmo.java.basics.console.ExecutionEnvironment;
 import com.itmo.java.basics.logic.Database;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public class ExecutionEnvironmentImpl implements ExecutionEnvironment {
 
-   public Path workingPath;
-   public Map<String, Database> dataBase = new HashMap<>();
+    private final DatabaseConfig dbConfig;
+    private final Map<String, Database> dataBase;
 
     public ExecutionEnvironmentImpl(DatabaseConfig config) {
-        workingPath = Paths.get(config.getWorkingPath());
+        dbConfig = config;
+        dataBase = new HashMap<>();
     }
 
     @Override
@@ -31,6 +31,6 @@ public class ExecutionEnvironmentImpl implements ExecutionEnvironment {
 
     @Override
     public Path getWorkingPath() {
-        return workingPath;
+        return Path.of(dbConfig.getWorkingPath());
     }
 }
