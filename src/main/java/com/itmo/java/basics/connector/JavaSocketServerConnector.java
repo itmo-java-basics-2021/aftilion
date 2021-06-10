@@ -1,16 +1,8 @@
 package com.itmo.java.basics.connector;
 
 import com.itmo.java.basics.DatabaseServer;
-import com.itmo.java.basics.config.ConfigLoader;
-import com.itmo.java.basics.config.DatabaseConfig;
-import com.itmo.java.basics.config.DatabaseServerConfig;
 import com.itmo.java.basics.config.ServerConfig;
 import com.itmo.java.basics.console.DatabaseCommandResult;
-import com.itmo.java.basics.console.impl.ExecutionEnvironmentImpl;
-import com.itmo.java.basics.initialization.impl.DatabaseInitializer;
-import com.itmo.java.basics.initialization.impl.DatabaseServerInitializer;
-import com.itmo.java.basics.initialization.impl.SegmentInitializer;
-import com.itmo.java.basics.initialization.impl.TableInitializer;
 import com.itmo.java.basics.resp.CommandReader;
 import com.itmo.java.protocol.RespReader;
 import com.itmo.java.protocol.RespWriter;
@@ -54,17 +46,16 @@ public class JavaSocketServerConnector implements Closeable {
      */
     public void start() {
         connectionAcceptorExecutor.submit(() -> {
-//            while(true) {
             Socket clientSocket = null;
             try {
                 clientSocket = serverSocket.accept();
             } catch (IOException exception) {
                 exception.printStackTrace();
             }
-            clientIOWorkers.submit(new ClientTask(clientSocket,server));
-//            }
+            clientIOWorkers.submit(new ClientTask(clientSocket, server));
         });
     }
+
     /**
      * Закрывает все, что нужно ¯\_(ツ)_/¯
      */
@@ -76,8 +67,8 @@ public class JavaSocketServerConnector implements Closeable {
         if (serverSocket != null) {
             try {
                 serverSocket.close();
-            } catch (IOException e) {
-                throw new RuntimeException("IOException when try to close connection", e);
+            } catch (IOException ex) {
+                throw new RuntimeException("IOException when try to close connection", ex);
             }
         }
     }
@@ -103,8 +94,8 @@ public class JavaSocketServerConnector implements Closeable {
             this.server = server;
             try {
                 this.respWriter = new RespWriter(client.getOutputStream());
-            } catch (IOException e){
-                throw new RuntimeException("IOException when open socket streams", e);
+            } catch (IOException ex) {
+                throw new RuntimeException("IOException when open socket streams", ex);
             }
         }
 
@@ -123,9 +114,9 @@ public class JavaSocketServerConnector implements Closeable {
                     respWriter.write(commandResult.get().serialize());
                 }
                 close();
-            } catch (Exception e) {
+            } catch (Exception ex) {
                 close();
-                throw new RuntimeException("When try to read, write or execute command", e);
+                throw new RuntimeException("Write or execute command", ex);
             }
         }
 
@@ -137,8 +128,8 @@ public class JavaSocketServerConnector implements Closeable {
             try {
                 respWriter.close();
                 client.close();
-            } catch (IOException e){
-                throw new RuntimeException("When try to close client connection", e);
+            } catch (IOException ex) {
+                throw new RuntimeException("When try to close client connection", ex);
             }
         }
     }

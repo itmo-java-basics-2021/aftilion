@@ -19,7 +19,8 @@ public class CreateDatabaseCommand implements DatabaseCommand {
     private final ExecutionEnvironment environment;
     private final DatabaseFactory dbfactory;
     private final List<RespObject> commandargs;
-    private static final int numberOfAgrguments = 3;
+    private final String dbName;
+  //  private static final int numberOfAgrguments = 3;
 
     /**
      * Создает команду.
@@ -33,12 +34,13 @@ public class CreateDatabaseCommand implements DatabaseCommand {
      * @throws IllegalArgumentException если передано неправильное количество аргументов
      */
     public CreateDatabaseCommand(ExecutionEnvironment env, DatabaseFactory factory, List<RespObject> comArgs) {
-        if (comArgs.size() != numberOfAgrguments) {
-            throw new IllegalArgumentException("Why " + comArgs.size() + "!= 3 ,  in CreateDataBaseCommand");
-        }
+//        if (comArgs.size() != numberOfAgrguments) {
+//            throw new IllegalArgumentException("Why " + comArgs.size() + "!= 3 ,  in CreateDataBaseCommand");
+//        }
         environment = env;
         dbfactory = factory;
         commandargs = comArgs;
+        dbName = comArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
     }
 
     /**
@@ -49,14 +51,15 @@ public class CreateDatabaseCommand implements DatabaseCommand {
     @Override
     public DatabaseCommandResult execute() {
         try {
-            String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
-            if (dbName == null) {
-                throw new DatabaseException("Why dbname is null? CreateDatabaseCommand ");
-            }
+//            String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+//            if (dbName == null) {
+//                throw new DatabaseException("Why dbname is null? CreateDatabaseCommand ");
+//            }
             environment.addDatabase(dbfactory.createNonExistent(dbName, environment.getWorkingPath()));
-            return DatabaseCommandResult.success(("Success add CreateDatabaseCommand" + dbName).getBytes(StandardCharsets.UTF_8));
+       //     return DatabaseCommandResult.success(("Success add CreateDatabaseCommand" + dbName).getBytes(StandardCharsets.UTF_8));
         } catch (DatabaseException ex) {
             return new FailedDatabaseCommandResult(ex.getMessage());
         }
+        return DatabaseCommandResult.success(("Success add CreateDatabaseCommand" + dbName).getBytes(StandardCharsets.UTF_8));
     }
 }
