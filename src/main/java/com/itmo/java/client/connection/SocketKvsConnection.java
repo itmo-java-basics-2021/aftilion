@@ -44,9 +44,9 @@ public class SocketKvsConnection implements KvsConnection {
             respWriter.write(command);
             RespReader respReader = new RespReader(socket.getInputStream());
             RespObject respObject = respReader.readObject();
-            if (respObject.isError()) {
-                throw new ConnectionException("Response error");
-            }
+//            if (respObject.isError()) {
+//                throw new ConnectionException("Response error");
+//            }
             return respObject;
         } catch (IOException e) {
             close();
