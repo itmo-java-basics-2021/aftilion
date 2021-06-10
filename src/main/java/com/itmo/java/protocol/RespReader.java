@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class RespReader implements AutoCloseable {
     private static final int READ_AHEAD_LIMIT = 3;
-    private final BufferedReader reader;
+    private final InputStreamReader reader;
 
     /**
      * Специальные символы окончания элемента
@@ -17,14 +17,17 @@ public class RespReader implements AutoCloseable {
     private static final byte LF = '\n';
 
     public RespReader(InputStream is) {
-        reader = new BufferedReader(new InputStreamReader(is));
+        reader = new InputStreamReader(is);
     }
 
     /**
      * Есть ли следующий массив в стриме?
      */
     public boolean hasArray() throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(reader);
+        bufferedReader.mark(READ_AHEAD_LIMIT);
         byte code = (byte) reader.read();
+        bufferedReader.reset();
         return code == RespArray.CODE;
     }
 
@@ -132,17 +135,15 @@ public class RespReader implements AutoCloseable {
                 throw new EOFException("Stream is empty when try to read all bytes before '\\r\\n'");
             }
             if (currentByte == CR) {
-                reader.mark(READ_AHEAD_LIMIT);
                 int nextByte = reader.read();
                 if (nextByte == -1) {
                     throw new EOFException("Stream is empty when try to read all bytes before '\\r\\n'");
                 }
                 if (nextByte == LF){
-                    reader.reset();
-                    reader.read();
                     break;
                 }else {
-                    reader.reset();
+                    message.add((byte) currentByte);
+                    currentByte = nextByte;
                 }
             }
             message.add((byte) currentByte);
