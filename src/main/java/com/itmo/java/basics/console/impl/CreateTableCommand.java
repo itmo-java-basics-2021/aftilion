@@ -19,8 +19,6 @@ import java.util.Optional;
 public class CreateTableCommand implements DatabaseCommand {
 
     private final ExecutionEnvironment environment;
-    private final List<RespObject> commandargs;
-  //  private static final int numberOfAgrguments = 4;\
     private final String dbName;
     private final String tbName;
 
@@ -36,11 +34,7 @@ public class CreateTableCommand implements DatabaseCommand {
      * @throws IllegalArgumentException если передано неправильное количество аргументов
      */
     public CreateTableCommand(ExecutionEnvironment env, List<RespObject> comArgs) {
-//        if (comArgs.size() != numberOfAgrguments) {
-//            throw new IllegalArgumentException("Why " + comArgs.size() + "!= 4 , in CreateTableCommand");
-//        }
         environment = env;
-        commandargs = comArgs;
         tbName = comArgs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
         dbName = comArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
     }
@@ -53,19 +47,10 @@ public class CreateTableCommand implements DatabaseCommand {
     @Override
     public DatabaseCommandResult execute() {
         try {
-//            String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
-//            if (dbName == null) {
-//                throw new DatabaseException("Why dbname is null? CreateTableCommand");
-//            }
-//            String tbName = commandargs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
-//            if (tbName == null) {
-//                throw new DatabaseException("Why tbName is  null? CreateTableCommand");
-//            }
             if (environment.getDatabase(dbName).isEmpty()) {
                 return DatabaseCommandResult.error("We dont found dataBase" + dbName);
             }
             environment.getDatabase(dbName).get().createTableIfNotExists(tbName);
-          //  return DatabaseCommandResult.success(("Success add CreateTableCommand " + dbName + tbName).getBytes(StandardCharsets.UTF_8));
         } catch (DatabaseException ex) {
             return new FailedDatabaseCommandResult(ex.getMessage());
         }

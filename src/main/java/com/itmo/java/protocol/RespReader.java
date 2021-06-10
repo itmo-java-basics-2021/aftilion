@@ -36,7 +36,7 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespObject readObject() throws IOException {
-        try {
+     //   try {
             int codeInt = reader.read();
             if (codeInt == -1) {
                 throw new EOFException("InputStream is empty RespObject");
@@ -54,9 +54,9 @@ public class RespReader implements AutoCloseable {
                 default:
                     throw new IOException("Code is not correct");
             }
-        } catch (IOException ex) {
-            throw new IOException("Error while readObject RespReader");
-        }
+//        } catch (IOException ex) {
+//            throw new IOException("Error while readObject RespReader");
+//        }
     }
 
     /**
