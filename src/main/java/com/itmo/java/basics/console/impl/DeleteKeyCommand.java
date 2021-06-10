@@ -21,6 +21,9 @@ public class DeleteKeyCommand implements DatabaseCommand {
     private final ExecutionEnvironment environment;
     private final List<RespObject> commandargs;
     private static final int numberOfAgrguments = 5;
+    private final String databaseName;
+    private final String tableName;
+    private final String key;
 
     /**
      * Создает команду.
@@ -39,6 +42,9 @@ public class DeleteKeyCommand implements DatabaseCommand {
         }
         environment = env;
         commandargs = comArgs;
+        this.databaseName = comArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+        this.tableName = comArgs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
+        this.key = comArgs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
     }
 
     /**
@@ -49,30 +55,18 @@ public class DeleteKeyCommand implements DatabaseCommand {
     @Override
     public DatabaseCommandResult execute() {
         try {
-            String dbName = commandargs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
-            if (dbName == null) {
-                throw new DatabaseException("Why dbname is null?");
+            Optional<Database> database = environment.getDatabase(databaseName);
+            if (database.isEmpty()){
+                return DatabaseCommandResult.error("Not found database " + databaseName);
             }
-            String tbName = commandargs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
-            if (tbName == null) {
-                throw new DatabaseException("Why tbName is null?");
+            Optional<byte[]> value = database.get().read(tableName, key);
+            if (value.isEmpty()){
+                return DatabaseCommandResult.error("Value with key " + key + " in database " + databaseName + " not found");
             }
-            String key = commandargs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
-            if (key == null) {
-                throw new DatabaseException("Why key is null?");
-            }
-            Optional<Database> dataBase = environment.getDatabase(dbName);
-            if (dataBase.isEmpty()) {
-                throw new DatabaseException("We dont have" + dbName);
-            }
-            Optional<byte[]> previous = dataBase.get().read(tbName,key);
-            if (previous.isEmpty()) {
-                return DatabaseCommandResult.error("Value not found");
-            }
-            dataBase.get().delete(tbName, key);
-            return DatabaseCommandResult.success(("Success del " + dbName + tbName + key).getBytes(StandardCharsets.UTF_8));
-        } catch (DatabaseException ex) {
-            return new FailedDatabaseCommandResult(ex.getMessage());
+            database.get().delete(tableName, key);
+            return DatabaseCommandResult.success(value.get());
+        } catch (DatabaseException e){
+            return DatabaseCommandResult.error("DatabaseException when try to delete value by key " + key + " in table " + tableName);
         }
     }
 }
