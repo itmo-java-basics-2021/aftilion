@@ -36,7 +36,7 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespObject readObject() throws IOException {
-        try {
+      //  try {
 
             int codeInt = reader.read();
             if (codeInt == -1) {
@@ -56,9 +56,9 @@ public class RespReader implements AutoCloseable {
                     throw new IOException("Code character is not correct");
 
             }
-        } catch(IOException ex) {
-            throw new RuntimeException("rer");
-        }
+//        } catch(IOException ex) {
+//            throw new RuntimeException("rer");
+//        }
     }
 
     /**
